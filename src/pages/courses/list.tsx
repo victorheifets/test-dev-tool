@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Box, Button, TextField, MenuItem, Select, Typography, SelectChangeEvent } from '@mui/material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Box, Button, TextField, MenuItem, Select, Typography, SelectChangeEvent, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Course, mockCourses } from '../../data/mockCourses';
 import { StatusChip } from '../../components/courses/StatusChip';
@@ -7,15 +7,18 @@ import { ActionMenu } from '../../components/courses/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 
 export const CourseList = () => {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('All');
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('All');
 
-  const handleStatusChange = (event: SelectChangeEvent<string>) => {
-    setStatus(event.target.value);
-  };
+  useEffect(() => {
+    const filtered = mockCourses
+      .filter(course => course.name.toLowerCase().includes(search.toLowerCase()))
+      .filter(course => status === 'All' || course.status === status);
+    setFilteredCourses(filtered);
+  }, [search, status]);
 
   const handleEdit = (id: number) => {
     alert(`Edit course ${id}`);
@@ -25,28 +28,19 @@ export const CourseList = () => {
     alert(`Duplicate course ${id}`);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDeleteRequest = (id: number) => {
     setSelectedCourseId(id);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
     if (selectedCourseId) {
-      setCourses(courses.filter((course) => course.id !== selectedCourseId));
+      const updatedCourses = filteredCourses.filter((course) => course.id !== selectedCourseId);
+      setFilteredCourses(updatedCourses);
     }
     setDialogOpen(false);
     setSelectedCourseId(null);
   };
-
-  const filteredCourses = useMemo(() => {
-    return courses
-      .filter((course) =>
-        course.name.toLowerCase().includes(search.toLowerCase())
-      )
-      .filter((course) =>
-        status === 'All' ? true : course.status === status
-      );
-  }, [courses, search, status]);
 
   const columns: GridColDef[] = [
     {
@@ -79,7 +73,7 @@ export const CourseList = () => {
         <ActionMenu
           onEdit={() => handleEdit(params.row.id)}
           onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDelete(params.row.id)}
+          onDelete={() => handleDeleteRequest(params.row.id)}
         />
       ),
     },
@@ -87,38 +81,41 @@ export const CourseList = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button variant="contained" >+ Add Class</Button>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search Class"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <Select value={status} onChange={handleStatusChange} size="small">
-            <MenuItem value="All">Status</MenuItem>
-            <MenuItem value="Published">Published</MenuItem>
-            <MenuItem value="Ongoing">Ongoing</MenuItem>
-            <MenuItem value="Draft">Draft</MenuItem>
-          </Select>
+      <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1, mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Button variant="contained" onClick={() => alert('Add new class')}>+ Add Class</Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+                <TextField
+                    variant="outlined"
+                    size="small"
+                    placeholder="Search Class"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                <Select value={status} onChange={(e) => setStatus(e.target.value)} size="small" sx={{ minWidth: 120 }}>
+                    <MenuItem value="All">Status</MenuItem>
+                    <MenuItem value="Published">Published</MenuItem>
+                    <MenuItem value="Ongoing">Ongoing</MenuItem>
+                    <MenuItem value="Draft">Draft</MenuItem>
+                </Select>
+            </Box>
         </Box>
       </Box>
-      <DataGrid
-        rows={filteredCourses}
-        columns={columns}
-        checkboxSelection
-        autoHeight
-        initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 3 },
-            },
-          }}
-          pageSizeOptions={[3, 5, 10]}
-      />
+      <Box sx={{ height: 500, width: '100%', backgroundColor: 'background.paper', borderRadius: 1 }}>
+          <DataGrid
+              rows={filteredCourses}
+              columns={columns}
+              checkboxSelection
+              initialState={{
+                  pagination: {
+                      paginationModel: { page: 0, pageSize: 5 },
+                  },
+              }}
+              pageSizeOptions={[3, 5, 10]}
+              disableRowSelectionOnClick
+              sx={{ border: 'none' }}
+          />
+      </Box>
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

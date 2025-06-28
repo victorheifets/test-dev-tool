@@ -10,9 +10,15 @@ export const resources: RefineProps['resources'] = [
     name: 'dashboard',
     list: '/dashboard',
     meta: {
-      label: 'Dashboards',
+      label: 'Dashboard',
       icon: <DashboardIcon />,
     },
+  },
+  {
+    name: 'section_apps_pages',
+    meta: {
+        label: 'APPS & PAGES',
+    }
   },
   {
     name: 'courses',
@@ -36,28 +42,6 @@ export const resources: RefineProps['resources'] = [
     meta: {
       label: 'Students',
       icon: <PeopleIcon />,
-    },
-  },
-  {
-    name: 'blog_posts',
-    list: '/blog-posts',
-    create: '/blog-posts/create',
-    edit: '/blog-posts/edit/:id',
-    show: '/blog-posts/show/:id',
-    meta: {
-      label: 'Blog Posts',
-      canDelete: true,
-    },
-  },
-  {
-    name: 'categories',
-    list: '/categories',
-    create: '/categories/create',
-    edit: '/categories/edit/:id',
-    show: '/categories/show/:id',
-    meta: {
-      label: 'Categories',
-      canDelete: true,
     },
   },
 ]; 

@@ -25,9 +25,6 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
 
   return (
     <div>
-      <IconButton onClick={onEdit}>
-        <EditIcon />
-      </IconButton>
       <IconButton
         aria-label="more"
         aria-controls="long-menu"
@@ -41,6 +38,12 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
         open={open}
         onClose={handleClose}
       >
+        <MenuItem onClick={() => { onEdit(); handleClose(); }}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Edit</ListItemText>
+        </MenuItem>
         <MenuItem onClick={() => { onDuplicate(); handleClose(); }}>
           <ListItemIcon>
             <FileCopyIcon fontSize="small" />

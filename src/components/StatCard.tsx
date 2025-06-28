@@ -5,9 +5,10 @@ interface StatCardProps {
   title: string;
   value: string;
   icon: React.ReactElement<SvgIconComponent>;
+  color: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, icon }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
   return (
     <Card>
       <CardContent>
@@ -20,7 +21,15 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon }) => {
               {title}
             </Typography>
           </Box>
-          <Box>
+          <Box sx={{ 
+            color: `${color}.main`, 
+            backgroundColor: `${color}.light`, 
+            borderRadius: '50%', 
+            padding: 1.5, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center'
+          }}>
             {icon}
           </Box>
         </Box>
