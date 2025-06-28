@@ -1,5 +1,5 @@
-import React from 'react';
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
+import React, { useState } from 'react';
+import { IconButton, Menu, MenuItem, ListItemIcon, Typography, Stack } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -12,7 +12,7 @@ interface ActionMenuProps {
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onDelete }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -24,13 +24,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
   };
 
   return (
-    <div>
-      <IconButton
-        aria-label="more"
-        aria-controls="long-menu"
-        aria-haspopup="true"
-        onClick={handleClick}
-      >
+    <Stack direction="row" spacing={0}>
+      <IconButton onClick={onEdit} color="primary">
+        <EditIcon />
+      </IconButton>
+      <IconButton onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
       <Menu
@@ -38,25 +36,19 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => { onEdit(); handleClose(); }}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Edit</ListItemText>
-        </MenuItem>
         <MenuItem onClick={() => { onDuplicate(); handleClose(); }}>
           <ListItemIcon>
-            <FileCopyIcon fontSize="small" />
+            <FileCopyIcon color="action" />
           </ListItemIcon>
-          <ListItemText>Duplicate</ListItemText>
+          <Typography>Duplicate</Typography>
         </MenuItem>
         <MenuItem onClick={() => { onDelete(); handleClose(); }}>
           <ListItemIcon>
-            <DeleteIcon fontSize="small" />
+            <DeleteIcon color="error" />
           </ListItemIcon>
-          <ListItemText>Delete</ListItemText>
+          <Typography color="error">Delete</Typography>
         </MenuItem>
       </Menu>
-    </div>
+    </Stack>
   );
 }; 

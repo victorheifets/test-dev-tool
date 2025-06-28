@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Button, TextField, MenuItem, Select, Typography, SelectChangeEvent, Grid } from '@mui/material';
-import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarProps } from '@mui/x-data-grid';
-import { useTheme } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, MenuItem, Select, Typography, Grid } from '@mui/material';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Course, mockCourses } from '../data/mockCourses';
 import { StatusChip } from '../components/courses/StatusChip';
 import { ActionMenu } from '../components/courses/ActionMenu';
@@ -11,27 +10,43 @@ import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import BusinessIcon from '@mui/icons-material/Business';
+import { CourseModal } from '../components/courses/CourseModal';
 
 export const Dashboard = () => {
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<Course[]>(mockCourses);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>(courses);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState<Course | Omit<Course, 'id'> | null>(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
 
   useEffect(() => {
-    const filtered = mockCourses
+    const filtered = courses
       .filter(course => course.name.toLowerCase().includes(search.toLowerCase()))
       .filter(course => status === 'All' || course.status === status);
     setFilteredCourses(filtered);
-  }, [search, status]);
+  }, [search, status, courses]);
 
   const handleEdit = (id: number) => {
-    alert(`Edit course ${id}`);
+    const courseToEdit = courses.find(c => c.id === id);
+    if (courseToEdit) {
+      setModalMode('edit');
+      setModalInitialData(courseToEdit);
+      setIsModalOpen(true);
+    }
   };
 
   const handleDuplicate = (id: number) => {
-    alert(`Duplicate course ${id}`);
+    const courseToDuplicate = courses.find(c => c.id === id);
+    if (courseToDuplicate) {
+      const { id, ...courseData } = courseToDuplicate;
+      setModalMode('duplicate');
+      setModalInitialData(courseData);
+      setIsModalOpen(true);
+    }
   };
 
   const handleDeleteRequest = (id: number) => {
@@ -41,11 +56,30 @@ export const Dashboard = () => {
 
   const confirmDelete = () => {
     if (selectedCourseId) {
-      const updatedCourses = filteredCourses.filter((course) => course.id !== selectedCourseId);
-      setFilteredCourses(updatedCourses);
+      setCourses(prev => prev.filter(course => course.id !== selectedCourseId));
     }
     setDialogOpen(false);
     setSelectedCourseId(null);
+  };
+  
+  const handleSaveCourse = (formData: Omit<Course, 'id'>) => {
+    if (modalMode === 'edit' && modalInitialData && 'id' in modalInitialData) {
+      setCourses(courses.map(c => c.id === (modalInitialData as Course).id ? { ...formData, id: (modalInitialData as Course).id } : c));
+    } else {
+      const newCourse = {
+        ...formData,
+        id: Math.max(0, ...courses.map(c => c.id)) + 1,
+      };
+      setCourses(prev => [...prev, newCourse]);
+    }
+    setIsModalOpen(false);
+    setModalInitialData(null);
+  };
+  
+  const handleAddNew = () => {
+    setModalMode('create');
+    setModalInitialData(null);
+    setIsModalOpen(true);
   };
 
   const columns: GridColDef[] = [
@@ -103,7 +137,7 @@ export const Dashboard = () => {
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Button variant="contained" onClick={() => alert('Add new class')}>+ Add Class</Button>
+            <Button variant="contained" onClick={handleAddNew}>+ Add Class</Button>
             <Box sx={{ display: 'flex', gap: 2 }}>
                 <TextField
                     variant="outlined"
@@ -142,6 +176,16 @@ export const Dashboard = () => {
         onConfirm={confirmDelete}
         title="Delete Course"
         description="Are you sure you want to delete this course? This action cannot be undone."
+      />
+      <CourseModal 
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        }}
+        onSave={handleSaveCourse}
+        initialData={modalInitialData}
+        mode={modalMode}
       />
     </Box>
   );
