@@ -1,5 +1,6 @@
 import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
+import Language from "@mui/icons-material/Language";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
@@ -8,10 +9,10 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { useGetIdentity } from "@refinedev/core";
 import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../../contexts/color-mode";
-import { FormControl, MenuItem, Select } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 
 type IUser = {
   id: number;
@@ -26,8 +27,20 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { i18n } = useTranslation();
   const { data: user } = useGetIdentity<IUser>();
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
+    handleClose();
   };
 
   return (
@@ -38,63 +51,44 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
         backgroundColor: 'background.paper',
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <HamburgerMenu />
         <Stack
           direction="row"
-          width="100%"
-          justifyContent="space-between"
+          gap={1}
           alignItems="center"
         >
-          <HamburgerMenu />
-          <Stack
-            direction="row"
-            gap="16px"
-            alignItems="center"
+          <IconButton
+            id="language-button"
+            aria-controls={open ? 'language-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+            color="inherit"
           >
-            <FormControl sx={{ minWidth: 80 }}>
-              <Select
-                value={i18n.language}
-                onChange={(e) => changeLanguage(e.target.value)}
-                variant="standard"
-                disableUnderline
-              >
-                <MenuItem value="en">English</MenuItem>
-                <MenuItem value="he">Hebrew</MenuItem>
-              </Select>
-            </FormControl>
+            <Language />
+          </IconButton>
+          <Menu
+            id="language-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              'aria-labelledby': 'language-button',
+            }}
+          >
+            <MenuItem onClick={() => changeLanguage('en')}>English</MenuItem>
+            <MenuItem onClick={() => changeLanguage('he')}>Hebrew</MenuItem>
+          </Menu>
 
-            <IconButton
-              color="inherit"
-              onClick={() => {
-                setMode();
-              }}
-            >
-              {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
-            </IconButton>
+          <IconButton
+            color="inherit"
+            onClick={setMode}
+          >
+            {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
+          </IconButton>
 
-            {(user?.avatar || user?.name) && (
-              <Stack
-                direction="row"
-                gap="16px"
-                alignItems="center"
-              >
-                {user?.name && (
-                  <Typography
-                    sx={{
-                      display: {
-                        xs: "none",
-                        sm: "inline-block",
-                      },
-                    }}
-                    variant="subtitle2"
-                  >
-                    {user?.name}
-                  </Typography>
-                )}
-                <Avatar src={user?.avatar} alt={user?.name} />
-              </Stack>
-            )}
-          </Stack>
+          <Avatar src={user?.avatar} alt={user?.name} />
         </Stack>
       </Toolbar>
     </AppBar>
