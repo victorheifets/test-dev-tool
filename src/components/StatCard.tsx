@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box, useTheme } from "@mui/material";
 
 interface StatCardProps {
   icon: JSX.Element;
@@ -8,25 +8,30 @@ interface StatCardProps {
 }
 
 export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color }) => {
+  const theme = useTheme();
+  
+  const paletteColor = theme.palette[color as keyof typeof theme.palette];
+  const mainColor = typeof paletteColor === 'object' && 'main' in paletteColor ? paletteColor.main : theme.palette.primary.main;
+
   return (
     <Card 
       sx={{ 
-        borderBottom: `5px solid ${color}`,
-        borderRadius: '8px', 
-        boxShadow: 3,
-        height: '100%'
+        borderBottom: `3px solid ${mainColor}`,
+        borderRadius: 2, 
+        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
+        height: '100%',
       }}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ color: color, display: 'flex', mr: 2 }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Box sx={{ color: mainColor, display: 'flex', mr: 1.5 }}>
             {icon}
           </Box>
-          <Typography variant="h6" component="div">
+          <Typography variant="subtitle2" color="text.secondary">
             {title}
           </Typography>
         </Box>
-        <Typography variant="h4" component="div" align="right">
+        <Typography variant="h6" component="div" align="right" fontWeight="bold">
           {value}
         </Typography>
       </CardContent>

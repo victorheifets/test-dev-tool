@@ -6,7 +6,6 @@ import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import { useGetIdentity } from "@refinedev/core";
 import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
 import React, { useContext, useState } from "react";
@@ -26,9 +25,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { mode, setMode } = useContext(ThemeContext);
   const { i18n } = useTranslation();
   const { data: user } = useGetIdentity<IUser>();
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -44,51 +41,33 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   };
 
   return (
-    <AppBar 
-      position={sticky ? "sticky" : "relative"} 
-      sx={{ 
-        boxShadow: 'none',
-        backgroundColor: 'background.paper',
-      }}
-    >
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <HamburgerMenu />
-        <Stack
-          direction="row"
-          gap={1}
-          alignItems="center"
-        >
-          <IconButton
-            id="language-button"
-            aria-controls={open ? 'language-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-            onClick={handleClick}
-            color="inherit"
-          >
-            <Language />
-          </IconButton>
-          <Menu
-            id="language-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              'aria-labelledby': 'language-button',
-            }}
-          >
-            <MenuItem onClick={() => changeLanguage('en')}>English</MenuItem>
-            <MenuItem onClick={() => changeLanguage('he')}>Hebrew</MenuItem>
-          </Menu>
-
-          <IconButton
-            color="inherit"
-            onClick={setMode}
-          >
-            {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
-          </IconButton>
-
-          <Avatar src={user?.avatar} alt={user?.name} />
+    <AppBar position={sticky ? "sticky" : "relative"} sx={{ boxShadow: 'none', backgroundColor: 'background.paper' }}>
+      <Toolbar>
+        <Stack direction="row" width="100%" justifyContent="space-between" alignItems="center">
+          <HamburgerMenu />
+          <Stack direction="row" gap="10px" alignItems="center">
+            <IconButton
+              color="inherit"
+              aria-controls="language-menu"
+              aria-haspopup="true"
+              onClick={handleClick}
+            >
+              <Language />
+            </IconButton>
+            <Menu
+              id="language-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={() => changeLanguage("en")}>English</MenuItem>
+              <MenuItem onClick={() => changeLanguage("he")}>Hebrew</MenuItem>
+            </Menu>
+            <IconButton color="inherit" onClick={setMode}>
+              {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
+            </IconButton>
+            <Avatar src={user?.avatar} alt={user?.name} />
+          </Stack>
         </Stack>
       </Toolbar>
     </AppBar>
