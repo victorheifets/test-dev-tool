@@ -6,7 +6,9 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  Box,
 } from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -24,14 +26,28 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   description,
 }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{title}</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      aria-labelledby="confirmation-dialog-title"
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+        }
+      }}
+    >
+      <DialogTitle id="confirmation-dialog-title">
+        <Box display="flex" alignItems="center">
+          <WarningAmberIcon color="error" sx={{ mr: 1 }} />
+          {title}
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>{description}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} color="primary" autoFocus>
+        <Button onClick={onConfirm} variant="contained" color="error" autoFocus>
           Confirm
         </Button>
       </DialogActions>

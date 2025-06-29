@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, MenuItem, Select, Typography, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useNotification } from '@refinedev/core';
 import { Course, mockCourses } from '../data/mockCourses';
 import { StatusChip } from '../components/courses/StatusChip';
 import { ActionMenu } from '../components/courses/ActionMenu';
@@ -22,6 +23,7 @@ export const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<Course | Omit<Course, 'id'> | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const { open: openNotification } = useNotification();
 
   useEffect(() => {
     const filtered = courses
@@ -57,13 +59,19 @@ export const Dashboard = () => {
   const confirmDelete = () => {
     if (selectedCourseId) {
       setCourses(prev => prev.filter(course => course.id !== selectedCourseId));
+      openNotification({
+        type: 'success',
+        message: 'Course deleted successfully!',
+        description: 'Successful',
+      });
     }
     setDialogOpen(false);
     setSelectedCourseId(null);
   };
   
   const handleSaveCourse = (formData: Omit<Course, 'id'>) => {
-    if (modalMode === 'edit' && modalInitialData && 'id' in modalInitialData) {
+    const isEditing = modalMode === 'edit';
+    if (isEditing && modalInitialData && 'id' in modalInitialData) {
       setCourses(courses.map(c => c.id === (modalInitialData as Course).id ? { ...formData, id: (modalInitialData as Course).id } : c));
     } else {
       const newCourse = {
@@ -72,6 +80,11 @@ export const Dashboard = () => {
       };
       setCourses(prev => [...prev, newCourse]);
     }
+    openNotification({
+      type: 'success',
+      message: `Course ${isEditing ? 'updated' : 'created'} successfully!`,
+      description: 'Successful',
+    });
     setIsModalOpen(false);
     setModalInitialData(null);
   };

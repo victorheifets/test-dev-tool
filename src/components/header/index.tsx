@@ -3,6 +3,7 @@ import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
 import Language from "@mui/icons-material/Language";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
@@ -43,31 +44,30 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   return (
     <AppBar position={sticky ? "sticky" : "relative"} sx={{ boxShadow: 'none', backgroundColor: 'background.paper' }}>
       <Toolbar>
-        <Stack direction="row" width="100%" justifyContent="space-between" alignItems="center">
+        <Box sx={{ flexGrow: 1 }} />
+        <Stack direction="row" gap="10px" alignItems="center">
           <HamburgerMenu />
-          <Stack direction="row" gap="10px" alignItems="center">
-            <IconButton
-              color="inherit"
-              aria-controls="language-menu"
-              aria-haspopup="true"
-              onClick={handleClick}
-            >
-              <Language />
-            </IconButton>
-            <Menu
-              id="language-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => changeLanguage("en")}>English</MenuItem>
-              <MenuItem onClick={() => changeLanguage("he")}>Hebrew</MenuItem>
-            </Menu>
-            <IconButton color="inherit" onClick={setMode}>
-              {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
-            </IconButton>
-            <Avatar src={user?.avatar} alt={user?.name} />
-          </Stack>
+          <IconButton
+            color="inherit"
+            aria-controls="language-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
+          >
+            <Language />
+          </IconButton>
+          <Menu
+            id="language-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={() => changeLanguage("en")}>English</MenuItem>
+            <MenuItem onClick={() => changeLanguage("he")}>Hebrew</MenuItem>
+          </Menu>
+          <IconButton color="inherit" onClick={setMode}>
+            {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
+          </IconButton>
+          <Avatar src={user?.avatar} alt={user?.name} />
         </Stack>
       </Toolbar>
     </AppBar>

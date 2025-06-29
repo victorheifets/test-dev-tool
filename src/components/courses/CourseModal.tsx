@@ -33,7 +33,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
     }
   }, [initialData, open]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<"Published" | "Ongoing" | "Draft">) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
     setCourse(prev => ({ ...prev, [name as string]: value }));
   };
@@ -50,7 +50,17 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+        }
+      }}
+    >
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
