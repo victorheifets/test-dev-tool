@@ -1,56 +1,97 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Button, TextField, MenuItem, Select, Typography, SelectChangeEvent, Grid } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, TextField, MenuItem, Select, Typography, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Course, mockCourses } from '../../data/mockCourses';
+import { useNotification, useDelete } from '@refinedev/core';
+import { useDataGrid } from '@refinedev/mui';
+import { Activity } from '../../types/activity';
+import { sampleActivities } from '../../data/sampleActivities';
 import { StatusChip } from '../../components/courses/StatusChip';
 import { ActionMenu } from '../../components/courses/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
+import { CourseModal } from '../../components/courses/CourseModal';
+import { StatCard } from '../../components/StatCard';
+import PeopleIcon from '@mui/icons-material/People';
+import SchoolIcon from '@mui/icons-material/School';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import BusinessIcon from '@mui/icons-material/Business';
 
 export const CourseList = () => {
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('All');
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState<Activity | null>(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  
+  const { open: openNotification } = useNotification();
+  const { mutate: deleteActivity } = useDelete();
 
-  useEffect(() => {
-    const filtered = mockCourses
-      .filter(course => course.name.toLowerCase().includes(search.toLowerCase()))
-      .filter(course => status === 'All' || course.status === status);
-    setFilteredCourses(filtered);
-  }, [search, status]);
-
-  const handleEdit = (id: number) => {
-    alert(`Edit course ${id}`);
+  // For now, use hardcoded sample data to demonstrate table actions
+  const activities = sampleActivities;
+  
+  // Prepare dataGridProps structure for the DataGrid component
+  const dataGridProps = {
+    rows: activities,
+    loading: false,
+    rowCount: activities.length,
   };
 
-  const handleDuplicate = (id: number) => {
-    alert(`Duplicate course ${id}`);
+  const handleEdit = (id: string) => {
+    const activityToEdit = activities.find(a => a.id === id);
+    if (activityToEdit) {
+      setModalMode('edit');
+      setModalInitialData(activityToEdit);
+      setIsModalOpen(true);
+    }
   };
 
-  const handleDeleteRequest = (id: number) => {
-    setSelectedCourseId(id);
+  const handleDuplicate = (id: string) => {
+    const activityToDuplicate = activities.find(a => a.id === id);
+    if (activityToDuplicate) {
+      setModalMode('duplicate');
+      setModalInitialData(activityToDuplicate);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleDeleteRequest = (id: string) => {
+    setSelectedActivityId(id);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (selectedCourseId) {
-      const updatedCourses = filteredCourses.filter((course) => course.id !== selectedCourseId);
-      setFilteredCourses(updatedCourses);
+    if (selectedActivityId) {
+      deleteActivity({
+        resource: 'activities',
+        id: selectedActivityId,
+      }, {
+        onSuccess: () => {
+          openNotification?.({
+            type: 'success',
+            message: 'Course deleted successfully!',
+            description: 'Successful',
+          });
+        }
+      });
     }
     setDialogOpen(false);
-    setSelectedCourseId(null);
+    setSelectedActivityId(null);
+  };
+  
+  const handleAddNew = () => {
+    setModalMode('create');
+    setModalInitialData(null);
+    setIsModalOpen(true);
   };
 
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'CLASS NAME',
+      headerName: 'COURSE NAME',
       flex: 1,
       renderCell: (params) => (
         <Box>
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{params.row.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{params.row.subtext}</Typography>
+            <Typography variant="caption" color="text.secondary">{params.row.category}</Typography>
         </Box>
       )
     },
@@ -60,11 +101,31 @@ export const CourseList = () => {
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
-    { field: 'instructor', headerName: 'INSTRUCTOR', flex: 1 },
+    { 
+      field: 'trainer_id', 
+      headerName: 'TRAINER', 
+      flex: 1,
+      renderCell: (params) => params.row.trainer_id || 'Not Assigned'
+    },
     { field: 'location', headerName: 'LOCATION', flex: 1 },
-    { field: 'startDate', headerName: 'START DATE', flex: 1 },
-    { field: 'endDate', headerName: 'END DATE', flex: 1 },
-    { field: 'capacity', headerName: 'CAPACITY', flex: 1 },
+    { 
+      field: 'start_date', 
+      headerName: 'START DATE', 
+      flex: 1,
+      renderCell: (params) => new Date(params.row.start_date).toLocaleDateString()
+    },
+    { 
+      field: 'end_date', 
+      headerName: 'END DATE', 
+      flex: 1,
+      renderCell: (params) => new Date(params.row.end_date).toLocaleDateString()
+    },
+    { 
+      field: 'capacity', 
+      headerName: 'CAPACITY', 
+      flex: 1,
+      renderCell: (params) => `${params.row.enrollments_count} / ${params.row.capacity}`
+    },
     {
       field: 'action',
       headerName: 'ACTION',
@@ -81,40 +142,33 @@ export const CourseList = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Button variant="contained" onClick={() => alert('Add new class')}>+ Add Class</Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-                <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Search Class"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <Select value={status} onChange={(e) => setStatus(e.target.value)} size="small" sx={{ minWidth: 120 }}>
-                    <MenuItem value="All">Status</MenuItem>
-                    <MenuItem value="Published">Published</MenuItem>
-                    <MenuItem value="Ongoing">Ongoing</MenuItem>
-                    <MenuItem value="Draft">Draft</MenuItem>
-                </Select>
-            </Box>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard title="Total Courses" value={activities.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard title="Published" value={activities.filter(a => a.status === 'published').length.toString()} icon={<BusinessIcon sx={{ fontSize: 40 }} />} color="success" />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard title="Ongoing" value={activities.filter(a => a.status === 'ongoing').length.toString()} icon={<MonetizationOnIcon sx={{ fontSize: 40 }} />} color="warning" />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard title="Draft" value={activities.filter(a => a.status === 'draft').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
+        </Grid>
+      </Grid>
+      <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Button variant="contained" onClick={handleAddNew}>+ Add Course</Button>
         </Box>
-      </Box>
-      <Box sx={{ height: 500, width: '100%', backgroundColor: 'background.paper', borderRadius: 1 }}>
-          <DataGrid
-              rows={filteredCourses}
-              columns={columns}
-              checkboxSelection
-              initialState={{
-                  pagination: {
-                      paginationModel: { page: 0, pageSize: 5 },
-                  },
-              }}
-              pageSizeOptions={[3, 5, 10]}
-              disableRowSelectionOnClick
-              sx={{ border: 'none' }}
-          />
+        <Box sx={{ height: 500, width: '100%' }}>
+            <DataGrid
+                {...dataGridProps}
+                columns={columns}
+                checkboxSelection
+                disableRowSelectionOnClick
+                sx={{ border: 'none' }}
+            />
+        </Box>
       </Box>
       <ConfirmationDialog
         open={dialogOpen}
@@ -122,6 +176,15 @@ export const CourseList = () => {
         onConfirm={confirmDelete}
         title="Delete Course"
         description="Are you sure you want to delete this course? This action cannot be undone."
+      />
+      <CourseModal 
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        }}
+        initialData={modalInitialData}
+        mode={modalMode}
       />
     </Box>
   );

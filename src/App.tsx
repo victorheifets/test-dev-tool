@@ -71,7 +71,7 @@ function App() {
           <RefineSnackbarProvider>
             <DevtoolsProvider>
               <Refine
-                dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
+                dataProvider={dataProvider("http://localhost:8082/api")}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerBindings}
                 resources={resources}

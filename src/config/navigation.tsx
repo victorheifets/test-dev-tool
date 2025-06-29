@@ -21,7 +21,7 @@ export const resources: RefineProps['resources'] = [
     }
   },
   {
-    name: 'courses',
+    name: 'activities',
     list: '/courses',
     meta: {
       label: 'Courses',

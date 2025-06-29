@@ -1,0 +1,72 @@
+import { Activity } from '../types/activity';
+
+export const sampleActivities: Activity[] = [
+  {
+    id: '1',
+    provider_id: '12345678-1234-5678-1234-567812345678',
+    created_at: '2025-01-01T10:00:00Z',
+    updated_at: '2025-01-01T10:00:00Z',
+    is_active: true,
+    name: 'Introduction to React Development',
+    description: 'Learn the fundamentals of React.js, including components, state management, and modern development practices. Perfect for beginners looking to start their frontend journey.',
+    capacity: 25,
+    start_date: '2025-08-15',
+    end_date: '2025-08-17',
+    status: 'published',
+    sessions: [],
+    pricing: {
+      amount: 149.99,
+      currency: 'USD',
+      description: 'Early bird pricing'
+    },
+    location: 'Online',
+    tags: ['react', 'javascript', 'frontend'],
+    category: 'Web Development',
+    activity_type: 'course',
+    level: 'beginner',
+    featured: true,
+    min_participants: 5,
+    max_participants: 25,
+    materials_included: ['Course materials', 'Practice projects'],
+    learning_outcomes: ['Build React components', 'Understand state management', 'Create interactive UIs'],
+    enrollments_count: 18,
+    available_spots: 7,
+    is_fully_booked: false,
+    reviews_count: 12,
+    rating: 4.8
+  },
+  {
+    id: '2',
+    provider_id: '12345678-1234-5678-1234-567812345678',
+    created_at: '2025-01-02T14:30:00Z',
+    updated_at: '2025-01-02T14:30:00Z',
+    is_active: true,
+    name: 'Advanced Python Programming',
+    description: 'Deep dive into advanced Python concepts including decorators, metaclasses, async programming, and performance optimization. Ideal for experienced developers.',
+    capacity: 15,
+    start_date: '2025-09-01',
+    end_date: '2025-09-05',
+    status: 'ongoing',
+    sessions: [],
+    pricing: {
+      amount: 299.99,
+      currency: 'USD',
+      description: 'Professional development'
+    },
+    location: 'Hybrid',
+    tags: ['python', 'advanced', 'programming'],
+    category: 'Software Development',
+    activity_type: 'workshop',
+    level: 'advanced',
+    featured: false,
+    min_participants: 8,
+    max_participants: 15,
+    materials_included: ['Advanced coding exercises', 'Performance profiling tools'],
+    learning_outcomes: ['Master advanced Python features', 'Optimize code performance', 'Build scalable applications'],
+    enrollments_count: 12,
+    available_spots: 3,
+    is_fully_booked: false,
+    reviews_count: 8,
+    rating: 4.9
+  }
+];

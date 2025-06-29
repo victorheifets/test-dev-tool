@@ -1,45 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Grid, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
-import { Course } from '../../data/mockCourses';
+import { Activity, ActivityCreate } from '../../types/activity';
 
 interface CourseModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (course: Omit<Course, 'id'>) => void;
-  initialData?: Course | Omit<Course, 'id'> | null;
+  onSave?: (activity: ActivityCreate) => void;
+  initialData?: Activity | null;
   mode: 'create' | 'edit' | 'duplicate';
 }
 
-const emptyCourse: Omit<Course, 'id'> = {
+const emptyActivity: ActivityCreate = {
   name: '',
-  subtext: '',
-  status: 'Draft',
-  instructor: '',
+  description: '',
+  status: 'draft',
   location: '',
-  startDate: '',
-  endDate: '',
-  capacity: 0,
+  start_date: '',
+  end_date: '',
+  capacity: 50,
+  category: '',
+  pricing: { amount: 0, currency: 'USD' },
 };
 
 export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave, initialData, mode }) => {
-  const [course, setCourse] = useState<Omit<Course, 'id'>>(emptyCourse);
+  const [activity, setActivity] = useState<ActivityCreate>(emptyActivity);
 
   useEffect(() => {
     if (initialData) {
-      const { id, ...data } = initialData as Course;
-      setCourse(data);
+      // Convert Activity to ActivityCreate format
+      const activityData: ActivityCreate = {
+        name: initialData.name,
+        description: initialData.description,
+        status: initialData.status,
+        location: initialData.location,
+        start_date: initialData.start_date,
+        end_date: initialData.end_date,
+        capacity: initialData.capacity,
+        category: initialData.category,
+        pricing: initialData.pricing,
+      };
+      setActivity(activityData);
     } else {
-      setCourse(emptyCourse);
+      setActivity(emptyActivity);
     }
   }, [initialData, open]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-    setCourse(prev => ({ ...prev, [name as string]: value }));
+    setActivity(prev => ({ ...prev, [name as string]: value }));
   };
 
   const handleSave = () => {
-    onSave(course);
+    if (onSave) {
+      onSave(activity);
+    }
     onClose();
   };
 
@@ -65,35 +79,37 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
-            <TextField name="name" label="Class Name" value={course.name} onChange={handleChange} fullWidth />
+            <TextField name="name" label="Course Name" value={activity.name} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12}>
-            <TextField name="subtext" label="Subtext" value={course.subtext} onChange={handleChange} fullWidth />
+            <TextField name="description" label="Description" value={activity.description} onChange={handleChange} fullWidth multiline rows={3} required />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField name="category" label="Category" value={activity.category} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
-              <Select name="status" value={course.status} onChange={handleChange} label="Status">
-                <MenuItem value="Published">Published</MenuItem>
-                <MenuItem value="Ongoing">Ongoing</MenuItem>
-                <MenuItem value="Draft">Draft</MenuItem>
+              <Select name="status" value={activity.status} onChange={handleChange} label="Status">
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="published">Published</MenuItem>
+                <MenuItem value="ongoing">Ongoing</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField name="instructor" label="Instructor" value={course.instructor} onChange={handleChange} fullWidth />
+            <TextField name="location" label="Location" value={activity.location} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField name="location" label="Location" value={course.location} onChange={handleChange} fullWidth />
+            <TextField name="capacity" label="Capacity" type="number" value={activity.capacity} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12} sm={6}>
-             <TextField name="capacity" label="Capacity" type="number" value={course.capacity} onChange={handleChange} fullWidth />
+            <TextField name="start_date" label="Start Date" type="date" value={activity.start_date} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField name="startDate" label="Start Date" value={course.startDate} onChange={handleChange} fullWidth />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField name="endDate" label="End Date" value={course.endDate} onChange={handleChange} fullWidth />
+            <TextField name="end_date" label="End Date" type="date" value={activity.end_date} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
           </Grid>
         </Grid>
       </DialogContent>
