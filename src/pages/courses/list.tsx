@@ -86,7 +86,7 @@ export const CourseList = () => {
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'COURSE NAME',
+      headerName: 'Course Name',
       flex: 1,
       renderCell: (params) => (
         <Box>
@@ -97,38 +97,38 @@ export const CourseList = () => {
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: 'Status',
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'trainer_id', 
-      headerName: 'TRAINER', 
+      headerName: 'Trainer', 
       flex: 1,
       renderCell: (params) => params.row.trainer_id || 'Not Assigned'
     },
-    { field: 'location', headerName: 'LOCATION', flex: 1 },
+    { field: 'location', headerName: 'Location', flex: 1 },
     { 
       field: 'start_date', 
-      headerName: 'START DATE', 
+      headerName: 'Start Date', 
       flex: 1,
       renderCell: (params) => new Date(params.row.start_date).toLocaleDateString()
     },
     { 
       field: 'end_date', 
-      headerName: 'END DATE', 
+      headerName: 'End Date', 
       flex: 1,
       renderCell: (params) => new Date(params.row.end_date).toLocaleDateString()
     },
     { 
       field: 'capacity', 
-      headerName: 'CAPACITY', 
+      headerName: 'Capacity', 
       flex: 1,
       renderCell: (params) => `${params.row.enrollments_count || 0} / ${params.row.capacity || 0}`
     },
     { 
       field: 'pricing', 
-      headerName: 'PRICE', 
+      headerName: 'Price', 
       flex: 1,
       renderCell: (params) => {
         const price = params.row.pricing?.amount || params.row.price || 0;
@@ -138,7 +138,7 @@ export const CourseList = () => {
     },
     {
       field: 'action',
-      headerName: 'ACTION',
+      headerName: 'Action',
       flex: 1,
       renderCell: (params) => (
         <ActionMenu

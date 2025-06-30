@@ -123,39 +123,39 @@ export const ParticipantsList = () => {
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'NAME',
+      headerName: 'Name',
       flex: 1,
     },
     {
       field: 'email',
-      headerName: 'EMAIL',
+      headerName: 'Email',
       flex: 1,
     },
     {
       field: 'phone',
-      headerName: 'PHONE',
+      headerName: 'Phone',
       flex: 1,
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: 'Status',
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'created_at', 
-      headerName: 'CREATED AT', 
+      headerName: 'Created At', 
       flex: 1,
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
     },
     { 
       field: 'enrollments_count', 
-      headerName: 'ENROLLMENTS', 
+      headerName: 'Enrollments', 
       flex: 1,
     },
     {
       field: 'action',
-      headerName: 'ACTION',
+      headerName: 'Action',
       flex: 1,
       renderCell: (params) => (
         <ActionMenu

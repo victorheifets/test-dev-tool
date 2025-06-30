@@ -49,12 +49,6 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handleAction(onEdit)}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" color="primary" />
-          </ListItemIcon>
-          <ListItemText>Edit</ListItemText>
-        </MenuItem>
         <MenuItem onClick={() => handleAction(onDuplicate)}>
           <ListItemIcon>
             <ContentCopyIcon fontSize="small" color="info" />

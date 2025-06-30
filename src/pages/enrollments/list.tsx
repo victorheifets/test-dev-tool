@@ -123,41 +123,41 @@ export const EnrollmentsList = () => {
   const columns: GridColDef[] = [
     {
       field: 'participant_name',
-      headerName: 'STUDENT',
+      headerName: 'Student',
       flex: 1,
     },
     {
       field: 'activity_name',
-      headerName: 'COURSE',
+      headerName: 'Course',
       flex: 1,
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: 'Status',
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'enrollment_date', 
-      headerName: 'ENROLLMENT DATE', 
+      headerName: 'Enrollment Date', 
       flex: 1,
       renderCell: (params) => new Date(params.row.enrollment_date).toLocaleDateString()
     },
     { 
       field: 'completion_date', 
-      headerName: 'COMPLETION DATE', 
+      headerName: 'Completion Date', 
       flex: 1,
       renderCell: (params) => params.row.completion_date ? new Date(params.row.completion_date).toLocaleDateString() : '-'
     },
     { 
       field: 'payment_status', 
-      headerName: 'PAYMENT STATUS', 
+      headerName: 'Payment Status', 
       flex: 1,
       renderCell: (params) => params.row.payment_status.charAt(0).toUpperCase() + params.row.payment_status.slice(1)
     },
     {
       field: 'action',
-      headerName: 'ACTION',
+      headerName: 'Action',
       flex: 1,
       renderCell: (params) => (
         <ActionMenu

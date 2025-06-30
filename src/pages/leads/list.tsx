@@ -123,45 +123,45 @@ export const LeadsList = () => {
   const columns: GridColDef[] = [
     {
       field: 'first_name',
-      headerName: 'FIRST NAME',
+      headerName: 'First Name',
       flex: 1,
     },
     {
       field: 'last_name',
-      headerName: 'LAST NAME',
+      headerName: 'Last Name',
       flex: 1,
     },
     {
       field: 'email',
-      headerName: 'EMAIL',
+      headerName: 'Email',
       flex: 1,
     },
     {
       field: 'phone',
-      headerName: 'PHONE',
+      headerName: 'Phone',
       flex: 1,
     },
     {
       field: 'source',
-      headerName: 'SOURCE',
+      headerName: 'Source',
       flex: 1,
       renderCell: (params) => params.row.source.charAt(0).toUpperCase() + params.row.source.slice(1)
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: 'Status',
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'created_at', 
-      headerName: 'CREATED AT', 
+      headerName: 'Created At', 
       flex: 1,
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
     },
     {
       field: 'action',
-      headerName: 'ACTION',
+      headerName: 'Action',
       flex: 1,
       renderCell: (params) => (
         <ActionMenu

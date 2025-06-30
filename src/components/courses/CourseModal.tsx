@@ -20,6 +20,7 @@ const emptyActivity: ActivityCreate = {
   end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
   capacity: 50,
   category: '',
+  activity_type: 'course',
   pricing: { amount: 0, currency: 'USD' },
 };
 
@@ -43,7 +44,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
         end_date: initialData.end_date,
         capacity: initialData.capacity,
         category: initialData.category,
-        pricing: initialData.pricing,
+        pricing: initialData.pricing || { amount: 0, currency: 'USD' },
       };
       setActivity(activityData);
     } else {
@@ -132,8 +133,18 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
       <DialogContent>
         <form id="course-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={8}>
             <TextField name="name" label="Course Name" value={activity.name} onChange={handleChange} fullWidth required />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth required>
+              <InputLabel>Type</InputLabel>
+              <Select name="activity_type" value={activity.activity_type || 'course'} onChange={handleChange} label="Type">
+                <MenuItem value="course">Course</MenuItem>
+                <MenuItem value="workshop">Workshop</MenuItem>
+                <MenuItem value="session">Session</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
             <TextField name="description" label="Description" value={activity.description} onChange={handleChange} fullWidth multiline rows={3} required />
@@ -160,7 +171,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
             <TextField name="capacity" label="Capacity" type="number" value={activity.capacity} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField name="price" label="Price (USD)" type="number" value={activity.pricing.amount} onChange={handleChange} fullWidth required />
+            <TextField name="price" label="Price (USD)" type="number" value={activity.pricing?.amount || 0} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField name="start_date" label="Start Date" type="date" value={activity.start_date} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
