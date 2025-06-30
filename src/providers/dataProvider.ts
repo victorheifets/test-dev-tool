@@ -241,15 +241,18 @@ export const dataProvider: DataProvider = {
     const apiResource = resourceMap[resource] || resource as keyof typeof API_CONFIG.endpoints;
     const url = buildApiUrl(apiResource, String(id));
     
+    console.log(`[DataProvider] DELETE request to: ${url}`);
+    
     try {
-      await httpClient(url, {
+      const response = await httpClient(url, {
         method: 'DELETE',
       });
       
-      console.log(`[DataProvider] deleteOne success for ${resource}:${id}`);
+      console.log(`[DataProvider] deleteOne success for ${resource}:${id}`, response);
       return { data: {} };
       
     } catch (error) {
+      console.error(`[DataProvider] deleteOne failed for ${resource}:${id}`, error);
       logError(error, `DataProvider.deleteOne(${resource}:${id})`);
       throw error;
     }
