@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useDelete } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Enrollment } from '../../types/enrollment';
@@ -24,6 +24,8 @@ export const EnrollmentsList = () => {
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteEnrollment } = useDelete();
+  const { mutate: createEnrollment } = useCreate();
+  const { mutate: updateEnrollment } = useUpdate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps, search, filters } = useDataGrid<Enrollment>({
@@ -81,6 +83,41 @@ export const EnrollmentsList = () => {
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
+  };
+
+  const handleSave = (enrollment: Omit<Enrollment, 'id'>) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createEnrollment({
+        resource: 'enrollments',
+        values: enrollment,
+      }, {
+        onSuccess: () => {
+          showSuccess('Enrollment created successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Create error:', error);
+          handleError(error, 'Create Enrollment');
+        }
+      });
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateEnrollment({
+        resource: 'enrollments',
+        id: modalInitialData.id,
+        values: enrollment,
+      }, {
+        onSuccess: () => {
+          showSuccess('Enrollment updated successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Update error:', error);
+          handleError(error, 'Update Enrollment');
+        }
+      });
+    }
   };
 
   const columns: GridColDef[] = [
@@ -178,7 +215,7 @@ export const EnrollmentsList = () => {
         }}
         initialData={modalInitialData}
         mode={modalMode}
-        onSave={() => {}}
+        onSave={handleSave}
       />
     </Box>
   );

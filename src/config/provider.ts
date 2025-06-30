@@ -3,7 +3,7 @@
  * This file stores the provider ID for the multi-tenant API
  */
 
-// The provider ID to use for all API requests
+// The provider ID to use for all API requests (matches existing provider in database)
 export const PROVIDER_ID = '12345678-1234-5678-1234-567812345678';
 
 // Function to get the provider ID (can be extended to get from localStorage, etc.)

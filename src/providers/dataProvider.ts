@@ -175,6 +175,19 @@ export const dataProvider: DataProvider = {
     }
     
     console.log('Final payload being sent to API:', JSON.stringify(payload, null, 2));
+    console.log(`[DataProvider] Sending POST request to: ${url}`);
+    
+    // Extra debugging for enrollment creation
+    if (resource === 'enrollments') {
+      console.log('\n=== ENROLLMENT CREATE DEBUG - Frontend ===');
+      console.log('Resource:', resource);
+      console.log('API Resource:', apiResource);
+      console.log('URL:', url);
+      console.log('Original variables:', JSON.stringify(variables, null, 2));
+      console.log('Final payload:', JSON.stringify(payload, null, 2));
+      console.log('Payload keys:', Object.keys(payload));
+      console.log('=============================================\n');
+    }
     
     try {
       const response = await httpClient(url, {

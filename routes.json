@@ -1,0 +1,10 @@
+{
+  "/api/activities*": "/activities$1",
+  "/api/participants*": "/participants$1",
+  "/api/enrollments*": "/enrollments$1",
+  "/api/marketing*": "/marketing$1",
+  "/api/providers*": "/providers$1",
+  "/api/statistics*": "/statistics$1",
+  "/api/auth*": "/auth$1",
+  "/api/health": "/health"
+} 

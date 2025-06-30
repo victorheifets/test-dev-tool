@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useDelete } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Participant } from '../../types/participant';
@@ -24,6 +24,8 @@ export const ParticipantsList = () => {
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteParticipant } = useDelete();
+  const { mutate: createParticipant } = useCreate();
+  const { mutate: updateParticipant } = useUpdate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps, search, filters } = useDataGrid<Participant>({
@@ -81,6 +83,41 @@ export const ParticipantsList = () => {
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
+  };
+
+  const handleSave = (participant: Omit<Participant, 'id'>) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createParticipant({
+        resource: 'participants',
+        values: participant,
+      }, {
+        onSuccess: () => {
+          showSuccess('Participant created successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Create error:', error);
+          handleError(error, 'Create Participant');
+        }
+      });
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateParticipant({
+        resource: 'participants',
+        id: modalInitialData.id,
+        values: participant,
+      }, {
+        onSuccess: () => {
+          showSuccess('Participant updated successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Update error:', error);
+          handleError(error, 'Update Participant');
+        }
+      });
+    }
   };
 
   const columns: GridColDef[] = [
@@ -176,7 +213,7 @@ export const ParticipantsList = () => {
         }}
         initialData={modalInitialData}
         mode={modalMode}
-        onSave={() => {}}
+        onSave={handleSave}
       />
     </Box>
   );

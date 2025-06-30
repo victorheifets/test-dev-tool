@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useDelete } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Lead } from '../../types/lead';
@@ -24,6 +24,8 @@ export const LeadsList = () => {
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteLead } = useDelete();
+  const { mutate: createLead } = useCreate();
+  const { mutate: updateLead } = useUpdate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps } = useDataGrid<Lead>({
@@ -83,10 +85,50 @@ export const LeadsList = () => {
     setIsModalOpen(true);
   };
 
+  const handleSave = (lead: Omit<Lead, 'id'>) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createLead({
+        resource: 'leads',
+        values: lead,
+      }, {
+        onSuccess: () => {
+          showSuccess('Lead created successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Create error:', error);
+          handleError(error, 'Create Lead');
+        }
+      });
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateLead({
+        resource: 'leads',
+        id: modalInitialData.id,
+        values: lead,
+      }, {
+        onSuccess: () => {
+          showSuccess('Lead updated successfully!');
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        },
+        onError: (error) => {
+          console.error('Update error:', error);
+          handleError(error, 'Update Lead');
+        }
+      });
+    }
+  };
+
   const columns: GridColDef[] = [
     {
-      field: 'name',
-      headerName: 'NAME',
+      field: 'first_name',
+      headerName: 'FIRST NAME',
+      flex: 1,
+    },
+    {
+      field: 'last_name',
+      headerName: 'LAST NAME',
       flex: 1,
     },
     {
@@ -177,7 +219,7 @@ export const LeadsList = () => {
         }}
         initialData={modalInitialData}
         mode={modalMode}
-        onSave={() => {}}
+        onSave={handleSave}
       />
     </Box>
   );

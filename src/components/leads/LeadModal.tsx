@@ -11,8 +11,9 @@ interface LeadModalProps {
 }
 
 const emptyLead: Omit<Lead, 'id'> = {
-  provider_id: '',
-  name: '',
+  provider_id: '12345678-1234-5678-1234-567812345678',
+  first_name: '',
+  last_name: '',
   email: '',
   phone: '',
   source: 'website',
@@ -63,8 +64,11 @@ export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, ini
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
-            <TextField name="name" label="Name" value={lead.name} onChange={handleChange} fullWidth />
+          <Grid item xs={12} sm={6}>
+            <TextField name="first_name" label="First Name" value={lead.first_name} onChange={handleChange} fullWidth />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField name="last_name" label="Last Name" value={lead.last_name} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12}>
             <TextField name="email" label="Email" value={lead.email} onChange={handleChange} fullWidth />

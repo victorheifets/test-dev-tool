@@ -1,0 +1,228 @@
+{
+  "activities": [
+    {
+      "id": "1",
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "name": "Introduction to React",
+      "description": "Learn the basics of React",
+      "start_date": "2023-01-01",
+      "end_date": "2023-01-31",
+      "status": "active",
+      "capacity": 30,
+      "enrolled": 20,
+      "location": "Online",
+      "price": 99.99,
+      "currency": "USD",
+      "created_at": "2022-12-01T12:00:00Z",
+      "updated_at": "2022-12-15T14:30:00Z"
+    },
+    {
+      "id": "2",
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "name": "Advanced JavaScript",
+      "description": "Master JavaScript concepts",
+      "start_date": "2023-02-01",
+      "end_date": "2023-02-28",
+      "status": "upcoming",
+      "capacity": 25,
+      "enrolled": 15,
+      "location": "Online",
+      "price": 149.99,
+      "currency": "USD",
+      "created_at": "2022-12-10T12:00:00Z",
+      "updated_at": "2022-12-20T14:30:00Z"
+    }
+  ],
+  "participants": [
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1234567890",
+      "status": "active",
+      "created_at": "2022-11-01T12:00:00Z",
+      "updated_at": "2022-11-15T14:30:00Z",
+      "name": "BARUCH",
+      "id": "1"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+0987654321",
+      "status": "inactive",
+      "created_at": "2022-11-05T12:00:00Z",
+      "updated_at": "2022-11-20T14:30:00Z",
+      "name": "Moshe Cocheb",
+      "id": "2"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "name": "Victor Heifets",
+      "email": "victor.heifets@gmail.com",
+      "phone": "0545456489",
+      "status": "inactive",
+      "created_at": "2025-06-30T14:04:44.595Z",
+      "enrollments_count": 0,
+      "id": "wWCLLzR"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "name": "Victor Heifets12",
+      "email": "victor.heifets@gmail.com",
+      "phone": "0545456489",
+      "status": "active",
+      "created_at": "2025-06-30T14:04:44.595Z",
+      "enrollments_count": 0,
+      "id": "R6G8_Yl"
+    }
+  ],
+  "enrollments": [
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "participant_id": "1",
+      "activity_id": "1",
+      "status": "confirmed",
+      "payment_status": "paid",
+      "created_at": "2022-12-05T12:00:00Z",
+      "updated_at": "2022-12-10T14:30:00Z",
+      "participant_name": "gdfgdf",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "participant_id": "2",
+      "activity_id": "1",
+      "status": "pending",
+      "payment_status": "unpaid",
+      "created_at": "2022-12-07T12:00:00Z",
+      "updated_at": "2022-12-12T14:30:00Z"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "participant_id": "test123",
+      "activity_id": "1",
+      "status": "enrolled",
+      "enrollment_date": "2024-01-01",
+      "payment_status": "pending",
+      "participant_name": "Test Student",
+      "activity_name": "Test Course",
+      "id": "cM7gRe3"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "participant_id": "new_test456",
+      "activity_id": "2",
+      "status": "enrolled",
+      "enrollment_date": "2024-06-30",
+      "payment_status": "pending",
+      "participant_name": "Another Test Student",
+      "activity_name": "Advanced JavaScript",
+      "id": "HA70h9t"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "participant_id": "participant_1751291753371",
+      "participant_name": "Victor Heifets",
+      "activity_id": "2",
+      "activity_name": "Advanced JavaScript",
+      "status": "cancelled",
+      "enrollment_date": "2025-06-30",
+      "payment_status": "refunded",
+      "notes": "",
+      "special_requirements": "",
+      "discount_code": "345435",
+      "referral_source": "web",
+      "completion_percentage": 0,
+      "is_active": true,
+      "id": "HL2trR2"
+    }
+  ],
+  "marketing": [
+    {
+      "id": "1",
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "Michael",
+      "last_name": "Johnson",
+      "email": "michael.johnson@example.com",
+      "phone": "+1122334455",
+      "status": "new",
+      "source": "website",
+      "notes": "Interested in React course",
+      "created_at": "2022-11-20T12:00:00Z",
+      "updated_at": "2022-11-25T14:30:00Z"
+    },
+    {
+      "id": "2",
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "Emily",
+      "last_name": "Brown",
+      "email": "emily.brown@example.com",
+      "phone": "+5544332211",
+      "status": "contacted",
+      "source": "referral",
+      "notes": "Wants information about JavaScript course",
+      "created_at": "2022-11-22T12:00:00Z",
+      "updated_at": "2022-11-27T14:30:00Z"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "Test",
+      "last_name": "User",
+      "email": "test@example.com",
+      "phone": "1234567890",
+      "status": "new",
+      "source": "website",
+      "id": "dmOeN7C"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "name": "Victor Heifets",
+      "email": "victor.heifets@gmail.com",
+      "phone": "0545456489",
+      "source": "referral",
+      "status": "converted",
+      "created_at": "2025-06-30T14:14:39.855Z",
+      "id": "HV1i_mm"
+    },
+    {
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "first_name": "Victor",
+      "last_name": "Heifets",
+      "email": "victor.heifets@gmail.com",
+      "phone": "32423432",
+      "source": "website",
+      "status": "qualified",
+      "created_at": "2025-06-30T14:27:48.490Z",
+      "id": "BmBqp6M"
+    }
+  ],
+  "providers": [
+    {
+      "id": "12345678-1234-5678-1234-567812345678",
+      "name": "Example Provider",
+      "description": "A provider for testing",
+      "email": "contact@example.com",
+      "phone": "+1234567890",
+      "website": "https://example.com",
+      "logo_url": "https://example.com/logo.png",
+      "created_at": "2022-10-01T12:00:00Z",
+      "updated_at": "2022-10-15T14:30:00Z"
+    }
+  ],
+  "statistics": {
+    "provider_id": "12345678-1234-5678-1234-567812345678",
+    "total_activities": 2,
+    "total_participants": 2,
+    "total_enrollments": 2,
+    "total_leads": 2
+  },
+  "health": {
+    "status": "ok",
+    "version": "1.0.0",
+    "uptime": "12h 30m"
+  }
+}
