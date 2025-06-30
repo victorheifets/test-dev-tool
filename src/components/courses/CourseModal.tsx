@@ -44,6 +44,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
         end_date: initialData.end_date,
         capacity: initialData.capacity,
         category: initialData.category,
+        activity_type: initialData.activity_type || 'course',
         pricing: initialData.pricing || { amount: 0, currency: 'USD' },
       };
       setActivity(activityData);

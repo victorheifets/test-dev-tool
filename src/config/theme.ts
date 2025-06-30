@@ -143,6 +143,24 @@ const baseThemeOptions: ThemeOptions = {
                 borderRadius: designTokens.borderRadius.none,
             }
         }
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: {
+          fontSize: '1.1rem',
+          fontWeight: 500,
+        }
+      }
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '& .MuiListItemText-primary': {
+            fontSize: '1.1rem',
+            fontWeight: 500,
+          }
+        }
+      }
     }
   },
 };
@@ -179,6 +197,24 @@ export const darkTheme = createTheme({
                     borderRadius: designTokens.borderRadius.none,
                 }
             }
+        },
+        MuiListItemText: {
+          styleOverrides: {
+            primary: {
+              fontSize: '1.1rem',
+              fontWeight: 500,
+            }
+          }
+        },
+        MuiListItemButton: {
+          styleOverrides: {
+            root: {
+              '& .MuiListItemText-primary': {
+                fontSize: '1.1rem',
+                fontWeight: 500,
+              }
+            }
+          }
         }
     }
 }); 

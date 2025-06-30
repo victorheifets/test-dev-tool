@@ -17,7 +17,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import AllInboxIcon from '@mui/icons-material/AllInbox';
+import SchoolIcon from '@mui/icons-material/School';
 
 import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
@@ -49,16 +49,20 @@ const Title = ({ collapsed }: { collapsed: boolean }) => (
       justifyContent: collapsed ? 'center' : 'flex-start',
     }}
   >
-    <AllInboxIcon sx={{ color: 'primary.main', fontSize: collapsed ? '2rem' : '1.75rem' }}/>
+    <SchoolIcon sx={{ color: 'primary.main', fontSize: collapsed ? '2rem' : '1.75rem' }}/>
     {!collapsed && (
       <Typography 
         variant="h6" 
         sx={{ 
           fontWeight: 700,
           color: 'text.primary',
+          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}
       >
-        Materialize
+        Course Master
       </Typography>
     )}
   </Box>

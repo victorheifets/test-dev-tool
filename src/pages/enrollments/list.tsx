@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, Grid } from '@mui/material';
+import { Box, Button, Typography, Grid, IconButton } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -154,6 +155,20 @@ export const EnrollmentsList = () => {
       headerName: 'Payment Status', 
       flex: 1,
       renderCell: (params) => params.row.payment_status.charAt(0).toUpperCase() + params.row.payment_status.slice(1)
+    },
+    {
+      field: 'edit',
+      headerName: 'Edit',
+      width: 80,
+      renderCell: (params) => (
+        <IconButton 
+          onClick={() => handleEdit(params.row.id)}
+          color="primary"
+          size="small"
+        >
+          <EditIcon />
+        </IconButton>
+      ),
     },
     {
       field: 'action',

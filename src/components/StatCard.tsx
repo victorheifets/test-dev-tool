@@ -27,11 +27,11 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
           <Box sx={{ color: mainColor, display: 'flex', mr: 1.5 }}>
             {icon}
           </Box>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
             {title}
           </Typography>
         </Box>
-        <Typography variant="h6" component="div" align="right" fontWeight="bold">
+        <Typography variant="h5" component="div" align="right" fontWeight="bold" sx={{ fontSize: '1.8rem' }}>
           {value}
         </Typography>
       </CardContent>

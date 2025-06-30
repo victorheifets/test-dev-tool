@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -158,6 +159,20 @@ export const LeadsList = () => {
       headerName: 'Created At', 
       flex: 1,
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
+    },
+    {
+      field: 'edit',
+      headerName: 'Edit',
+      width: 80,
+      renderCell: (params) => (
+        <IconButton 
+          onClick={() => handleEdit(params.row.id)}
+          color="primary"
+          size="small"
+        >
+          <EditIcon />
+        </IconButton>
+      ),
     },
     {
       field: 'action',
