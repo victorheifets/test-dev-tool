@@ -4,7 +4,6 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useNotification, useDelete } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { Activity } from '../../types/activity';
-import { sampleActivities } from '../../data/sampleActivities';
 import { StatusChip } from '../../components/courses/StatusChip';
 import { ActionMenu } from '../../components/courses/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
@@ -25,15 +24,13 @@ export const CourseList = () => {
   const { open: openNotification } = useNotification();
   const { mutate: deleteActivity } = useDelete();
 
-  // For now, use hardcoded sample data to demonstrate table actions
-  const activities = sampleActivities;
+  // Use real API data via useDataGrid hook
+  const { dataGridProps, search, filters } = useDataGrid<Activity>({
+    resource: 'courses', // This maps to 'activities' in our data provider
+  });
   
-  // Prepare dataGridProps structure for the DataGrid component
-  const dataGridProps = {
-    rows: activities,
-    loading: false,
-    rowCount: activities.length,
-  };
+  // Get activities from dataGridProps for stat calculations
+  const activities = dataGridProps.rows || [];
 
   const handleEdit = (id: string) => {
     const activityToEdit = activities.find(a => a.id === id);
@@ -61,7 +58,7 @@ export const CourseList = () => {
   const confirmDelete = () => {
     if (selectedActivityId) {
       deleteActivity({
-        resource: 'activities',
+        resource: 'courses',
         id: selectedActivityId,
       }, {
         onSuccess: () => {
@@ -124,7 +121,17 @@ export const CourseList = () => {
       field: 'capacity', 
       headerName: 'CAPACITY', 
       flex: 1,
-      renderCell: (params) => `${params.row.enrollments_count} / ${params.row.capacity}`
+      renderCell: (params) => `${params.row.enrollments_count || 0} / ${params.row.capacity || 0}`
+    },
+    { 
+      field: 'pricing', 
+      headerName: 'PRICE', 
+      flex: 1,
+      renderCell: (params) => {
+        const price = params.row.pricing?.amount || params.row.price || 0;
+        const currency = params.row.pricing?.currency || 'USD';
+        return `${price} ${currency}`;
+      }
     },
     {
       field: 'action',

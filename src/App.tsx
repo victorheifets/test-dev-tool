@@ -27,7 +27,7 @@ import routerBindings, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { useRouterContext } from '@refinedev/core';
-import dataProvider from "@refinedev/simple-rest";
+import { dataProvider } from "./providers/dataProvider";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import React from "react";
 import { Header } from "./components/header";
@@ -71,7 +71,7 @@ function App() {
           <RefineSnackbarProvider>
             <DevtoolsProvider>
               <Refine
-                dataProvider={dataProvider("http://localhost:8082/api")}
+                dataProvider={dataProvider}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerBindings}
                 resources={resources}
