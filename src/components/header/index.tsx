@@ -45,13 +45,14 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
     <AppBar position={sticky ? "sticky" : "relative"} sx={{ boxShadow: 'none', backgroundColor: 'background.paper' }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1 }} />
-        <Stack direction="row" gap="10px" alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="center">
           <HamburgerMenu />
           <IconButton
             color="inherit"
             aria-controls="language-menu"
             aria-haspopup="true"
             onClick={handleClick}
+            sx={{ mx: 0.5 }}
           >
             <Language />
           </IconButton>
@@ -61,13 +62,17 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={() => changeLanguage("en")}>English</MenuItem>
-            <MenuItem onClick={() => changeLanguage("he")}>Hebrew</MenuItem>
+            <MenuItem onClick={() => changeLanguage("en")}>
+              🇺🇸 English
+            </MenuItem>
+            <MenuItem onClick={() => changeLanguage("he")}>
+              🇮🇱 Hebrew
+            </MenuItem>
           </Menu>
-          <IconButton color="inherit" onClick={setMode}>
+          <IconButton color="inherit" onClick={setMode} sx={{ mx: 0.5 }}>
             {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
           </IconButton>
-          <Avatar src={user?.avatar} alt={user?.name} />
+          <Avatar src={user?.avatar} alt={user?.name} sx={{ ml: 1 }} />
         </Stack>
       </Toolbar>
     </AppBar>

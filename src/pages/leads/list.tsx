@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Grid, IconButton } from '@mui/material';
+import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
@@ -22,6 +22,8 @@ export const LeadsList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<Lead | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteLead } = useDelete();
@@ -33,8 +35,30 @@ export const LeadsList = () => {
     resource: 'leads',
   });
   
-  // Get leads from dataGridProps for stat calculations
-  const leads = dataGridProps.rows || [];
+  // Get leads from dataGridProps and apply client-side filtering
+  const allLeads = dataGridProps.rows || [];
+  
+  // Apply client-side filtering
+  const leads = allLeads.filter(lead => {
+    // Text search filter
+    const matchesSearch = !searchText || 
+      lead.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      lead.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      lead.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+      lead.phone?.toLowerCase().includes(searchText.toLowerCase()) ||
+      lead.source?.toLowerCase().includes(searchText.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = !statusFilter || lead.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Update dataGridProps with filtered data
+  const filteredDataGridProps = {
+    ...dataGridProps,
+    rows: leads,
+  };
 
   const handleEdit = (id: string) => {
     const leadToEdit = leads.find(l => l.id === id);
@@ -161,29 +185,24 @@ export const LeadsList = () => {
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
     },
     {
-      field: 'edit',
-      headerName: 'Edit',
-      width: 80,
-      renderCell: (params) => (
-        <IconButton 
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-          size="small"
-        >
-          <EditIcon />
-        </IconButton>
-      ),
-    },
-    {
       field: 'action',
       headerName: 'Action',
-      flex: 1,
+      width: 120,
       renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEdit(params.row.id)}
-          onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDeleteRequest(params.row.id)}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton 
+            onClick={() => handleEdit(params.row.id)}
+            color="primary"
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <ActionMenu
+            onEdit={() => handleEdit(params.row.id)}
+            onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDeleteRequest(params.row.id)}
+          />
+        </Box>
       ),
     },
   ];
@@ -205,12 +224,41 @@ export const LeadsList = () => {
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Button variant="contained" onClick={handleAddNew}>+ Add Lead</Button>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                placeholder="Search leads..."
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 250 }}
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  label="Status"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="new">New</MenuItem>
+                  <MenuItem value="contacted">Contacted</MenuItem>
+                  <MenuItem value="qualified">Qualified</MenuItem>
+                  <MenuItem value="converted">Converted</MenuItem>
+                  <MenuItem value="lost">Lost</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
         </Box>
         <Box sx={{ height: 500, width: '100%' }}>
             <DataGrid
-                {...dataGridProps}
+                {...filteredDataGridProps}
                 columns={columns}
                 checkboxSelection
                 disableRowSelectionOnClick

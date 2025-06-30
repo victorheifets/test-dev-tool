@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, Grid, IconButton } from '@mui/material';
+import { Box, Button, Typography, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
@@ -22,6 +22,8 @@ export const ParticipantsList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<Participant | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteParticipant } = useDelete();
@@ -29,12 +31,32 @@ export const ParticipantsList = () => {
   const { mutate: updateParticipant } = useUpdate();
 
   // Use real API data via useDataGrid hook
-  const { dataGridProps, search, filters } = useDataGrid<Participant>({
+  const { dataGridProps } = useDataGrid<Participant>({
     resource: 'participants',
   });
   
-  // Get participants from dataGridProps for stat calculations
-  const participants = dataGridProps.rows || [];
+  // Get participants from dataGridProps and apply client-side filtering
+  const allParticipants = dataGridProps.rows || [];
+  
+  // Apply client-side filtering
+  const participants = allParticipants.filter(participant => {
+    // Text search filter
+    const matchesSearch = !searchText || 
+      participant.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      participant.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+      participant.phone?.toLowerCase().includes(searchText.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = !statusFilter || participant.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Update dataGridProps with filtered data
+  const filteredDataGridProps = {
+    ...dataGridProps,
+    rows: participants,
+  };
 
   const handleEdit = (id: string) => {
     const participantToEdit = participants.find(p => p.id === id);
@@ -155,29 +177,24 @@ export const ParticipantsList = () => {
       flex: 1,
     },
     {
-      field: 'edit',
-      headerName: 'Edit',
-      width: 80,
-      renderCell: (params) => (
-        <IconButton 
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-          size="small"
-        >
-          <EditIcon />
-        </IconButton>
-      ),
-    },
-    {
       field: 'action',
       headerName: 'Action',
-      flex: 1,
+      width: 120,
       renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEdit(params.row.id)}
-          onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDeleteRequest(params.row.id)}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton 
+            onClick={() => handleEdit(params.row.id)}
+            color="primary"
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <ActionMenu
+            onEdit={() => handleEdit(params.row.id)}
+            onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDeleteRequest(params.row.id)}
+          />
+        </Box>
       ),
     },
   ];
@@ -186,25 +203,51 @@ export const ParticipantsList = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Students" value={participants.length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title="Total Students" value={allParticipants.length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Active" value={participants.filter(p => p.status === 'active').length.toString()} icon={<VerifiedUserIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title="Active" value={allParticipants.filter(p => p.status === 'active').length.toString()} icon={<VerifiedUserIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Inactive" value={participants.filter(p => p.status === 'inactive').length.toString()} icon={<EmailIcon sx={{ fontSize: 40 }} />} color="error" />
+          <StatCard title="Inactive" value={allParticipants.filter(p => p.status === 'inactive').length.toString()} icon={<EmailIcon sx={{ fontSize: 40 }} />} color="error" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Enrollments" value={participants.reduce((sum, p) => sum + (p.enrollments_count || 0), 0).toString()} icon={<PhoneIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title="Total Enrollments" value={allParticipants.reduce((sum, p) => sum + (p.enrollments_count || 0), 0).toString()} icon={<PhoneIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Button variant="contained" onClick={handleAddNew}>+ Add Student</Button>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                placeholder="Search students..."
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 250 }}
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  label="Status"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="inactive">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
         </Box>
         <Box sx={{ height: 500, width: '100%' }}>
             <DataGrid
-                {...dataGridProps}
+                {...filteredDataGridProps}
                 columns={columns}
                 checkboxSelection
                 disableRowSelectionOnClick

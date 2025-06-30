@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, MenuItem, Select, Typography, Grid } from '@mui/material';
+import { Box, Button, TextField, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useDelete } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
@@ -21,17 +21,40 @@ export const CourseList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<Activity | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteActivity } = useDelete();
 
   // Use real API data via useDataGrid hook
-  const { dataGridProps, search, filters } = useDataGrid<Activity>({
+  const { dataGridProps } = useDataGrid<Activity>({
     resource: 'courses', // This maps to 'activities' in our data provider
   });
   
-  // Get activities from dataGridProps for stat calculations
-  const activities = dataGridProps.rows || [];
+  // Get activities from dataGridProps and apply client-side filtering
+  const allActivities = dataGridProps.rows || [];
+  
+  // Apply client-side filtering
+  const activities = allActivities.filter(activity => {
+    // Text search filter
+    const matchesSearch = !searchText || 
+      activity.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      activity.category?.toLowerCase().includes(searchText.toLowerCase()) ||
+      activity.trainer?.toLowerCase().includes(searchText.toLowerCase()) ||
+      activity.location?.toLowerCase().includes(searchText.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = !statusFilter || activity.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Update dataGridProps with filtered data
+  const filteredDataGridProps = {
+    ...dataGridProps,
+    rows: activities,
+  };
 
   const handleEdit = (id: string) => {
     const activityToEdit = activities.find(a => a.id === id);
@@ -154,25 +177,53 @@ export const CourseList = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Courses" value={activities.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title="Total Courses" value={allActivities.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Published" value={activities.filter(a => a.status === 'published').length.toString()} icon={<BusinessIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title="Published" value={allActivities.filter(a => a.status === 'published').length.toString()} icon={<BusinessIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Ongoing" value={activities.filter(a => a.status === 'ongoing').length.toString()} icon={<MonetizationOnIcon sx={{ fontSize: 40 }} />} color="warning" />
+          <StatCard title="Ongoing" value={allActivities.filter(a => a.status === 'ongoing').length.toString()} icon={<MonetizationOnIcon sx={{ fontSize: 40 }} />} color="warning" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Draft" value={activities.filter(a => a.status === 'draft').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title="Draft" value={allActivities.filter(a => a.status === 'draft').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Button variant="contained" onClick={handleAddNew}>+ Add Course</Button>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                placeholder="Search courses..."
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 250 }}
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  label="Status"
+                  defaultValue=""
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
         </Box>
         <Box sx={{ height: 500, width: '100%' }}>
             <DataGrid
-                {...dataGridProps}
+                {...filteredDataGridProps}
                 columns={columns}
                 checkboxSelection
                 disableRowSelectionOnClick

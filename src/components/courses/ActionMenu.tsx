@@ -38,7 +38,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
       >
         <MenuItem onClick={() => { onDuplicate(); handleClose(); }}>
           <ListItemIcon>
-            <FileCopyIcon color="action" />
+            <FileCopyIcon color="info" />
           </ListItemIcon>
           <Typography>Duplicate</Typography>
         </MenuItem>

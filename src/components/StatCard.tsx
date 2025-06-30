@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box, useTheme, CardHeader } from "@mui/material";
+import { Card, CardContent, Typography, Box, useTheme } from "@mui/material";
 
 interface StatCardProps {
   icon: JSX.Element;
@@ -19,27 +19,13 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
         borderBottom: `3px solid ${mainColor}`,
         borderRadius: 2, 
         boxShadow: theme.palette.mode === 'light' 
-          ? '0 4px 8px 0 rgba(0,0,0,0.12)' 
+          ? '0 2px 8px 0 rgba(0,0,0,0.15)' 
           : '0 2px 4px 0 rgba(0,0,0,0.1)',
         height: '100%',
-        border: theme.palette.mode === 'light' 
-          ? `1px solid ${theme.palette.grey[200]}` 
-          : 'none',
       }}
     >
-      <Box 
-        sx={{ 
-          background: theme.palette.mode === 'light' 
-            ? `linear-gradient(135deg, ${mainColor}10, ${mainColor}05)` 
-            : 'transparent',
-          borderBottom: theme.palette.mode === 'light' 
-            ? `1px solid ${theme.palette.grey[100]}` 
-            : 'none',
-          p: 2,
-          pb: 1,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <Box sx={{ color: mainColor, display: 'flex', mr: 1.5 }}>
             {icon}
           </Box>
@@ -47,8 +33,6 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
             {title}
           </Typography>
         </Box>
-      </Box>
-      <CardContent sx={{ p: 2, pt: 1, '&:last-child': { pb: 2 } }}>
         <Typography variant="h5" component="div" align="right" fontWeight="bold" sx={{ fontSize: '1.8rem' }}>
           {value}
         </Typography>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, Grid, IconButton } from '@mui/material';
+import { Box, Button, Typography, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
@@ -22,6 +22,8 @@ export const EnrollmentsList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<Enrollment | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteEnrollment } = useDelete();
@@ -29,12 +31,32 @@ export const EnrollmentsList = () => {
   const { mutate: updateEnrollment } = useUpdate();
 
   // Use real API data via useDataGrid hook
-  const { dataGridProps, search, filters } = useDataGrid<Enrollment>({
+  const { dataGridProps } = useDataGrid<Enrollment>({
     resource: 'enrollments',
   });
   
-  // Get enrollments from dataGridProps for stat calculations
-  const enrollments = dataGridProps.rows || [];
+  // Get enrollments from dataGridProps and apply client-side filtering
+  const allEnrollments = dataGridProps.rows || [];
+  
+  // Apply client-side filtering
+  const enrollments = allEnrollments.filter(enrollment => {
+    // Text search filter
+    const matchesSearch = !searchText || 
+      enrollment.participant_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      enrollment.course_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      enrollment.payment_status?.toLowerCase().includes(searchText.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = !statusFilter || enrollment.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Update dataGridProps with filtered data
+  const filteredDataGridProps = {
+    ...dataGridProps,
+    rows: enrollments,
+  };
 
   const handleEdit = (id: string) => {
     const enrollmentToEdit = enrollments.find(e => e.id === id);
@@ -157,29 +179,24 @@ export const EnrollmentsList = () => {
       renderCell: (params) => params.row.payment_status.charAt(0).toUpperCase() + params.row.payment_status.slice(1)
     },
     {
-      field: 'edit',
-      headerName: 'Edit',
-      width: 80,
-      renderCell: (params) => (
-        <IconButton 
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-          size="small"
-        >
-          <EditIcon />
-        </IconButton>
-      ),
-    },
-    {
       field: 'action',
       headerName: 'Action',
-      flex: 1,
+      width: 120,
       renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEdit(params.row.id)}
-          onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDeleteRequest(params.row.id)}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton 
+            onClick={() => handleEdit(params.row.id)}
+            color="primary"
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <ActionMenu
+            onEdit={() => handleEdit(params.row.id)}
+            onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDeleteRequest(params.row.id)}
+          />
+        </Box>
       ),
     },
   ];
@@ -201,12 +218,39 @@ export const EnrollmentsList = () => {
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Button variant="contained" onClick={handleAddNew}>+ Add Enrollment</Button>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                placeholder="Search enrollments..."
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 250 }}
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  label="Status"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
         </Box>
         <Box sx={{ height: 500, width: '100%' }}>
             <DataGrid
-                {...dataGridProps}
+                {...filteredDataGridProps}
                 columns={columns}
                 checkboxSelection
                 disableRowSelectionOnClick

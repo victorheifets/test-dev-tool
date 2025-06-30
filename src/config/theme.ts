@@ -141,6 +141,11 @@ const baseThemeOptions: ThemeOptions = {
                 borderRight: `1px solid ${designTokens.colors.light.sidebarBorder}`,
                 width: designTokens.spacing.sidebarWidth,
                 borderRadius: designTokens.borderRadius.none,
+                '& .refine-sider-collapse-button': {
+                  right: '-12px !important',
+                  position: 'absolute',
+                  transition: 'all 0.2s ease-in-out',
+                },
             }
         }
     },
@@ -195,6 +200,11 @@ export const darkTheme = createTheme({
                     borderRight: `1px solid ${designTokens.colors.dark.sidebarBorder}`,
                     width: designTokens.spacing.sidebarWidth,
                     borderRadius: designTokens.borderRadius.none,
+                    '& .refine-sider-collapse-button': {
+                      right: '-12px !important',
+                      position: 'absolute',
+                      transition: 'all 0.2s ease-in-out',
+                    },
                 }
             }
         },
