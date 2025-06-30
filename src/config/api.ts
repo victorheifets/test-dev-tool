@@ -3,8 +3,10 @@
  * Handles environment-specific API endpoints and settings
  */
 
+import { getProviderId } from './provider';
+
 // Environment configuration
-const isDevelopment = import.meta.env.MODE === 'development';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 // API Configuration
 export const API_CONFIG = {
@@ -17,7 +19,7 @@ export const API_CONFIG = {
   timeout: 10000,
   
   // Provider ID for development (will be replaced with JWT token data)
-  defaultProviderId: '00000000-0000-0000-0000-000000000000',
+  defaultProviderId: getProviderId(),
   
   // API endpoints
   endpoints: {

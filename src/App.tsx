@@ -35,6 +35,9 @@ import { ThemeContextProvider } from "./contexts/color-mode";
 import { resources } from "./config/navigation";
 import { Dashboard } from "./pages/dashboard";
 import { CourseList } from './pages/courses/list';
+import { ParticipantsList } from './pages/participants/list';
+import { EnrollmentsList } from './pages/enrollments/list';
+import { LeadsList } from './pages/leads/list';
 
 const Title = ({ collapsed }: { collapsed: boolean }) => (
   <Box 
@@ -98,6 +101,9 @@ function App() {
                     />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/courses" element={<CourseList />} />
+                    <Route path="/participants" element={<ParticipantsList />} />
+                    <Route path="/enrollments" element={<EnrollmentsList />} />
+                    <Route path="/leads" element={<LeadsList />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
