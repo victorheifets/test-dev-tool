@@ -58,6 +58,7 @@ export const CourseList = () => {
 
   const confirmDelete = () => {
     if (selectedActivityId) {
+      console.log('Deleting course with ID:', selectedActivityId);
       deleteActivity({
         resource: 'courses',
         id: selectedActivityId,
@@ -66,6 +67,7 @@ export const CourseList = () => {
           showSuccess('Course deleted successfully!');
         },
         onError: (error) => {
+          console.error('Delete error:', error);
           handleError(error, 'Delete Course');
         }
       });
@@ -75,6 +77,7 @@ export const CourseList = () => {
   };
   
   const handleAddNew = () => {
+    console.log('Opening create modal');
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
@@ -173,6 +176,7 @@ export const CourseList = () => {
                 columns={columns}
                 checkboxSelection
                 disableRowSelectionOnClick
+                pageSizeOptions={[5, 10, 25, 50]}
                 sx={{ border: 'none' }}
             />
         </Box>

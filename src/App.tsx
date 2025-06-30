@@ -72,7 +72,6 @@ function App() {
             <DevtoolsProvider>
               <Refine
                 dataProvider={dataProvider}
-                notificationProvider={useNotificationProvider}
                 routerProvider={routerBindings}
                 resources={resources}
                 options={{

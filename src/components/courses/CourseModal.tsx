@@ -69,9 +69,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
   };
 
   const handleSave = () => {
+    console.log('CourseModal handleSave called, mode:', mode, 'data:', activity);
     setIsLoading(true);
     
     if (mode === 'create' || mode === 'duplicate') {
+      console.log('Creating/duplicating activity');
       createActivity({
         resource: 'courses',
         values: activity,
@@ -128,7 +130,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
     >
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <form id="course-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
             <TextField name="name" label="Course Name" value={activity.name} onChange={handleChange} fullWidth required />
           </Grid>
@@ -165,11 +168,12 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initial
           <Grid item xs={12} sm={6}>
             <TextField name="end_date" label="End Date" type="date" value={activity.end_date} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
           </Grid>
-        </Grid>
+          </Grid>
+        </form>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained" disabled={isLoading}>
+        <Button type="submit" form="course-form" variant="contained" disabled={isLoading}>
           {isLoading ? 'Saving...' : 'Save'}
         </Button>
       </DialogActions>

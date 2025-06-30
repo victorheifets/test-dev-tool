@@ -133,7 +133,7 @@ export const logError = (error: any, context?: string): void => {
     status: parsedError.status,
     code: parsedError.code,
     details: parsedError.details,
-    originalError: error,
+    originalError: JSON.stringify(error, null, 2),
   });
 };
 
