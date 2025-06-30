@@ -2,5 +2,59 @@
   "direction": "ltr",
   "language": "English",
   "blog_posts": "Blog Posts",
-  "categories": "Categories"
+  "categories": "Categories",
+  
+  "courses": "Courses",
+  "course": "Course",
+  "participants": "Participants",
+  "participant": "Participant",
+  "students": "Students",
+  "student": "Student",
+  "enrollments": "Enrollments",
+  "enrollment": "Enrollment",
+  "leads": "Leads",
+  "lead": "Lead",
+  "marketing": "Marketing",
+  "instructors": "Instructors",
+  "instructor": "Instructor",
+  
+  "actions": {
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "refresh": "Refresh"
+  },
+  
+  "messages": {
+    "success": "Operation completed successfully",
+    "error": "An error occurred",
+    "loading": "Loading data...",
+    "no_data": "No data available",
+    "confirm_delete": "Are you sure you want to delete this item?"
+  },
+  
+  "course_status": {
+    "draft": "Draft",
+    "published": "Published", 
+    "ongoing": "Ongoing",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "archived": "Archived"
+  },
+  
+  "course_fields": {
+    "name": "Course Name",
+    "description": "Description",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "capacity": "Capacity",
+    "price": "Price",
+    "status": "Status",
+    "location": "Location",
+    "category": "Category"
+  }
 } 

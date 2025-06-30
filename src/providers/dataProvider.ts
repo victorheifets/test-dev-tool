@@ -1,5 +1,6 @@
 import { DataProvider } from "@refinedev/core";
-import { API_CONFIG, buildApiUrl, getAuthHeaders, ApiError } from "../config/api";
+import { API_CONFIG, buildApiUrl, getAuthHeaders } from "../config/api";
+import { AppError, logError, parseError } from "../utils/errorHandler";
 
 /**
  * Custom Data Provider for Course Management API
@@ -23,22 +24,24 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
     if (!response.ok) {
       const errorText = await response.text();
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      let errorCode = 'API_ERROR';
       
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.message || errorJson.detail || errorMessage;
+        errorCode = errorJson.code || errorCode;
       } catch {
         // If not JSON, use the text as message
         errorMessage = errorText || errorMessage;
       }
       
-      throw new Error(errorMessage);
+      throw new AppError(errorMessage, response.status, errorCode);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error(`API Request failed for ${url}:`, error);
+    logError(error, `HTTP Request: ${url}`);
     throw error;
   }
 };
@@ -121,7 +124,7 @@ export const dataProvider: DataProvider = {
       return { data, total };
       
     } catch (error) {
-      console.error(`[DataProvider] getList error for ${resource}:`, error);
+      logError(error, `DataProvider.getList(${resource})`);
       throw error;
     }
   },
@@ -146,7 +149,7 @@ export const dataProvider: DataProvider = {
       return { data };
       
     } catch (error) {
-      console.error(`[DataProvider] getOne error for ${resource}:${id}:`, error);
+      logError(error, `DataProvider.getOne(${resource}:${id})`);
       throw error;
     }
   },
@@ -181,7 +184,7 @@ export const dataProvider: DataProvider = {
       return { data };
       
     } catch (error) {
-      console.error(`[DataProvider] create error for ${resource}:`, error);
+      logError(error, `DataProvider.create(${resource})`);
       throw error;
     }
   },
@@ -216,7 +219,7 @@ export const dataProvider: DataProvider = {
       return { data };
       
     } catch (error) {
-      console.error(`[DataProvider] update error for ${resource}:${id}:`, error);
+      logError(error, `DataProvider.update(${resource}:${id})`);
       throw error;
     }
   },
@@ -237,7 +240,7 @@ export const dataProvider: DataProvider = {
       return { data: {} };
       
     } catch (error) {
-      console.error(`[DataProvider] deleteOne error for ${resource}:${id}:`, error);
+      logError(error, `DataProvider.deleteOne(${resource}:${id})`);
       throw error;
     }
   },
@@ -269,7 +272,7 @@ export const dataProvider: DataProvider = {
       return { data: response };
       
     } catch (error) {
-      console.error(`[DataProvider] custom error:`, error);
+      logError(error, `DataProvider.custom(${method} ${url})`);
       throw error;
     }
   },

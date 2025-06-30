@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, MenuItem, Select, Typography, Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useNotification, useDelete } from '@refinedev/core';
+import { useDelete } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Activity } from '../../types/activity';
 import { StatusChip } from '../../components/courses/StatusChip';
 import { ActionMenu } from '../../components/courses/ActionMenu';
@@ -21,7 +22,7 @@ export const CourseList = () => {
   const [modalInitialData, setModalInitialData] = useState<Activity | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   
-  const { open: openNotification } = useNotification();
+  const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteActivity } = useDelete();
 
   // Use real API data via useDataGrid hook
@@ -62,11 +63,10 @@ export const CourseList = () => {
         id: selectedActivityId,
       }, {
         onSuccess: () => {
-          openNotification?.({
-            type: 'success',
-            message: 'Course deleted successfully!',
-            description: 'Successful',
-          });
+          showSuccess('Course deleted successfully!');
+        },
+        onError: (error) => {
+          handleError(error, 'Delete Course');
         }
       });
     }

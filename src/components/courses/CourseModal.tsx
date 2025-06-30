@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Grid, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
+import { useCreate, useUpdate } from '@refinedev/core';
 import { Activity, ActivityCreate } from '../../types/activity';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 interface CourseModalProps {
   open: boolean;
   onClose: () => void;
-  onSave?: (activity: ActivityCreate) => void;
   initialData?: Activity | null;
   mode: 'create' | 'edit' | 'duplicate';
 }
@@ -22,8 +23,13 @@ const emptyActivity: ActivityCreate = {
   pricing: { amount: 0, currency: 'USD' },
 };
 
-export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave, initialData, mode }) => {
+export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, initialData, mode }) => {
   const [activity, setActivity] = useState<ActivityCreate>(emptyActivity);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { handleError, showSuccess } = useErrorHandler();
+  const { mutate: createActivity } = useCreate();
+  const { mutate: updateActivity } = useUpdate();
 
   useEffect(() => {
     if (initialData) {
@@ -47,14 +53,59 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-    setActivity(prev => ({ ...prev, [name as string]: value }));
+    
+    // Handle pricing fields specially
+    if (name === 'price') {
+      setActivity(prev => ({ 
+        ...prev, 
+        pricing: { 
+          ...prev.pricing, 
+          amount: Number(value) || 0 
+        }
+      }));
+    } else {
+      setActivity(prev => ({ ...prev, [name as string]: value }));
+    }
   };
 
   const handleSave = () => {
-    if (onSave) {
-      onSave(activity);
+    setIsLoading(true);
+    
+    if (mode === 'create' || mode === 'duplicate') {
+      createActivity({
+        resource: 'courses',
+        values: activity,
+      }, {
+        onSuccess: () => {
+          showSuccess('Course created successfully!');
+          onClose();
+          setActivity(emptyActivity);
+        },
+        onError: (error) => {
+          handleError(error, 'Create Course');
+        },
+        onSettled: () => {
+          setIsLoading(false);
+        }
+      });
+    } else if (mode === 'edit' && initialData) {
+      updateActivity({
+        resource: 'courses',
+        id: initialData.id,
+        values: activity,
+      }, {
+        onSuccess: () => {
+          showSuccess('Course updated successfully!');
+          onClose();
+        },
+        onError: (error) => {
+          handleError(error, 'Update Course');
+        },
+        onSettled: () => {
+          setIsLoading(false);
+        }
+      });
     }
-    onClose();
   };
 
   const getTitle = () => {
@@ -106,6 +157,9 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
             <TextField name="capacity" label="Capacity" type="number" value={activity.capacity} onChange={handleChange} fullWidth required />
           </Grid>
           <Grid item xs={12} sm={6}>
+            <TextField name="price" label="Price (USD)" type="number" value={activity.pricing.amount} onChange={handleChange} fullWidth required />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <TextField name="start_date" label="Start Date" type="date" value={activity.start_date} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -114,8 +168,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">Save</Button>
+        <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
+        <Button onClick={handleSave} variant="contained" disabled={isLoading}>
+          {isLoading ? 'Saving...' : 'Save'}
+        </Button>
       </DialogActions>
     </Dialog>
   );
