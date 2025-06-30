@@ -2,6 +2,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolIcon from '@mui/icons-material/School';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PeopleIcon from '@mui/icons-material/People';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import type { RefineProps } from '@refinedev/core';
 
@@ -21,11 +23,19 @@ export const resources: RefineProps['resources'] = [
     }
   },
   {
-    name: 'activities',
+    name: 'courses',
     list: '/courses',
     meta: {
       label: 'Courses',
       icon: <SchoolIcon />,
+    },
+  },
+  {
+    name: 'participants',
+    list: '/participants',
+    meta: {
+      label: 'Students',
+      icon: <PeopleIcon />,
     },
   },
   {
@@ -37,11 +47,11 @@ export const resources: RefineProps['resources'] = [
     },
   },
   {
-    name: 'students',
-    list: '/students',
+    name: 'leads',
+    list: '/leads',
     meta: {
-      label: 'Students',
-      icon: <PeopleIcon />,
+      label: 'Leads',
+      icon: <PersonAddIcon />,
     },
   },
 ]; 

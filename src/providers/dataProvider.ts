@@ -167,6 +167,11 @@ export const dataProvider: DataProvider = {
       payload = transformCourseToActivity(variables);
     }
     
+    // Add provider_id to payload if not present
+    if (!payload.provider_id) {
+      payload.provider_id = API_CONFIG.defaultProviderId;
+    }
+    
     try {
       const response = await httpClient(url, {
         method: 'POST',
@@ -200,6 +205,11 @@ export const dataProvider: DataProvider = {
     let payload = variables;
     if (resource === 'courses') {
       payload = transformCourseToActivity(variables);
+    }
+    
+    // Add provider_id to payload if not present (for updates too)
+    if (!payload.provider_id) {
+      payload.provider_id = API_CONFIG.defaultProviderId;
     }
     
     try {
