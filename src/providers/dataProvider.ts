@@ -23,11 +23,13 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`API Error Response (${response.status}):`, errorText);
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       let errorCode = 'API_ERROR';
       
       try {
         const errorJson = JSON.parse(errorText);
+        console.error('Parsed error details:', errorJson);
         errorMessage = errorJson.message || errorJson.detail || errorMessage;
         errorCode = errorJson.code || errorCode;
       } catch {
@@ -172,6 +174,8 @@ export const dataProvider: DataProvider = {
       payload.provider_id = API_CONFIG.defaultProviderId;
     }
     
+    console.log('Final payload being sent to API:', JSON.stringify(payload, null, 2));
+    
     try {
       const response = await httpClient(url, {
         method: 'POST',
@@ -309,14 +313,24 @@ function transformActivityToCourse(activity: any): any {
 function transformCourseToActivity(course: any): any {
   if (!course) return course;
   
-  return {
+  const transformed = {
     ...course,
     // Transform simple price back to pricing object
     pricing: course.price ? {
       amount: course.price,
       currency: 'USD'
-    } : undefined,
-    // Remove the simple price field
-    price: undefined,
+    } : course.pricing,
   };
+  
+  // Remove the simple price field completely (don't send undefined)
+  delete transformed.price;
+  
+  // Clean up undefined values that might cause API issues
+  Object.keys(transformed).forEach(key => {
+    if (transformed[key] === undefined) {
+      delete transformed[key];
+    }
+  });
+  
+  return transformed;
 }
