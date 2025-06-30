@@ -315,17 +315,22 @@ function transformCourseToActivity(course: any): any {
   
   const transformed = {
     ...course,
+    // Ensure proper data types
+    capacity: Number(course.capacity) || 0,
     // Transform simple price back to pricing object
     pricing: course.price ? {
-      amount: course.price,
+      amount: Number(course.price) || 0,
       currency: 'USD'
-    } : course.pricing,
+    } : {
+      amount: Number(course.pricing?.amount) || 0,
+      currency: course.pricing?.currency || 'USD'
+    },
   };
   
   // Remove the simple price field completely (don't send undefined)
   delete transformed.price;
   
-  // Clean up undefined values that might cause API issues
+  // Clean up undefined values that might cause API issues  
   Object.keys(transformed).forEach(key => {
     if (transformed[key] === undefined) {
       delete transformed[key];

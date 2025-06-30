@@ -16,8 +16,8 @@ const emptyActivity: ActivityCreate = {
   description: '',
   status: 'draft',
   location: '',
-  start_date: '',
-  end_date: '',
+  start_date: new Date().toISOString().split('T')[0], // Today's date as default
+  end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
   capacity: 50,
   category: '',
   pricing: { amount: 0, currency: 'USD' },
