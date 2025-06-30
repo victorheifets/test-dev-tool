@@ -49,17 +49,22 @@ const Title = ({ collapsed }: { collapsed: boolean }) => (
       justifyContent: collapsed ? 'center' : 'flex-start',
     }}
   >
-    <SchoolIcon sx={{ color: 'primary.main', fontSize: collapsed ? '2rem' : '1.75rem' }}/>
+    <SchoolIcon sx={{ 
+      color: '#7367F0', 
+      fontSize: collapsed ? '2rem' : '1.75rem',
+      filter: 'drop-shadow(0 2px 4px rgba(115, 103, 240, 0.3))'
+    }}/>
     {!collapsed && (
       <Typography 
         variant="h6" 
         sx={{ 
           fontWeight: 700,
-          color: 'text.primary',
-          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+          background: 'linear-gradient(135deg, #7367F0, #9C88FF)',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
+          textShadow: '0 2px 4px rgba(115, 103, 240, 0.2)',
+          letterSpacing: '0.5px',
         }}
       >
         Course Master

@@ -147,7 +147,7 @@ const baseThemeOptions: ThemeOptions = {
     MuiListItemText: {
       styleOverrides: {
         primary: {
-          fontSize: '1.1rem',
+          fontSize: '1rem',
           fontWeight: 500,
         }
       }
@@ -156,7 +156,7 @@ const baseThemeOptions: ThemeOptions = {
       styleOverrides: {
         root: {
           '& .MuiListItemText-primary': {
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             fontWeight: 500,
           }
         }
@@ -201,7 +201,7 @@ export const darkTheme = createTheme({
         MuiListItemText: {
           styleOverrides: {
             primary: {
-              fontSize: '1.1rem',
+              fontSize: '1rem',
               fontWeight: 500,
             }
           }
@@ -210,7 +210,7 @@ export const darkTheme = createTheme({
           styleOverrides: {
             root: {
               '& .MuiListItemText-primary': {
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 fontWeight: 500,
               }
             }
