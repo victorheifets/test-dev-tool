@@ -9,6 +9,7 @@ import {
   Box,
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   title,
   description,
 }) => {
+  const { t } = useTranslation();
   return (
     <Dialog 
       open={open} 
@@ -46,9 +48,9 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         <DialogContentText>{description}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('common.cancel')}</Button>
         <Button onClick={onConfirm} variant="contained" color="error" autoFocus>
-          Confirm
+          {t('common.confirm')}
         </Button>
       </DialogActions>
     </Dialog>

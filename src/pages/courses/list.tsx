@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Button, TextField, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useDelete } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Activity } from '../../types/activity';
@@ -16,6 +17,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 
 export const CourseList = () => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +28,9 @@ export const CourseList = () => {
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteActivity } = useDelete();
+  const { mutate: createActivity } = useCreate();
+  const { mutate: updateActivity } = useUpdate();
+  const invalidate = useInvalidate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps } = useDataGrid<Activity>({
@@ -34,6 +39,7 @@ export const CourseList = () => {
   
   // Get activities from dataGridProps and apply client-side filtering
   const allActivities = dataGridProps.rows || [];
+  
   
   // Apply client-side filtering
   const activities = allActivities.filter(activity => {
@@ -87,11 +93,12 @@ export const CourseList = () => {
         id: selectedActivityId,
       }, {
         onSuccess: () => {
-          showSuccess('Course deleted successfully!');
+          showSuccess(t('messages.success'));
+          // Just close dialog - let auto-refresh handle it
         },
         onError: (error) => {
           console.error('Delete error:', error);
-          handleError(error, 'Delete Course');
+          handleError(error, t('actions.delete') + ' ' + t('course'));
         }
       });
     }
@@ -109,49 +116,58 @@ export const CourseList = () => {
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'Course Name',
+      headerName: t('course_fields.name'),
       flex: 1,
       renderCell: (params) => (
-        <Box>
-            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{params.row.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{params.row.category}</Typography>
-        </Box>
+        <Typography variant="body2" sx={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', height: '100%' }}>
+          {params.row.name}
+        </Typography>
+      )
+    },
+    {
+      field: 'activity_type',
+      headerName: t('forms.type'),
+      flex: 0.7,
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontSize: '0.85rem', textTransform: 'capitalize', display: 'flex', alignItems: 'center', height: '100%' }}>
+          {params.row.activity_type || t('course')}
+        </Typography>
       )
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('course_fields.status'),
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'trainer_id', 
-      headerName: 'Trainer', 
+      headerName: t('instructor'), 
       flex: 1,
-      renderCell: (params) => params.row.trainer_id || 'Not Assigned'
+      renderCell: (params) => params.row.trainer_id || t('common.not_assigned')
     },
-    { field: 'location', headerName: 'Location', flex: 1 },
+    { field: 'location', headerName: t('course_fields.location'), flex: 1 },
     { 
       field: 'start_date', 
-      headerName: 'Start Date', 
+      headerName: t('course_fields.start_date'), 
       flex: 1,
       renderCell: (params) => new Date(params.row.start_date).toLocaleDateString()
     },
     { 
       field: 'end_date', 
-      headerName: 'End Date', 
+      headerName: t('course_fields.end_date'), 
       flex: 1,
       renderCell: (params) => new Date(params.row.end_date).toLocaleDateString()
     },
     { 
       field: 'capacity', 
-      headerName: 'Capacity', 
+      headerName: t('course_fields.capacity'), 
       flex: 1,
       renderCell: (params) => `${params.row.enrollments_count || 0} / ${params.row.capacity || 0}`
     },
     { 
       field: 'pricing', 
-      headerName: 'Price', 
+      headerName: t('course_fields.price'), 
       flex: 1,
       renderCell: (params) => {
         const price = params.row.pricing?.amount || params.row.price || 0;
@@ -161,7 +177,7 @@ export const CourseList = () => {
     },
     {
       field: 'action',
-      headerName: 'Action',
+      headerName: t('common.actions'),
       flex: 1,
       renderCell: (params) => (
         <ActionMenu
@@ -177,24 +193,24 @@ export const CourseList = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Courses" value={allActivities.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title={t('courses')} value={allActivities.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Published" value={allActivities.filter(a => a.status === 'published').length.toString()} icon={<BusinessIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title={t('course_status.published')} value={allActivities.filter(a => a.status === 'published').length.toString()} icon={<BusinessIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Ongoing" value={allActivities.filter(a => a.status === 'ongoing').length.toString()} icon={<MonetizationOnIcon sx={{ fontSize: 40 }} />} color="warning" />
+          <StatCard title={t('course_status.ongoing')} value={allActivities.filter(a => a.status === 'ongoing').length.toString()} icon={<MonetizationOnIcon sx={{ fontSize: 40 }} />} color="warning" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Draft" value={allActivities.filter(a => a.status === 'draft').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title={t('course_status.draft')} value={allActivities.filter(a => a.status === 'draft').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ Add Course</Button>
+            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('course')}</Button>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                placeholder="Search courses..."
+                placeholder={t('search.placeholder_courses')}
                 variant="outlined"
                 size="small"
                 sx={{ minWidth: 250 }}
@@ -204,19 +220,19 @@ export const CourseList = () => {
                 }}
               />
               <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('course_fields.status')}</InputLabel>
                 <Select
-                  label="Status"
+                  label={t('course_fields.status')}
                   defaultValue=""
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                  <MenuItem value="">{t('common.all')}</MenuItem>
+                  <MenuItem value="active">{t('common.active')}</MenuItem>
+                  <MenuItem value="completed">{t('course_status.completed')}</MenuItem>
+                  <MenuItem value="cancelled">{t('course_status.cancelled')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -236,14 +252,52 @@ export const CourseList = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title="Delete Course"
-        description="Are you sure you want to delete this course? This action cannot be undone."
+        title={`${t('actions.delete')} ${t('course')}`}
+        description={t('messages.confirm_delete')}
       />
       <CourseModal 
         open={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setModalInitialData(null);
+        }}
+        onSave={async (activityData) => {
+          console.log('Saving activity:', activityData);
+          
+          if (modalMode === 'create' || modalMode === 'duplicate') {
+            createActivity({
+              resource: 'courses',
+              values: activityData,
+            }, {
+              onSuccess: () => {
+                showSuccess(t('messages.course_created'));
+                setIsModalOpen(false);
+                setModalInitialData(null);
+                // Just close modal - let auto-refresh handle it
+              },
+              onError: (error) => {
+                console.error('Create error:', error);
+                handleError(error, t('actions.create') + ' ' + t('course'));
+              }
+            });
+          } else if (modalMode === 'edit' && modalInitialData?.id) {
+            updateActivity({
+              resource: 'courses',
+              id: modalInitialData.id,
+              values: activityData,
+            }, {
+              onSuccess: () => {
+                showSuccess(t('messages.course_updated'));
+                setIsModalOpen(false);
+                setModalInitialData(null);
+                // Just close modal - let auto-refresh handle it
+              },
+              onError: (error) => {
+                console.error('Update error:', error);
+                handleError(error, t('actions.edit') + ' ' + t('course'));
+              }
+            });
+          }
         }}
         initialData={modalInitialData}
         mode={modalMode}

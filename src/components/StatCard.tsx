@@ -12,6 +12,8 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
   
   const paletteColor = theme.palette[color as keyof typeof theme.palette];
   const mainColor = typeof paletteColor === 'object' && 'main' in paletteColor ? paletteColor.main : theme.palette.primary.main;
+  
+  const isRTL = theme.direction === 'rtl';
 
   return (
     <Card 
@@ -33,7 +35,15 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
             {title}
           </Typography>
         </Box>
-        <Typography variant="h5" component="div" align="right" fontWeight="bold" sx={{ fontSize: '1.8rem' }}>
+        <Typography 
+          variant="h5" 
+          component="div" 
+          fontWeight="bold" 
+          sx={{ 
+            fontSize: '1.8rem',
+            textAlign: isRTL ? 'left' : 'right'
+          }}
+        >
           {value}
         </Typography>
       </CardContent>

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
-import { useDelete, useCreate, useUpdate } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Participant } from '../../types/participant';
@@ -17,6 +18,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 
 export const ParticipantsList = () => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,6 +31,7 @@ export const ParticipantsList = () => {
   const { mutate: deleteParticipant } = useDelete();
   const { mutate: createParticipant } = useCreate();
   const { mutate: updateParticipant } = useUpdate();
+  const invalidate = useInvalidate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps } = useDataGrid<Participant>({
@@ -42,12 +45,15 @@ export const ParticipantsList = () => {
   const participants = allParticipants.filter(participant => {
     // Text search filter
     const matchesSearch = !searchText || 
-      participant.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      participant.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      participant.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       participant.email?.toLowerCase().includes(searchText.toLowerCase()) ||
       participant.phone?.toLowerCase().includes(searchText.toLowerCase());
     
     // Status filter
-    const matchesStatus = !statusFilter || participant.status === statusFilter;
+    const matchesStatus = !statusFilter || 
+      (statusFilter === 'active' && participant.is_active) ||
+      (statusFilter === 'inactive' && !participant.is_active);
     
     return matchesSearch && matchesStatus;
   });
@@ -89,11 +95,11 @@ export const ParticipantsList = () => {
         id: selectedParticipantId,
       }, {
         onSuccess: () => {
-          showSuccess('Student deleted successfully!');
+          showSuccess(t('messages.student_deleted'));
         },
         onError: (error) => {
           console.error('Delete error:', error);
-          handleError(error, 'Delete Student');
+          handleError(error, t('actions.delete') + ' ' + t('student'));
         }
       });
     }
@@ -115,13 +121,14 @@ export const ParticipantsList = () => {
         values: participant,
       }, {
         onSuccess: () => {
-          showSuccess('Participant created successfully!');
+          showSuccess(t('messages.participant_created'));
           setIsModalOpen(false);
           setModalInitialData(null);
+          window.location.reload();
         },
         onError: (error) => {
           console.error('Create error:', error);
-          handleError(error, 'Create Participant');
+          handleError(error, t('actions.create') + ' ' + t('participant'));
         }
       });
     } else if (modalMode === 'edit' && modalInitialData) {
@@ -131,13 +138,14 @@ export const ParticipantsList = () => {
         values: participant,
       }, {
         onSuccess: () => {
-          showSuccess('Participant updated successfully!');
+          showSuccess(t('messages.participant_updated'));
           setIsModalOpen(false);
           setModalInitialData(null);
+          window.location.reload();
         },
         onError: (error) => {
           console.error('Update error:', error);
-          handleError(error, 'Update Participant');
+          handleError(error, t('actions.edit') + ' ' + t('participant'));
         }
       });
     }
@@ -146,39 +154,40 @@ export const ParticipantsList = () => {
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: t('common.name'),
       flex: 1,
+      renderCell: (params) => `${params.row.first_name || ''} ${params.row.last_name || ''}`.trim(),
     },
     {
       field: 'email',
-      headerName: 'Email',
+      headerName: t('common.email'),
       flex: 1,
     },
     {
       field: 'phone',
-      headerName: 'Phone',
+      headerName: t('common.phone'),
       flex: 1,
     },
     {
-      field: 'status',
-      headerName: 'Status',
+      field: 'is_active',
+      headerName: t('course_fields.status'),
       flex: 1,
-      renderCell: (params) => <StatusChip status={params.row.status} />,
+      renderCell: (params) => <StatusChip isActive={params.row.is_active} />,
     },
     { 
       field: 'created_at', 
-      headerName: 'Created At', 
+      headerName: t('common.created_at'), 
       flex: 1,
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
     },
     { 
       field: 'enrollments_count', 
-      headerName: 'Enrollments', 
+      headerName: t('enrollments'), 
       flex: 1,
     },
     {
       field: 'action',
-      headerName: 'Action',
+      headerName: t('common.actions'),
       width: 120,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -203,24 +212,24 @@ export const ParticipantsList = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Students" value={allParticipants.length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title={t('students')} value={allParticipants.length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Active" value={allParticipants.filter(p => p.status === 'active').length.toString()} icon={<VerifiedUserIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title={t('common.active')} value={allParticipants.filter(p => p.status === 'active').length.toString()} icon={<VerifiedUserIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Inactive" value={allParticipants.filter(p => p.status === 'inactive').length.toString()} icon={<EmailIcon sx={{ fontSize: 40 }} />} color="error" />
+          <StatCard title={t('status_options.inactive')} value={allParticipants.filter(p => p.status === 'inactive').length.toString()} icon={<EmailIcon sx={{ fontSize: 40 }} />} color="error" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Enrollments" value={allParticipants.reduce((sum, p) => sum + (p.enrollments_count || 0), 0).toString()} icon={<PhoneIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title={t('enrollments')} value={allParticipants.reduce((sum, p) => sum + (p.enrollments_count || 0), 0).toString()} icon={<PhoneIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ Add Student</Button>
+            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('student')}</Button>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                placeholder="Search students..."
+                placeholder={t('search.placeholder_students')}
                 variant="outlined"
                 size="small"
                 sx={{ minWidth: 250 }}
@@ -230,17 +239,17 @@ export const ParticipantsList = () => {
                 }}
               />
               <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('course_fields.status')}</InputLabel>
                 <Select
-                  label="Status"
+                  label={t('course_fields.status')}
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
+                  <MenuItem value="">{t('common.all')}</MenuItem>
+                  <MenuItem value="active">{t('common.active')}</MenuItem>
+                  <MenuItem value="inactive">{t('status_options.inactive')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -260,8 +269,8 @@ export const ParticipantsList = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title="Delete Student"
-        description="Are you sure you want to delete this student? This action cannot be undone."
+        title={t('actions.delete') + ' ' + t('student')}
+        description={t('messages.confirm_delete')}
       />
       <ParticipantModal 
         open={isModalOpen}

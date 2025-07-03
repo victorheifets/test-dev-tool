@@ -4,6 +4,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTranslation } from 'react-i18next';
 
 interface ActionMenuProps {
   onEdit: () => void;
@@ -12,6 +13,7 @@ interface ActionMenuProps {
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onDelete }) => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   
@@ -53,13 +55,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
           <ListItemIcon>
             <ContentCopyIcon fontSize="small" color="info" />
           </ListItemIcon>
-          <ListItemText>Duplicate</ListItemText>
+          <ListItemText>{t('actions.duplicate')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleAction(onDelete)}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText>Delete</ListItemText>
+          <ListItemText>{t('actions.delete')}</ListItemText>
         </MenuItem>
       </Menu>
     </>

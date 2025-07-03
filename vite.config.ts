@@ -10,68 +10,26 @@ const db = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
 export default defineConfig({
   plugins: [
     react(),
-    {
-      name: 'mock-api',
-      configureServer(server) {
-        // Add provider ID middleware
-        server.middlewares.use((req, res, next) => {
-          const providerId = req.headers['x-provider-id'];
-          if (!providerId) {
-            console.log('Missing provider ID header');
-            // Still allow the request to pass through for testing
-          } else {
-            console.log(`Provider ID: ${providerId}`);
-          }
-          next();
-        });
-
-        // API routes
-        server.middlewares.use('/api/health', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ status: 'ok', version: '1.0.0', uptime: '12h 30m' }));
-        });
-
-        server.middlewares.use('/api/activities', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.activities));
-        });
-
-        server.middlewares.use('/api/participants', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.participants));
-        });
-
-        server.middlewares.use('/api/enrollments', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.enrollments));
-        });
-
-        server.middlewares.use('/api/marketing', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.marketing));
-        });
-
-        server.middlewares.use('/api/providers', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.providers));
-        });
-
-        server.middlewares.use('/api/statistics', (req, res) => {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db.statistics));
-        });
-      }
-    }
+    // Disabled mock API - now using real backend
+    // {
+    //   name: 'mock-api',
+    //   configureServer(server) {
+    //     // Mock API routes disabled - using real backend at localhost:8082
+    //   }
+    // }
   ],
   server: {
     proxy: {
       // Proxy API requests to the backend during development
       '/api': {
-        target: 'http://localhost:5173',
+        target: 'http://localhost:8082',
         changeOrigin: true,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Proxying request:', req.method, req.url, '-> http://localhost:8082');
           });
         },
       },

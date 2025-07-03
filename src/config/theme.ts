@@ -135,18 +135,30 @@ const baseThemeOptions: ThemeOptions = {
     },
     MuiDrawer: {
         styleOverrides: {
-            paper: {
+            paper: ({ theme }) => ({
                 backgroundColor: designTokens.colors.light.sidebarBackground,
                 color: palette.text.primary,
-                borderRight: `1px solid ${designTokens.colors.light.sidebarBorder}`,
+                ...(theme.direction === 'rtl' ? {
+                  borderLeft: `1px solid ${designTokens.colors.light.sidebarBorder}`,
+                  borderRight: 'none',
+                } : {
+                  borderRight: `1px solid ${designTokens.colors.light.sidebarBorder}`,
+                  borderLeft: 'none',
+                }),
                 width: designTokens.spacing.sidebarWidth,
                 borderRadius: designTokens.borderRadius.none,
                 '& .refine-sider-collapse-button': {
-                  right: '-12px !important',
+                  ...(theme.direction === 'rtl' ? {
+                    left: '-12px !important',
+                    right: 'auto !important',
+                  } : {
+                    right: '-12px !important',
+                    left: 'auto !important',
+                  }),
                   position: 'absolute',
                   transition: 'all 0.2s ease-in-out',
                 },
-            }
+            })
         }
     },
     MuiListItemText: {
@@ -164,6 +176,13 @@ const baseThemeOptions: ThemeOptions = {
             fontSize: '1rem',
             fontWeight: 500,
           }
+        }
+      }
+    },
+    MuiDataGrid: {
+      styleOverrides: {
+        cell: {
+          fontSize: '0.85rem',
         }
       }
     }
@@ -192,20 +211,45 @@ export const darkTheme = createTheme({
     },
     components: {
         ...baseThemeOptions.components,
+        MuiAppBar: {
+          styleOverrides: {
+            root: {
+              boxShadow: designTokens.shadows.header,
+              backgroundColor: '#283046', // Dark theme background
+              color: '#D0D2D6', // Brighter text color for dark theme
+              borderRadius: designTokens.borderRadius.none,
+              '& .MuiIconButton-root': {
+                color: '#D0D2D6', // Brighter icon color for dark theme
+              },
+            },
+          },
+        },
         MuiDrawer: {
             styleOverrides: {
-                paper: {
+                paper: ({ theme }) => ({
                     backgroundColor: designTokens.colors.dark.sidebarBackground,
                     color: '#D0D2D6', // Dark theme text color
-                    borderRight: `1px solid ${designTokens.colors.dark.sidebarBorder}`,
+                    ...(theme.direction === 'rtl' ? {
+                      borderLeft: `1px solid ${designTokens.colors.dark.sidebarBorder}`,
+                      borderRight: 'none',
+                    } : {
+                      borderRight: `1px solid ${designTokens.colors.dark.sidebarBorder}`,
+                      borderLeft: 'none',
+                    }),
                     width: designTokens.spacing.sidebarWidth,
                     borderRadius: designTokens.borderRadius.none,
                     '& .refine-sider-collapse-button': {
-                      right: '-12px !important',
+                      ...(theme.direction === 'rtl' ? {
+                        left: '-12px !important',
+                        right: 'auto !important',
+                      } : {
+                        right: '-12px !important',
+                        left: 'auto !important',
+                      }),
                       position: 'absolute',
                       transition: 'all 0.2s ease-in-out',
                     },
-                }
+                })
             }
         },
         MuiListItemText: {

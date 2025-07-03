@@ -16,17 +16,23 @@ export const CustomSider: React.FC<CustomSiderProps> = (props) => {
             {...props}
             {...renderProps}
             collapsed={collapsed}
-            sx={{
+            sx={(theme) => ({
               '& .MuiDrawer-paper': {
                 '& .refine-sider-collapse-button': {
-                  right: collapsed ? '-12px' : '-12px',
+                  ...(theme.direction === 'rtl' ? {
+                    left: collapsed ? '-12px' : '-12px',
+                    right: 'auto',
+                  } : {
+                    right: collapsed ? '-12px' : '-12px',
+                    left: 'auto',
+                  }),
                   position: 'absolute',
                   top: '20px',
                   zIndex: 1000,
-                  transition: 'right 0.2s ease-in-out',
+                  transition: theme.direction === 'rtl' ? 'left 0.2s ease-in-out' : 'right 0.2s ease-in-out',
                 }
               }
-            }}
+            })}
           />
         )}
       />

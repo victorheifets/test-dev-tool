@@ -52,7 +52,12 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             aria-controls="language-menu"
             aria-haspopup="true"
             onClick={handleClick}
-            sx={{ mx: 0.5 }}
+            sx={(theme) => ({
+              mx: 0.5,
+              '& .MuiSvgIcon-root': {
+                transform: theme.direction === 'rtl' ? 'scaleX(-1)' : 'none'
+              }
+            })}
           >
             <Language />
           </IconButton>
@@ -63,16 +68,18 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             onClose={handleClose}
           >
             <MenuItem onClick={() => changeLanguage("en")}>
-              🇺🇸 English
+              🇺🇸 {i18n.t("common.english")}
             </MenuItem>
             <MenuItem onClick={() => changeLanguage("he")}>
-              🇮🇱 Hebrew
+              🇮🇱 {i18n.t("common.hebrew")}
             </MenuItem>
           </Menu>
           <IconButton color="inherit" onClick={setMode} sx={{ mx: 0.5 }}>
             {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
           </IconButton>
-          <Avatar src={user?.avatar} alt={user?.name} sx={{ ml: 1 }} />
+          <Avatar src={user?.avatar} alt={user?.name} sx={(theme) => ({
+            [theme.direction === 'rtl' ? 'mr' : 'ml']: 1
+          })} />
         </Stack>
       </Toolbar>
     </AppBar>

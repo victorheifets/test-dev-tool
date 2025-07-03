@@ -2,5 +2,208 @@
   "direction": "rtl",
   "language": "עברית",
   "blog_posts": "פוסטים בבלוג",
-  "categories": "קטגוריות"
-} 
+  "categories": "קטגוריות",
+  
+  "courses": "קורסים",
+  "course": "קורס",
+  "participants": "משתתפים",
+  "participant": "משתתף",
+  "students": "תלמידים",
+  "student": "תלמיד",
+  "enrollments": "הרשמות",
+  "enrollment": "הרשמה",
+  "leads": "לידים",
+  "lead": "ליד",
+  "marketing": "שיווק",
+  "instructors": "מדריכים",
+  "instructor": "מדריך",
+  
+  "actions": {
+    "create": "צור",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "view": "צפה",
+    "save": "שמור",
+    "cancel": "בטל",
+    "loading": "טוען...",
+    "refresh": "רענן",
+    "duplicate": "שכפל"
+  },
+  
+  "messages": {
+    "success": "הפעולה הושלמה בהצלחה",
+    "error": "אירעה שגיאה",
+    "loading": "טוען נתונים...",
+    "no_data": "אין נתונים זמינים",
+    "confirm_delete": "האם אתה בטוח שברצונך למחוק פריט זה?",
+    "course_created": "הקורס נוצר בהצלחה",
+    "course_updated": "הקורס עודכן בהצלחה",
+    "enrollment_deleted": "הרשמה נמחקה בהצלחה!",
+    "enrollment_created": "הרשמה נוצרה בהצלחה!",
+    "enrollment_updated": "הרשמה עודכנה בהצלחה!",
+    "student_deleted": "תלמיד נמחק בהצלחה!",
+    "participant_created": "משתתף נוצר בהצלחה!",
+    "participant_updated": "משתתף עודכן בהצלחה!",
+    "lead_deleted": "ליד נמחק בהצלחה!",
+    "lead_created": "ליד נוצר בהצלחה!",
+    "lead_updated": "ליד עודכן בהצלחה!"
+  },
+  
+  "course_status": {
+    "draft": "טיוטה",
+    "published": "פורסם", 
+    "ongoing": "מתקיים",
+    "completed": "הושלם",
+    "cancelled": "בוטל",
+    "archived": "בארכיון"
+  },
+  
+  "course_fields": {
+    "name": "שם הקורס",
+    "description": "תיאור",
+    "start_date": "תאריך התחלה",
+    "end_date": "תאריך סיום",
+    "capacity": "קיבולת",
+    "price": "מחיר",
+    "status": "סטטוס",
+    "location": "מיקום",
+    "category": "קטגוריה"
+  },
+  
+  "navigation": {
+    "dashboard": "לוח מחוונים",
+    "courses": "קורסים",
+    "participants": "תלמידים",
+    "enrollments": "הרשמות",
+    "leads": "לידים",
+    "providers": "ספקים",
+    "settings": "הגדרות",
+    "apps_pages": "אפליקציות ודפים",
+    "marketing": "שיווק",
+    "landing_pages": "דפי נחיתה"
+  },
+  
+  "common": {
+    "english": "אנגלית",
+    "hebrew": "עברית",
+    "id": "מזהה",
+    "name": "שם",
+    "email": "אימייל",
+    "phone": "טלפון",
+    "address": "כתובת",
+    "actions": "פעולות",
+    "dates": "תאריכים",
+    "enrollment": "הרשמה",
+    "not_available": "לא זמין",
+    "loading": "טוען...",
+    "connected": "מחובר",
+    "failed": "נכשל",
+    "authenticated": "מאומת",
+    "not_authenticated": "לא מאומת",
+    "not_assigned": "לא מוקצה",
+    "all": "הכל",
+    "active": "פעיל",
+    "first_name": "שם פרטי",
+    "last_name": "שם משפחה",
+    "created_at": "נוצר ב",
+    "cancel": "בטל",
+    "confirm": "אשר"
+  },
+  
+  "search": {
+    "placeholder_courses": "חיפוש קורסים...",
+    "placeholder_participants": "חיפוש משתתפים...",
+    "placeholder_enrollments": "חיפוש הרשמות...",
+    "placeholder_leads": "חיפוש לידים...",
+    "placeholder_students": "חיפוש תלמידים..."
+  },
+  
+  "forms": {
+    "first_name": "שם פרטי",
+    "last_name": "שם משפחה",
+    "currency": "מטבע",
+    "provider": "ספק",
+    "type": "סוג",
+    "notes": "הערות",
+    "special_requirements": "דרישות מיוחדות",
+    "source": "מקור",
+    "activity_of_interest": "פעילות מעניינת",
+    "placeholder_activity_interest": "למשל, שיעור יוגה, סדנת בישול",
+    "participant_id": "מזהה משתתף",
+    "payment_status": "סטטוס תשלום",
+    "activity_id": "מזהה פעילות",
+    "enrollment_date": "תאריך הרשמה",
+    "progress": "התקדמות"
+  },
+  
+  "status_options": {
+    "pending": "ממתין",
+    "confirmed": "מאושר",
+    "cancelled": "בוטל",
+    "completed": "הושלם",
+    "waitlisted": "ברשימת המתנה",
+    "no_show": "לא הגיע",
+    "new": "חדש",
+    "contacted": "נוצר קשר",
+    "qualified": "מוכשר",
+    "converted": "הומר",
+    "lost": "אבד",
+    "enrolled": "רשום",
+    "paid": "שולם",
+    "inactive": "לא פעיל",
+    "pending": "ממתין",
+    "active": "פעיל",
+    "confirmed": "מאושר",
+    "waitlisted": "ברשימת המתנה",
+    "no_show": "לא הגיע"
+  },
+  
+  "activity_types": {
+    "course": "קורס",
+    "workshop": "סדנה",
+    "seminar": "סמינר",
+    "webinar": "וובינר",
+    "other": "אחר"
+  },
+  
+  "sources": {
+    "website": "אתר אינטרנט",
+    "referral": "הפניה",
+    "social_media": "רשתות חברתיות",
+    "email": "אימייל",
+    "advertisement": "פרסומת",
+    "other": "אחר"
+  },
+  
+  "currencies": {
+    "usd": "דולר אמריקאי",
+    "eur": "יורו",
+    "gbp": "לירה שטרלינג"
+  },
+  
+  "payment_status": {
+    "unpaid": "לא שולם",
+    "partial": "שולם חלקית",
+    "paid": "שולם",
+    "refunded": "הוחזר"
+  },
+  
+  "app": {
+    "title": "אמן קורסים"
+  },
+  
+  "dashboard": {
+    "welcome": "ברוך הבא, ויקטור!",
+    "subtitle": "הנה מה קורה עם הקורסים שלך היום.",
+    "active_students": "תלמידים פעילים",
+    "course_completion": "השלמת קורס",
+    "revenue": "הכנסות",
+    "recent_activity": "פעילות אחרונה",
+    "top_courses": "קורסים מובילים",
+    "enrolled": "נרשמו",
+    "upcoming_events": "אירועים קרובים",
+    "quick_actions": "פעולות מהירות",
+    "schedule_event": "תזמן אירוע",
+    "send_alert": "שלח התראה"
+  }
+}

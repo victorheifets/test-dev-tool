@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
-import { useDelete, useCreate, useUpdate } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { Enrollment } from '../../types/enrollment';
@@ -17,6 +18,7 @@ import EventIcon from '@mui/icons-material/Event';
 import PaymentIcon from '@mui/icons-material/Payment';
 
 export const EnrollmentsList = () => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,6 +31,7 @@ export const EnrollmentsList = () => {
   const { mutate: deleteEnrollment } = useDelete();
   const { mutate: createEnrollment } = useCreate();
   const { mutate: updateEnrollment } = useUpdate();
+  const invalidate = useInvalidate();
 
   // Use real API data via useDataGrid hook
   const { dataGridProps } = useDataGrid<Enrollment>({
@@ -42,9 +45,9 @@ export const EnrollmentsList = () => {
   const enrollments = allEnrollments.filter(enrollment => {
     // Text search filter
     const matchesSearch = !searchText || 
-      enrollment.participant_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      enrollment.course_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      enrollment.payment_status?.toLowerCase().includes(searchText.toLowerCase());
+      enrollment.participant_id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      enrollment.activity_id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      enrollment.payment_info?.payment_status?.toLowerCase().includes(searchText.toLowerCase());
     
     // Status filter
     const matchesStatus = !statusFilter || enrollment.status === statusFilter;
@@ -89,11 +92,11 @@ export const EnrollmentsList = () => {
         id: selectedEnrollmentId,
       }, {
         onSuccess: () => {
-          showSuccess('Enrollment deleted successfully!');
+          showSuccess(t('messages.enrollment_deleted'));
         },
         onError: (error) => {
           console.error('Delete error:', error);
-          handleError(error, 'Delete Enrollment');
+          handleError(error, t('actions.delete') + ' ' + t('enrollment'));
         }
       });
     }
@@ -115,13 +118,14 @@ export const EnrollmentsList = () => {
         values: enrollment,
       }, {
         onSuccess: () => {
-          showSuccess('Enrollment created successfully!');
+          showSuccess(t('messages.enrollment_created'));
           setIsModalOpen(false);
           setModalInitialData(null);
+          invalidate({ resource: 'enrollments', invalidates: ['list'] });
         },
         onError: (error) => {
           console.error('Create error:', error);
-          handleError(error, 'Create Enrollment');
+          handleError(error, t('actions.create') + ' ' + t('enrollment'));
         }
       });
     } else if (modalMode === 'edit' && modalInitialData) {
@@ -131,13 +135,14 @@ export const EnrollmentsList = () => {
         values: enrollment,
       }, {
         onSuccess: () => {
-          showSuccess('Enrollment updated successfully!');
+          showSuccess(t('messages.enrollment_updated'));
           setIsModalOpen(false);
           setModalInitialData(null);
+          invalidate({ resource: 'enrollments', invalidates: ['list'] });
         },
         onError: (error) => {
           console.error('Update error:', error);
-          handleError(error, 'Update Enrollment');
+          handleError(error, t('actions.edit') + ' ' + t('enrollment'));
         }
       });
     }
@@ -145,42 +150,42 @@ export const EnrollmentsList = () => {
 
   const columns: GridColDef[] = [
     {
-      field: 'participant_name',
-      headerName: 'Student',
+      field: 'participant_id',
+      headerName: t('forms.participant_id'),
       flex: 1,
     },
     {
-      field: 'activity_name',
-      headerName: 'Course',
+      field: 'activity_id',
+      headerName: t('forms.activity_id'),
       flex: 1,
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('course_fields.status'),
       flex: 1,
       renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'enrollment_date', 
-      headerName: 'Enrollment Date', 
+      headerName: t('forms.enrollment_date'), 
       flex: 1,
       renderCell: (params) => new Date(params.row.enrollment_date).toLocaleDateString()
     },
     { 
-      field: 'completion_date', 
-      headerName: 'Completion Date', 
+      field: 'completion_percentage', 
+      headerName: t('forms.progress'), 
       flex: 1,
-      renderCell: (params) => params.row.completion_date ? new Date(params.row.completion_date).toLocaleDateString() : '-'
+      renderCell: (params) => `${params.row.completion_percentage || 0}%`
     },
     { 
-      field: 'payment_status', 
-      headerName: 'Payment Status', 
+      field: 'payment_info', 
+      headerName: t('forms.payment_status'), 
       flex: 1,
-      renderCell: (params) => params.row.payment_status.charAt(0).toUpperCase() + params.row.payment_status.slice(1)
+      renderCell: (params) => params.row.payment_info?.payment_status?.charAt(0).toUpperCase() + params.row.payment_info?.payment_status?.slice(1) || 'N/A'
     },
     {
       field: 'action',
-      headerName: 'Action',
+      headerName: t('common.actions'),
       width: 120,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -205,24 +210,24 @@ export const EnrollmentsList = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Enrollments" value={enrollments.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title={t('enrollments')} value={enrollments.length.toString()} icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Enrolled" value={enrollments.filter(e => e.status === 'enrolled').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title={t('status_options.enrolled')} value={enrollments.filter(e => e.status === 'enrolled').length.toString()} icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Completed" value={enrollments.filter(e => e.status === 'completed').length.toString()} icon={<EventIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title={t('course_status.completed')} value={enrollments.filter(e => e.status === 'completed').length.toString()} icon={<EventIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Paid" value={enrollments.filter(e => e.payment_status === 'paid').length.toString()} icon={<PaymentIcon sx={{ fontSize: 40 }} />} color="warning" />
+          <StatCard title={t('status_options.paid')} value={enrollments.filter(e => e.payment_status === 'paid').length.toString()} icon={<PaymentIcon sx={{ fontSize: 40 }} />} color="warning" />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ Add Enrollment</Button>
+            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('enrollment')}</Button>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                placeholder="Search enrollments..."
+                placeholder={t('search.placeholder_enrollments')}
                 variant="outlined"
                 size="small"
                 sx={{ minWidth: 250 }}
@@ -232,18 +237,18 @@ export const EnrollmentsList = () => {
                 }}
               />
               <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('course_fields.status')}</InputLabel>
                 <Select
-                  label="Status"
+                  label={t('course_fields.status')}
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                  <MenuItem value="">{t('common.all')}</MenuItem>
+                  <MenuItem value="active">{t('common.active')}</MenuItem>
+                  <MenuItem value="completed">{t('course_status.completed')}</MenuItem>
+                  <MenuItem value="cancelled">{t('course_status.cancelled')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -263,8 +268,8 @@ export const EnrollmentsList = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title="Delete Enrollment"
-        description="Are you sure you want to delete this enrollment? This action cannot be undone."
+        title={t('actions.delete') + ' ' + t('enrollment')}
+        description={t('messages.confirm_delete')}
       />
       <EnrollmentModal 
         open={isModalOpen}

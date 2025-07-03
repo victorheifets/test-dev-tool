@@ -1,20 +1,20 @@
 import { Chip } from '@mui/material';
-import { ParticipantStatus } from '../../types/participant';
+import { useTranslation } from 'react-i18next';
 
 interface StatusChipProps {
-  status: ParticipantStatus;
+  isActive: boolean;
 }
 
-export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
-  const getStatusDisplay = (status: ParticipantStatus) => {
-    const statusMap = {
-      active: { label: 'Active', color: 'success' as const },
-      inactive: { label: 'Inactive', color: 'error' as const },
-    };
-    return statusMap[status] || { label: status, color: 'default' as const };
+export const StatusChip: React.FC<StatusChipProps> = ({ isActive }) => {
+  const { t } = useTranslation();
+  
+  const getStatusDisplay = (isActive: boolean) => {
+    return isActive 
+      ? { label: t('common.active'), color: 'success' as const }
+      : { label: t('status_options.inactive'), color: 'error' as const };
   };
 
-  const { label, color } = getStatusDisplay(status);
+  const { label, color } = getStatusDisplay(isActive);
 
   return <Chip label={label} color={color} size="small" />;
 }; 

@@ -16,6 +16,7 @@ import {
   Divider,
   IconButton
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { StatCard } from '../components/StatCard';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
@@ -48,31 +49,33 @@ const mockData = {
 };
 
 export const Dashboard = () => {
+  const { t } = useTranslation();
+  
   return (
     <Box sx={{ width: '100%' }}>
       {/* Welcome Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-          Welcome back, Victor! 👋
+          {t('dashboard.welcome')} 👋
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Here's what's happening with your courses today.
+          {t('dashboard.subtitle')}
         </Typography>
       </Box>
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Courses" value="12" icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+          <StatCard title={t('courses')} value="12" icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Active Students" value="156" icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="success" />
+          <StatCard title={t('dashboard.active_students')} value="156" icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Course Completion" value="89%" icon={<TrendingUpIcon sx={{ fontSize: 40 }} />} color="info" />
+          <StatCard title={t('dashboard.course_completion')} value="89%" icon={<TrendingUpIcon sx={{ fontSize: 40 }} />} color="info" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Revenue" value="$12.4k" icon={<AttachMoneyIcon sx={{ fontSize: 40 }} />} color="warning" />
+          <StatCard title={t('dashboard.revenue')} value="$12.4k" icon={<AttachMoneyIcon sx={{ fontSize: 40 }} />} color="warning" />
         </Grid>
       </Grid>
 
@@ -83,7 +86,7 @@ export const Dashboard = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Recent Activity
+                  {t('dashboard.recent_activity')}
                 </Typography>
                 <IconButton size="small">
                   <MoreVertIcon />
@@ -137,7 +140,7 @@ export const Dashboard = () => {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Top Performing Courses
+                {t('dashboard.top_courses')}
               </Typography>
               {mockData.topCourses.map((course, index) => (
                 <Box key={index} sx={{ mb: 3 }}>
@@ -162,7 +165,7 @@ export const Dashboard = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    {course.progress}% enrolled
+                    {course.progress}% {t('dashboard.enrolled')}
                   </Typography>
                 </Box>
               ))}
@@ -176,7 +179,7 @@ export const Dashboard = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Upcoming Events
+                  {t('dashboard.upcoming_events')}
                 </Typography>
                 <EventIcon color="primary" />
               </Box>
@@ -199,7 +202,7 @@ export const Dashboard = () => {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Quick Actions
+                {t('dashboard.quick_actions')}
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
@@ -214,7 +217,7 @@ export const Dashboard = () => {
                   >
                     <SchoolIcon color="primary" sx={{ fontSize: 32, mb: 1 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Add Course
+                      {t('actions.create')} {t('course')}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -230,7 +233,7 @@ export const Dashboard = () => {
                   >
                     <PersonIcon color="success" sx={{ fontSize: 32, mb: 1 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Add Student
+                      {t('actions.create')} {t('student')}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -246,7 +249,7 @@ export const Dashboard = () => {
                   >
                     <EventIcon color="info" sx={{ fontSize: 32, mb: 1 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Schedule Event
+                      {t('dashboard.schedule_event')}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -262,7 +265,7 @@ export const Dashboard = () => {
                   >
                     <NotificationsIcon color="warning" sx={{ fontSize: 32, mb: 1 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Send Alert
+                      {t('dashboard.send_alert')}
                     </Typography>
                   </Paper>
                 </Grid>

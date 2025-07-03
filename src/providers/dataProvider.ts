@@ -10,7 +10,6 @@ import { AppError, logError, parseError } from "../utils/errorHandler";
 // HTTP Client with error handling
 const httpClient = async (url: string, options: RequestInit = {}): Promise<any> => {
   const config: RequestInit = {
-    headers: getAuthHeaders(),
     ...options,
     headers: {
       ...getAuthHeaders(),
@@ -30,7 +29,17 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
       try {
         const errorJson = JSON.parse(errorText);
         console.error('Parsed error details:', errorJson);
-        errorMessage = errorJson.message || errorJson.detail || errorMessage;
+        
+        // Handle new standardized error format
+        if (errorJson.error && errorJson.message) {
+          errorMessage = errorJson.message;
+          if (errorJson.details && errorJson.details.length > 0) {
+            errorMessage += ': ' + errorJson.details.map((d: any) => d.message).join(', ');
+          }
+        } else {
+          // Fallback to old format
+          errorMessage = errorJson.message || errorJson.detail || errorMessage;
+        }
         errorCode = errorJson.code || errorCode;
       } catch {
         // If not JSON, use the text as message
@@ -40,7 +49,28 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
       throw new AppError(errorMessage, response.status, errorCode);
     }
     
-    const data = await response.json();
+    // Check if response has content to parse
+    const contentType = response.headers.get('content-type');
+    const hasJsonContent = contentType && contentType.includes('application/json');
+    
+    // For successful DELETE operations or empty responses, return empty object
+    if (response.status === 204 || !hasJsonContent) {
+      return {};
+    }
+    
+    // Try to parse JSON, but handle empty responses gracefully
+    const text = await response.text();
+    if (!text.trim()) {
+      return {};
+    }
+    
+    const data = JSON.parse(text);
+    
+    // Handle new standardized success response format
+    if (data.success !== undefined) {
+      return data.data || data;
+    }
+    
     return data;
   } catch (error) {
     logError(error, `HTTP Request: ${url}`);

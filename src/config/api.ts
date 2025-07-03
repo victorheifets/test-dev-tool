@@ -12,7 +12,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 export const API_CONFIG = {
   // Base API URL - different for development and production
   baseURL: isDevelopment 
-    ? 'http://localhost:8083/api' 
+    ? 'http://localhost:8082/api' 
     : process.env.VITE_API_URL || 'https://api.coursemanagement.com/api',
   
   // API timeout in milliseconds
@@ -26,7 +26,7 @@ export const API_CONFIG = {
     activities: '/activities',
     participants: '/participants', 
     enrollments: '/enrollments',
-    marketing: '/marketing',
+    marketing: '/marketing/leads',
     instructors: '/trainers', // Note: not in swagger but keeping for future
     providers: '/providers',
     statistics: '/statistics',
@@ -59,11 +59,18 @@ export const buildApiUrl = (endpoint: keyof typeof API_CONFIG.endpoints, id?: st
   return id ? `${baseUrl}/${id}` : baseUrl;
 };
 
-// Helper function to get auth headers (placeholder for JWT implementation)
+// Helper function to get auth headers with JWT token
 export const getAuthHeaders = (): Record<string, string> => {
-  // TODO: Replace with actual JWT token from auth context
-  return {
+  const headers: Record<string, string> = {
     ...API_CONFIG.headers,
-    'X-Provider-ID': API_CONFIG.defaultProviderId // Development only
+    'X-Provider-ID': API_CONFIG.defaultProviderId // For multi-tenant support
   };
+
+  // Add JWT token if available
+  const token = localStorage.getItem('auth-token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 };

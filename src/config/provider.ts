@@ -4,7 +4,7 @@
  */
 
 // The provider ID to use for all API requests (matches existing provider in database)
-export const PROVIDER_ID = '12345678-1234-5678-1234-567812345678';
+export const PROVIDER_ID = 'ffa6c96f-e4a2-4df2-8298-415daa45d23c';
 
 // Function to get the provider ID (can be extended to get from localStorage, etc.)
 export const getProviderId = (): string => {

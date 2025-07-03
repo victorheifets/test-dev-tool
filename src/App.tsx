@@ -1,4 +1,4 @@
-import { GitHubBanner, Refine, useMenu, CanAccess } from "@refinedev/core";
+import { Refine, useMenu, CanAccess, Authenticated } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import {
@@ -7,6 +7,7 @@ import {
   ThemedLayoutV2,
   ThemedSiderV2,
   useNotificationProvider,
+  AuthPage,
 } from "@refinedev/mui";
 import {
   List,
@@ -28,18 +29,23 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import { useRouterContext } from '@refinedev/core';
 import { dataProvider } from "./providers/dataProvider";
+import { authProvider } from "./providers/authProvider";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import React from "react";
 import { Header } from "./components/header";
 import { ThemeContextProvider } from "./contexts/color-mode";
-import { resources } from "./config/navigation";
+import { useResources } from "./config/navigation";
+import { useTranslation } from "react-i18next";
 import { Dashboard } from "./pages/dashboard";
 import { CourseList } from './pages/courses/list';
 import { ParticipantsList } from './pages/participants/list';
 import { EnrollmentsList } from './pages/enrollments/list';
 import { LeadsList } from './pages/leads/list';
+import { LandingPageBuilder } from './pages/landing-builder';
 
-const Title = ({ collapsed }: { collapsed: boolean }) => (
+const Title = ({ collapsed }: { collapsed: boolean }) => {
+  const { t } = useTranslation();
+  return (
   <Box 
     sx={{ 
       display: 'flex', 
@@ -67,25 +73,25 @@ const Title = ({ collapsed }: { collapsed: boolean }) => (
           letterSpacing: '0.5px',
         }}
       >
-        Course Master
+        {t('app.title')}
       </Typography>
     )}
   </Box>
-);
+  );
+};
 
-function App() {
+const AppContent = () => {
+  const resources = useResources();
+  const notificationProvider = useNotificationProvider();
+  
   return (
-    <BrowserRouter>
-      <RefineKbarProvider>
-        <ThemeContextProvider>
-          <CssBaseline />
-          <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
-          <RefineSnackbarProvider>
-            <DevtoolsProvider>
-              <Refine
-                dataProvider={dataProvider}
-                routerProvider={routerBindings}
-                resources={resources}
+    <DevtoolsProvider>
+      <Refine
+        dataProvider={dataProvider}
+        authProvider={authProvider}
+        routerProvider={routerBindings}
+        notificationProvider={notificationProvider}
+        resources={resources}
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
@@ -96,12 +102,17 @@ function App() {
                 <Routes>
                   <Route
                     element={
-                      <ThemedLayoutV2 
-                        Header={() => <Header sticky={false} />}
-                        Sider={(props) => <ThemedSiderV2 {...props} Title={Title} />}
+                      <Authenticated
+                        key="authenticated-inner"
+                        fallback={<AuthPage type="login" />}
                       >
-                        <Outlet />
-                      </ThemedLayoutV2>
+                        <ThemedLayoutV2 
+                          Header={() => <Header sticky={false} />}
+                          Sider={(props) => <ThemedSiderV2 {...props} Title={Title} />}
+                        >
+                          <Outlet />
+                        </ThemedLayoutV2>
+                      </Authenticated>
                     }
                   >
                     <Route
@@ -113,7 +124,17 @@ function App() {
                     <Route path="/participants" element={<ParticipantsList />} />
                     <Route path="/enrollments" element={<EnrollmentsList />} />
                     <Route path="/leads" element={<LeadsList />} />
+                    <Route path="/landing-builder" element={<LandingPageBuilder />} />
                     <Route path="*" element={<ErrorComponent />} />
+                  </Route>
+                  <Route
+                    element={
+                      <Authenticated key="authenticated-outer" fallback={<Outlet />}>
+                        <NavigateToResource />
+                      </Authenticated>
+                    }
+                  >
+                    <Route path="/login" element={<AuthPage type="login" />} />
                   </Route>
                 </Routes>
 
@@ -121,8 +142,19 @@ function App() {
                 <UnsavedChangesNotifier />
                 <DocumentTitleHandler />
               </Refine>
-              <DevtoolsProvider />
             </DevtoolsProvider>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <RefineKbarProvider>
+        <ThemeContextProvider>
+          <CssBaseline />
+          <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
+          <RefineSnackbarProvider>
+            <AppContent />
           </RefineSnackbarProvider>
         </ThemeContextProvider>
       </RefineKbarProvider>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Grid, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import { Lead, LeadSource, LeadStatus } from '../../types/lead';
+import { useTranslation } from 'react-i18next';
 
 interface LeadModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ const emptyLead: Omit<Lead, 'id'> = {
 };
 
 export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, initialData, mode }) => {
+  const { t } = useTranslation();
   const [lead, setLead] = useState<Omit<Lead, 'id'>>(emptyLead);
 
   useEffect(() => {
@@ -44,9 +46,9 @@ export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, ini
   };
 
   const getTitle = () => {
-    if (mode === 'edit') return 'Edit Lead';
-    if (mode === 'duplicate') return 'Duplicate Lead';
-    return 'Add New Lead';
+    if (mode === 'edit') return t('actions.edit') + ' ' + t('lead');
+    if (mode === 'duplicate') return t('actions.duplicate') + ' ' + t('lead');
+    return t('actions.create') + ' ' + t('lead');
   };
 
   return (
@@ -63,45 +65,53 @@ export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, ini
     >
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid container spacing={2} sx={(theme) => ({
+          mt: 1,
+          direction: theme.direction,
+          '& .MuiTextField-root': {
+            '& .MuiInputLabel-root': {
+              transformOrigin: theme.direction === 'rtl' ? 'top right' : 'top left',
+            }
+          }
+        })}>
           <Grid item xs={12} sm={6}>
-            <TextField name="first_name" label="First Name" value={lead.first_name} onChange={handleChange} fullWidth />
+            <TextField name="first_name" label={t('forms.first_name')} value={lead.first_name} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField name="last_name" label="Last Name" value={lead.last_name} onChange={handleChange} fullWidth />
+            <TextField name="last_name" label={t('forms.last_name')} value={lead.last_name} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12}>
-            <TextField name="email" label="Email" value={lead.email} onChange={handleChange} fullWidth />
+            <TextField name="email" label={t('common.email')} value={lead.email} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12}>
-            <TextField name="phone" label="Phone" value={lead.phone} onChange={handleChange} fullWidth />
+            <TextField name="phone" label={t('common.phone')} value={lead.phone} onChange={handleChange} fullWidth />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Source</InputLabel>
-              <Select name="source" value={lead.source} onChange={handleChange} label="Source">
-                <MenuItem value="website">Website</MenuItem>
-                <MenuItem value="referral">Referral</MenuItem>
-                <MenuItem value="social">Social Media</MenuItem>
+              <InputLabel>{t('forms.source')}</InputLabel>
+              <Select name="source" value={lead.source} onChange={handleChange} label={t('forms.source')}>
+                <MenuItem value="website">{t('sources.website')}</MenuItem>
+                <MenuItem value="referral">{t('sources.referral')}</MenuItem>
+                <MenuItem value="social_media">{t('sources.social_media')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select name="status" value={lead.status} onChange={handleChange} label="Status">
-                <MenuItem value="new">New</MenuItem>
-                <MenuItem value="contacted">Contacted</MenuItem>
-                <MenuItem value="qualified">Qualified</MenuItem>
-                <MenuItem value="converted">Converted</MenuItem>
+              <InputLabel>{t('course_fields.status')}</InputLabel>
+              <Select name="status" value={lead.status} onChange={handleChange} label={t('course_fields.status')}>
+                <MenuItem value="new">{t('status_options.new')}</MenuItem>
+                <MenuItem value="contacted">{t('status_options.contacted')}</MenuItem>
+                <MenuItem value="qualified">{t('status_options.qualified')}</MenuItem>
+                <MenuItem value="converted">{t('status_options.converted')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">Save</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button onClick={handleSave} variant="contained">{t('actions.save')}</Button>
       </DialogActions>
     </Dialog>
   );

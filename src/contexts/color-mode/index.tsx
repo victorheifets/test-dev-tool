@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import stylisRTLPlugin from "stylis-plugin-rtl";
+import { prefixer } from "stylis";
 import { lightTheme, darkTheme } from "../../config/theme";
 
 type ThemeContextType = {
@@ -36,8 +37,8 @@ export const ThemeContextProvider: React.FC<PropsWithChildren> = ({
   );
 
   const cacheRtl = createCache({
-    key: i18n.language === "he" ? "rtl" : "css",
-    stylisPlugins: i18n.language === "he" ? [stylisRTLPlugin] : [],
+    key: i18n.language === "he" ? "muirtl" : "muiltr",
+    stylisPlugins: i18n.language === "he" ? [prefixer, stylisRTLPlugin] : [prefixer],
   });
 
   useEffect(() => {

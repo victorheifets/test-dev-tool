@@ -1,16 +1,22 @@
 import { Chip } from '@mui/material';
 import { EnrollmentStatus } from '../../types/enrollment';
+import { useTranslation } from 'react-i18next';
 
 interface StatusChipProps {
   status: EnrollmentStatus;
 }
 
 export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
+  const { t } = useTranslation();
+  
   const getStatusDisplay = (status: EnrollmentStatus) => {
     const statusMap = {
-      enrolled: { label: 'Enrolled', color: 'info' as const },
-      completed: { label: 'Completed', color: 'success' as const },
-      cancelled: { label: 'Cancelled', color: 'error' as const },
+      pending: { label: t('status_options.pending'), color: 'warning' as const },
+      confirmed: { label: t('status_options.confirmed'), color: 'info' as const },
+      completed: { label: t('status_options.completed'), color: 'success' as const },
+      cancelled: { label: t('status_options.cancelled'), color: 'error' as const },
+      waitlisted: { label: t('status_options.waitlisted'), color: 'secondary' as const },
+      no_show: { label: t('status_options.no_show'), color: 'error' as const },
     };
     return statusMap[status] || { label: status, color: 'default' as const };
   };

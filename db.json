@@ -31,6 +31,40 @@
       },
       "provider_id": "12345678-1234-5678-1234-567812345678",
       "id": "2"
+    },
+    {
+      "name": "Capuera",
+      "description": "njklnflwe",
+      "status": "ongoing",
+      "location": "Online",
+      "start_date": "2025-06-30",
+      "end_date": "2025-07-07",
+      "capacity": 50,
+      "category": "Test",
+      "activity_type": "workshop",
+      "pricing": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "id": "wzMaKp9"
+    },
+    {
+      "name": "Capuera1212",
+      "description": "njklnflwe",
+      "status": "ongoing",
+      "location": "Online",
+      "start_date": "2025-06-30",
+      "end_date": "2025-07-07",
+      "capacity": 50,
+      "category": "Test",
+      "activity_type": "workshop",
+      "pricing": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "provider_id": "12345678-1234-5678-1234-567812345678",
+      "id": "qAXY_Jw"
     }
   ],
   "participants": [
@@ -174,7 +208,7 @@
       "last_name": "User",
       "email": "test@example.com",
       "phone": "1234567890",
-      "status": "new",
+      "status": "converted",
       "source": "website",
       "id": "dmOeN7C"
     },
