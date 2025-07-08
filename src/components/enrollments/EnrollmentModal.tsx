@@ -14,12 +14,19 @@ interface EnrollmentModalProps {
   mode: 'create' | 'edit' | 'duplicate';
 }
 
-const ENROLLMENT_STATUSES: EnrollmentStatus[] = ['pending', 'confirmed', 'cancelled', 'completed', 'waitlisted', 'no_show'];
+const ENROLLMENT_STATUSES: EnrollmentStatus[] = [
+  EnrollmentStatus.PENDING,
+  EnrollmentStatus.CONFIRMED,
+  EnrollmentStatus.CANCELLED,
+  EnrollmentStatus.COMPLETED,
+  EnrollmentStatus.WAITLISTED,
+  EnrollmentStatus.NO_SHOW
+];
 
 const emptyEnrollment: EnrollmentCreate = {
   participant_id: '',
   activity_id: '',
-  status: 'pending',
+  status: EnrollmentStatus.PENDING,
 };
 
 export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({ open, onClose, onSave, initialData, mode }) => {
@@ -49,11 +56,7 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({ open, onClose,
         activity_id: data.activity_id,
         status: data.status,
         notes: data.notes,
-        attended_sessions: data.attended_sessions,
-        payment_info: data.payment_info,
         special_requirements: data.special_requirements,
-        discount_code: data.discount_code,
-        referral_source: data.referral_source,
       };
       setEnrollment(enrollmentCreate);
     } else {
@@ -63,18 +66,7 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({ open, onClose,
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-    
-    if (name === 'payment_status') {
-      setEnrollment(prev => ({ 
-        ...prev, 
-        payment_info: {
-          ...prev.payment_info || { amount_paid: 0, is_refunded: false, payment_status: 'unpaid' },
-          payment_status: value as any
-        }
-      }));
-    } else {
-      setEnrollment(prev => ({ ...prev, [name as string]: value }));
-    }
+    setEnrollment(prev => ({ ...prev, [name as string]: value }));
   };
 
   const handleSave = () => {
@@ -138,23 +130,12 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({ open, onClose,
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>{t('course_fields.status')}</InputLabel>
-              <Select name="status" value={enrollment.status || 'pending'} onChange={handleChange} label={t('course_fields.status')}>
+              <Select name="status" value={enrollment.status || EnrollmentStatus.PENDING} onChange={handleChange} label={t('course_fields.status')}>
                 {ENROLLMENT_STATUSES.map((status) => (
                   <MenuItem key={status} value={status}>
                     {t('status_options.' + status, status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '))}
                   </MenuItem>
                 ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>{t('forms.payment_status')}</InputLabel>
-              <Select name="payment_status" value={enrollment.payment_info?.payment_status || 'unpaid'} onChange={handleChange} label={t('forms.payment_status')}>
-                <MenuItem value="unpaid">{t('payment_status.unpaid')}</MenuItem>
-                <MenuItem value="partial">{t('payment_status.partial')}</MenuItem>
-                <MenuItem value="paid">{t('payment_status.paid')}</MenuItem>
-                <MenuItem value="refunded">{t('payment_status.refunded')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>

@@ -42,6 +42,10 @@ import { ParticipantsList } from './pages/participants/list';
 import { EnrollmentsList } from './pages/enrollments/list';
 import { LeadsList } from './pages/leads/list';
 import { LandingPageBuilder } from './pages/landing-builder';
+import { LandingPageBuilderV2 } from './pages/landing-builder-v2/LandingPageBuilderV2';
+import LandingPageDemo from './pages/landing-page-demo/LandingPageDemo';
+import AdvancedEditor from './pages/landing-page-demo/AdvancedEditor';
+import LandingBuilderV3 from './pages/landing-builder-v3';
 
 const Title = ({ collapsed }: { collapsed: boolean }) => {
   const { t } = useTranslation();
@@ -125,6 +129,10 @@ const AppContent = () => {
                     <Route path="/enrollments" element={<EnrollmentsList />} />
                     <Route path="/leads" element={<LeadsList />} />
                     <Route path="/landing-builder" element={<LandingPageBuilder />} />
+                    <Route path="/landing-builder-v2" element={<LandingPageBuilderV2 />} />
+                    <Route path="/landing-page-demo" element={<LandingPageDemo />} />
+                    <Route path="/advanced-editor" element={<AdvancedEditor />} />
+                    <Route path="/landing-builder-v3" element={<LandingBuilderV3 />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                   <Route

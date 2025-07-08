@@ -10,13 +10,14 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
   const { t } = useTranslation();
   
   const getStatusDisplay = (status: LeadStatus) => {
-    const statusMap = {
-      new: { label: t('status_options.new'), color: 'info' as const },
-      contacted: { label: t('status_options.contacted'), color: 'primary' as const },
-      qualified: { label: t('status_options.qualified'), color: 'success' as const },
-      converted: { label: t('status_options.converted'), color: 'secondary' as const },
+    const statusMap: Record<LeadStatus, { label: string; color: 'info' | 'primary' | 'success' | 'secondary' | 'error' | 'default' }> = {
+      [LeadStatus.NEW]: { label: t('status_options.new'), color: 'info' },
+      [LeadStatus.CONTACTED]: { label: t('status_options.contacted'), color: 'primary' },
+      [LeadStatus.QUALIFIED]: { label: t('status_options.qualified'), color: 'success' },
+      [LeadStatus.CONVERTED]: { label: t('status_options.converted'), color: 'secondary' },
+      [LeadStatus.LOST]: { label: t('status_options.lost'), color: 'error' },
     };
-    return statusMap[status] || { label: status, color: 'default' as const };
+    return statusMap[status] || { label: status, color: 'default' };
   };
 
   const { label, color } = getStatusDisplay(status);

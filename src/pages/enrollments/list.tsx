@@ -6,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { Enrollment } from '../../types/enrollment';
+import { Enrollment, EnrollmentCreate, EnrollmentStatus } from '../../types/enrollment';
 import { StatusChip } from '../../components/enrollments/StatusChip';
 import { ActionMenu } from '../../components/enrollments/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
@@ -26,6 +26,8 @@ export const EnrollmentsList = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteEnrollment } = useDelete();
@@ -103,6 +105,53 @@ export const EnrollmentsList = () => {
     setDialogOpen(false);
     setSelectedEnrollmentId(null);
   };
+
+  const handleBulkDelete = () => {
+    if (selectedRows.length > 0) {
+      setBulkDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+    
+    console.log('Bulk deleting enrollments with IDs:', selectedRows);
+    let deleteCount = 0;
+    let errorCount = 0;
+
+    for (const id of selectedRows) {
+      try {
+        await new Promise((resolve, reject) => {
+          deleteEnrollment({
+            resource: 'enrollments',
+            id,
+          }, {
+            onSuccess: () => {
+              deleteCount++;
+              resolve(void 0);
+            },
+            onError: (error) => {
+              console.error(`Delete error for ID ${id}:`, error);
+              errorCount++;
+              reject(error);
+            }
+          });
+        });
+      } catch (error) {
+        // Error already logged above
+      }
+    }
+
+    if (deleteCount > 0) {
+      showSuccess(t('messages.bulk_delete_success', { count: deleteCount }));
+    }
+    if (errorCount > 0) {
+      handleError(new Error(`${errorCount} items failed to delete`), t('actions.bulk_delete'));
+    }
+
+    setBulkDeleteDialogOpen(false);
+    setSelectedRows([]);
+  };
   
   const handleAddNew = () => {
     console.log('Opening create modal');
@@ -111,7 +160,7 @@ export const EnrollmentsList = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (enrollment: Omit<Enrollment, 'id'>) => {
+  const handleSave = (enrollment: EnrollmentCreate) => {
     if (modalMode === 'create' || modalMode === 'duplicate') {
       createEnrollment({
         resource: 'enrollments',
@@ -224,7 +273,19 @@ export const EnrollmentsList = () => {
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('enrollment')}</Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('enrollment')}</Button>
+              {selectedRows.length > 0 && (
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={handleBulkDelete}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {t('actions.delete')} ({selectedRows.length})
+                </Button>
+              )}
+            </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 placeholder={t('search.placeholder_enrollments')}
@@ -246,9 +307,11 @@ export const EnrollmentsList = () => {
                   }}
                 >
                   <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value="active">{t('common.active')}</MenuItem>
-                  <MenuItem value="completed">{t('course_status.completed')}</MenuItem>
-                  <MenuItem value="cancelled">{t('course_status.cancelled')}</MenuItem>
+                  <MenuItem value={EnrollmentStatus.PENDING}>{t('enrollment_status.pending')}</MenuItem>
+                  <MenuItem value={EnrollmentStatus.CONFIRMED}>{t('enrollment_status.confirmed')}</MenuItem>
+                  <MenuItem value={EnrollmentStatus.COMPLETED}>{t('enrollment_status.completed')}</MenuItem>
+                  <MenuItem value={EnrollmentStatus.CANCELLED}>{t('enrollment_status.cancelled')}</MenuItem>
+                  <MenuItem value={EnrollmentStatus.WAITLISTED}>{t('enrollment_status.waitlisted')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -261,6 +324,10 @@ export const EnrollmentsList = () => {
                 disableRowSelectionOnClick
                 pageSizeOptions={[5, 10, 25, 50]}
                 sx={{ border: 'none' }}
+                onRowSelectionModelChange={(newSelectionModel) => {
+                  setSelectedRows(newSelectionModel as string[]);
+                }}
+                rowSelectionModel={selectedRows}
             />
         </Box>
       </Box>
@@ -270,6 +337,13 @@ export const EnrollmentsList = () => {
         onConfirm={confirmDelete}
         title={t('actions.delete') + ' ' + t('enrollment')}
         description={t('messages.confirm_delete')}
+      />
+      <ConfirmationDialog
+        open={bulkDeleteDialogOpen}
+        onClose={() => setBulkDeleteDialogOpen(false)}
+        onConfirm={confirmBulkDelete}
+        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('enrollments')}`}
+        description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
       <EnrollmentModal 
         open={isModalOpen}

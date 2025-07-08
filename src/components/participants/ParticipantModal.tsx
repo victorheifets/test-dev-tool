@@ -31,10 +31,8 @@ export const ParticipantModal: React.FC<ParticipantModalProps> = ({ open, onClos
         last_name: data.last_name,
         email: data.email,
         phone: data.phone,
+        date_of_birth: data.date_of_birth,
         address: data.address,
-        profile_info: data.profile_info,
-        health_declaration: data.health_declaration,
-        terms_declaration: data.terms_declaration,
       };
       setParticipant(participantCreate);
     } else {

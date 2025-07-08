@@ -101,7 +101,7 @@ export const dataProvider: DataProvider = {
     // Build query parameters
     const params = new URLSearchParams();
     
-    if (pagination) {
+    if (pagination && pagination.current && pagination.pageSize) {
       params.append('skip', String((pagination.current - 1) * pagination.pageSize));
       params.append('limit', String(pagination.pageSize));
     }
@@ -200,8 +200,8 @@ export const dataProvider: DataProvider = {
     }
     
     // Add provider_id to payload if not present
-    if (!payload.provider_id) {
-      payload.provider_id = API_CONFIG.defaultProviderId;
+    if (!(payload as any).provider_id) {
+      (payload as any).provider_id = API_CONFIG.defaultProviderId;
     }
     
     console.log('Final payload being sent to API:', JSON.stringify(payload, null, 2));
@@ -215,7 +215,7 @@ export const dataProvider: DataProvider = {
       console.log('URL:', url);
       console.log('Original variables:', JSON.stringify(variables, null, 2));
       console.log('Final payload:', JSON.stringify(payload, null, 2));
-      console.log('Payload keys:', Object.keys(payload));
+      console.log('Payload keys:', Object.keys(payload as object));
       console.log('=============================================\n');
     }
     
@@ -255,8 +255,8 @@ export const dataProvider: DataProvider = {
     }
     
     // Add provider_id to payload if not present (for updates too)
-    if (!payload.provider_id) {
-      payload.provider_id = API_CONFIG.defaultProviderId;
+    if (!(payload as any).provider_id) {
+      (payload as any).provider_id = API_CONFIG.defaultProviderId;
     }
     
     try {
@@ -296,7 +296,7 @@ export const dataProvider: DataProvider = {
       });
       
       console.log(`[DataProvider] deleteOne success for ${resource}:${id}`, response);
-      return { data: {} };
+      return { data: { id } as any };
       
     } catch (error) {
       console.error(`[DataProvider] deleteOne failed for ${resource}:${id}`, error);

@@ -150,7 +150,7 @@ export const successNotification = (message: string, description?: string): Open
  * Create info notification
  */
 export const infoNotification = (message: string, description?: string): OpenNotificationParams => ({
-  type: 'info',
+  type: 'success',
   message,
   description,
 });

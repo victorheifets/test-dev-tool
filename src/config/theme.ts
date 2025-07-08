@@ -178,13 +178,6 @@ const baseThemeOptions: ThemeOptions = {
           }
         }
       }
-    },
-    MuiDataGrid: {
-      styleOverrides: {
-        cell: {
-          fontSize: '0.85rem',
-        }
-      }
     }
   },
 };

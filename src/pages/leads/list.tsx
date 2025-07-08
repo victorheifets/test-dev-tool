@@ -6,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { Lead } from '../../types/lead';
+import { Lead, LeadStatus } from '../../types/lead';
 import { StatusChip } from '../../components/leads/StatusChip';
 import { ActionMenu } from '../../components/leads/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
@@ -26,6 +26,8 @@ export const LeadsList = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteLead } = useDelete();
@@ -104,6 +106,53 @@ export const LeadsList = () => {
     }
     setDialogOpen(false);
     setSelectedLeadId(null);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRows.length > 0) {
+      setBulkDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+    
+    console.log('Bulk deleting leads with IDs:', selectedRows);
+    let deleteCount = 0;
+    let errorCount = 0;
+
+    for (const id of selectedRows) {
+      try {
+        await new Promise((resolve, reject) => {
+          deleteLead({
+            resource: 'leads',
+            id,
+          }, {
+            onSuccess: () => {
+              deleteCount++;
+              resolve(void 0);
+            },
+            onError: (error) => {
+              console.error(`Delete error for ID ${id}:`, error);
+              errorCount++;
+              reject(error);
+            }
+          });
+        });
+      } catch (error) {
+        // Error already logged above
+      }
+    }
+
+    if (deleteCount > 0) {
+      showSuccess(t('messages.bulk_delete_success', { count: deleteCount }));
+    }
+    if (errorCount > 0) {
+      handleError(new Error(`${errorCount} items failed to delete`), t('actions.bulk_delete'));
+    }
+
+    setBulkDeleteDialogOpen(false);
+    setSelectedRows([]);
   };
   
   const handleAddNew = () => {
@@ -230,7 +279,19 @@ export const LeadsList = () => {
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('lead')}</Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('lead')}</Button>
+              {selectedRows.length > 0 && (
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={handleBulkDelete}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {t('actions.delete')} ({selectedRows.length})
+                </Button>
+              )}
+            </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 placeholder={t('search.placeholder_leads')}
@@ -252,11 +313,11 @@ export const LeadsList = () => {
                   }}
                 >
                   <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value="new">{t('status_options.new')}</MenuItem>
-                  <MenuItem value="contacted">{t('status_options.contacted')}</MenuItem>
-                  <MenuItem value="qualified">{t('status_options.qualified')}</MenuItem>
-                  <MenuItem value="converted">{t('status_options.converted')}</MenuItem>
-                  <MenuItem value="lost">{t('status_options.lost')}</MenuItem>
+                  <MenuItem value={LeadStatus.NEW}>{t('status_options.new')}</MenuItem>
+                  <MenuItem value={LeadStatus.CONTACTED}>{t('status_options.contacted')}</MenuItem>
+                  <MenuItem value={LeadStatus.QUALIFIED}>{t('status_options.qualified')}</MenuItem>
+                  <MenuItem value={LeadStatus.CONVERTED}>{t('status_options.converted')}</MenuItem>
+                  <MenuItem value={LeadStatus.LOST}>{t('status_options.lost')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -269,6 +330,10 @@ export const LeadsList = () => {
                 disableRowSelectionOnClick
                 pageSizeOptions={[5, 10, 25, 50]}
                 sx={{ border: 'none' }}
+                onRowSelectionModelChange={(newSelectionModel) => {
+                  setSelectedRows(newSelectionModel as string[]);
+                }}
+                rowSelectionModel={selectedRows}
             />
         </Box>
       </Box>
@@ -278,6 +343,13 @@ export const LeadsList = () => {
         onConfirm={confirmDelete}
         title={t('actions.delete') + ' ' + t('lead')}
         description={t('messages.confirm_delete')}
+      />
+      <ConfirmationDialog
+        open={bulkDeleteDialogOpen}
+        onClose={() => setBulkDeleteDialogOpen(false)}
+        onConfirm={confirmBulkDelete}
+        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('leads')}`}
+        description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
       <LeadModal 
         open={isModalOpen}

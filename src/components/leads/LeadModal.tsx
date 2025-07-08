@@ -17,9 +17,13 @@ const emptyLead: Omit<Lead, 'id'> = {
   last_name: '',
   email: '',
   phone: '',
-  source: 'website',
-  status: 'new',
+  source: LeadSource.WEBSITE,
+  status: LeadStatus.NEW,
   created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  is_active: true,
+  activity_of_interest: undefined,
+  notes: undefined,
 };
 
 export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, initialData, mode }) => {
@@ -90,9 +94,9 @@ export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, ini
             <FormControl fullWidth>
               <InputLabel>{t('forms.source')}</InputLabel>
               <Select name="source" value={lead.source} onChange={handleChange} label={t('forms.source')}>
-                <MenuItem value="website">{t('sources.website')}</MenuItem>
-                <MenuItem value="referral">{t('sources.referral')}</MenuItem>
-                <MenuItem value="social_media">{t('sources.social_media')}</MenuItem>
+                <MenuItem value={LeadSource.WEBSITE}>{t('sources.website')}</MenuItem>
+                <MenuItem value={LeadSource.REFERRAL}>{t('sources.referral')}</MenuItem>
+                <MenuItem value={LeadSource.SOCIAL_MEDIA}>{t('sources.social_media')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -100,10 +104,10 @@ export const LeadModal: React.FC<LeadModalProps> = ({ open, onClose, onSave, ini
             <FormControl fullWidth>
               <InputLabel>{t('course_fields.status')}</InputLabel>
               <Select name="status" value={lead.status} onChange={handleChange} label={t('course_fields.status')}>
-                <MenuItem value="new">{t('status_options.new')}</MenuItem>
-                <MenuItem value="contacted">{t('status_options.contacted')}</MenuItem>
-                <MenuItem value="qualified">{t('status_options.qualified')}</MenuItem>
-                <MenuItem value="converted">{t('status_options.converted')}</MenuItem>
+                <MenuItem value={LeadStatus.NEW}>{t('status_options.new')}</MenuItem>
+                <MenuItem value={LeadStatus.CONTACTED}>{t('status_options.contacted')}</MenuItem>
+                <MenuItem value={LeadStatus.QUALIFIED}>{t('status_options.qualified')}</MenuItem>
+                <MenuItem value={LeadStatus.CONVERTED}>{t('status_options.converted')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>

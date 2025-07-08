@@ -5,7 +5,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { Activity } from '../../types/activity';
+import { Activity, ActivityStatus } from '../../types/activity';
 import { StatusChip } from '../../components/courses/StatusChip';
 import { ActionMenu } from '../../components/courses/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
@@ -25,6 +25,8 @@ export const CourseList = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   const { handleError, showSuccess } = useErrorHandler();
   const { mutate: deleteActivity } = useDelete();
@@ -104,6 +106,53 @@ export const CourseList = () => {
     }
     setDialogOpen(false);
     setSelectedActivityId(null);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRows.length > 0) {
+      setBulkDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+    
+    console.log('Bulk deleting courses with IDs:', selectedRows);
+    let deleteCount = 0;
+    let errorCount = 0;
+
+    for (const id of selectedRows) {
+      try {
+        await new Promise((resolve, reject) => {
+          deleteActivity({
+            resource: 'courses',
+            id,
+          }, {
+            onSuccess: () => {
+              deleteCount++;
+              resolve(void 0);
+            },
+            onError: (error) => {
+              console.error(`Delete error for ID ${id}:`, error);
+              errorCount++;
+              reject(error);
+            }
+          });
+        });
+      } catch (error) {
+        // Error already logged above
+      }
+    }
+
+    if (deleteCount > 0) {
+      showSuccess(t('messages.bulk_delete_success', { count: deleteCount }));
+    }
+    if (errorCount > 0) {
+      handleError(new Error(`${errorCount} items failed to delete`), t('actions.bulk_delete'));
+    }
+
+    setBulkDeleteDialogOpen(false);
+    setSelectedRows([]);
   };
   
   const handleAddNew = () => {
@@ -207,7 +256,19 @@ export const CourseList = () => {
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('course')}</Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('course')}</Button>
+              {selectedRows.length > 0 && (
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={handleBulkDelete}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {t('actions.delete')} ({selectedRows.length})
+                </Button>
+              )}
+            </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 placeholder={t('search.placeholder_courses')}
@@ -230,9 +291,11 @@ export const CourseList = () => {
                   }}
                 >
                   <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value="active">{t('common.active')}</MenuItem>
-                  <MenuItem value="completed">{t('course_status.completed')}</MenuItem>
-                  <MenuItem value="cancelled">{t('course_status.cancelled')}</MenuItem>
+                  <MenuItem value={ActivityStatus.DRAFT}>{t('course_status.draft')}</MenuItem>
+                  <MenuItem value={ActivityStatus.PUBLISHED}>{t('course_status.published')}</MenuItem>
+                  <MenuItem value={ActivityStatus.ONGOING}>{t('course_status.ongoing')}</MenuItem>
+                  <MenuItem value={ActivityStatus.COMPLETED}>{t('course_status.completed')}</MenuItem>
+                  <MenuItem value={ActivityStatus.CANCELLED}>{t('course_status.cancelled')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -245,6 +308,10 @@ export const CourseList = () => {
                 disableRowSelectionOnClick
                 pageSizeOptions={[5, 10, 25, 50]}
                 sx={{ border: 'none' }}
+                onRowSelectionModelChange={(newSelectionModel) => {
+                  setSelectedRows(newSelectionModel as string[]);
+                }}
+                rowSelectionModel={selectedRows}
             />
         </Box>
       </Box>
@@ -254,6 +321,13 @@ export const CourseList = () => {
         onConfirm={confirmDelete}
         title={`${t('actions.delete')} ${t('course')}`}
         description={t('messages.confirm_delete')}
+      />
+      <ConfirmationDialog
+        open={bulkDeleteDialogOpen}
+        onClose={() => setBulkDeleteDialogOpen(false)}
+        onConfirm={confirmBulkDelete}
+        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('courses')}`}
+        description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
       <CourseModal 
         open={isModalOpen}

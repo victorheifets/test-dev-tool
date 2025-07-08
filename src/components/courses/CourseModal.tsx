@@ -24,21 +24,33 @@ interface CourseModalProps {
   mode: 'create' | 'edit' | 'duplicate';
 }
 
-const ACTIVITY_STATUSES: ActivityStatus[] = ['draft', 'published', 'ongoing', 'completed', 'cancelled'];
-const ACTIVITY_TYPES: ActivityType[] = ['course', 'workshop', 'seminar', 'webinar', 'other'];
+const ACTIVITY_STATUSES: ActivityStatus[] = [
+  ActivityStatus.DRAFT, 
+  ActivityStatus.PUBLISHED, 
+  ActivityStatus.ONGOING, 
+  ActivityStatus.COMPLETED, 
+  ActivityStatus.CANCELLED
+];
+const ACTIVITY_TYPES: ActivityType[] = [
+  ActivityType.COURSE, 
+  ActivityType.WORKSHOP, 
+  ActivityType.SEMINAR, 
+  ActivityType.WEBINAR, 
+  ActivityType.OTHER
+];
 
 const emptyActivity: ActivityCreate = {
   name: '',
-  description: null,
-  capacity: null,
-  start_date: null,
-  end_date: null,
-  location: null,
-  activity_type: 'course' as ActivityType,
-  status: 'draft' as ActivityStatus,
-  price: null,
+  description: undefined,
+  capacity: undefined,
+  start_date: undefined,
+  end_date: undefined,
+  location: undefined,
+  activity_type: ActivityType.COURSE,
+  status: ActivityStatus.DRAFT,
+  price: undefined,
   currency: 'USD',
-  category: null,
+  category: undefined,
 };
 
 export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave, initialData, mode }) => {

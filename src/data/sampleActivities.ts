@@ -1,4 +1,4 @@
-import { Activity } from '../types/activity';
+import { Activity, ActivityStatus, ActivityType } from '../types/activity';
 
 export const sampleActivities: Activity[] = [
   {
@@ -12,28 +12,15 @@ export const sampleActivities: Activity[] = [
     capacity: 25,
     start_date: '2025-08-15',
     end_date: '2025-08-17',
-    status: 'published',
-    sessions: [],
-    pricing: {
-      amount: 149.99,
-      currency: 'USD',
-      description: 'Early bird pricing'
-    },
+    status: ActivityStatus.PUBLISHED,
     location: 'Online',
-    tags: ['react', 'javascript', 'frontend'],
+    activity_type: ActivityType.COURSE,
+    price: 149.99,
+    currency: 'USD',
     category: 'Web Development',
-    activity_type: 'course',
-    level: 'beginner',
-    featured: true,
-    min_participants: 5,
-    max_participants: 25,
-    materials_included: ['Course materials', 'Practice projects'],
-    learning_outcomes: ['Build React components', 'Understand state management', 'Create interactive UIs'],
     enrollments_count: 18,
     available_spots: 7,
-    is_fully_booked: false,
-    reviews_count: 12,
-    rating: 4.8
+    is_fully_booked: false
   },
   {
     id: '2',
@@ -46,27 +33,14 @@ export const sampleActivities: Activity[] = [
     capacity: 15,
     start_date: '2025-09-01',
     end_date: '2025-09-05',
-    status: 'ongoing',
-    sessions: [],
-    pricing: {
-      amount: 299.99,
-      currency: 'USD',
-      description: 'Professional development'
-    },
+    status: ActivityStatus.ONGOING,
     location: 'Hybrid',
-    tags: ['python', 'advanced', 'programming'],
+    activity_type: ActivityType.WORKSHOP,
+    price: 299.99,
+    currency: 'USD',
     category: 'Software Development',
-    activity_type: 'workshop',
-    level: 'advanced',
-    featured: false,
-    min_participants: 8,
-    max_participants: 15,
-    materials_included: ['Advanced coding exercises', 'Performance profiling tools'],
-    learning_outcomes: ['Master advanced Python features', 'Optimize code performance', 'Build scalable applications'],
     enrollments_count: 12,
     available_spots: 3,
-    is_fully_booked: false,
-    reviews_count: 8,
-    rating: 4.9
+    is_fully_booked: false
   }
 ];
