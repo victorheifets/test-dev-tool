@@ -1,0 +1,144 @@
+npm warn Unknown project config "strict-peer-dependencies". This will stop working in the next major version of npm.
+
+> test-dev-tool@0.1.0 dev
+> refine dev
+
+╭──────────────────────────────────────────────────────────────────────────────╮│                                                                              ││   Refine AI is out! Create Refine projects end-to-end with Refine AI, now    ││   with ShadCN support. https://s.refine.dev/refine-ai                        ││                                                                              │╰──────────────────────────────────────────────────────────────────────────────╯
+
+                                Update Available                                
+
+- Current: The version of the package that is currently installed
+- Wanted: The maximum version of the package that satisfies the semver range specified in `package.json`
+- Latest: The latest version of the package available on npm
+[90m┌────────────────────────────[39m[90m┬─────────[39m[90m┬─────────[39m[90m┬─────────[39m[90m┬───────────────────┐[39m
+[90m│[39m[34m name                       [39m[90m│[39m[34m current [39m[90m│[39m[34m wanted  [39m[90m│[39m[34m latest  [39m[90m│[39m[34m changelog         [39m[90m│[39m
+[90m├────────────────────────────[39m[90m┼─────────[39m[90m┼─────────[39m[90m┼─────────[39m[90m┼───────────────────┤[39m
+[90m│[39m @refinedev/core            [90m│[39m 4.57.9  [90m│[39m 4.57.10 [90m│[39m 4.57.10 [90m│[39m https://c.refine… [90m│[39m
+[90m├────────────────────────────[39m[90m┼─────────[39m[90m┼─────────[39m[90m┼─────────[39m[90m┼───────────────────┤[39m
+[90m│[39m @refinedev/mui             [90m│[39m 6.2.1   [90m│[39m 6.2.2   [90m│[39m 6.2.2   [90m│[39m https://c.refine… [90m│[39m
+[90m├────────────────────────────[2m5:26:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtest-logout.html[22m
+9m[90m┼───────────────────┤[39m
+[90m│[39m @refinedev/react-hook-form [90m│[39m 4.10.1  [90m│[39m 4.10.2  [90m│[39m 4.10.2  [90m│[39m https://c.refine… [90m│[39m
+[90m└────────────────────────────[39m[90m┴─────────[39m[90m┴─────────[39m[90m┴─────────[39m[90m┴───────────────────┘[39m
+                To update `Refine` packages with wanted version                
+- Getting package manager...
+                Run the following command: npm run refine update               
+
+
+
+
+✓ Refine Devtools is running at port 5001
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+Port 5175 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.0.2[39m  [2mready in [0m[1m2114[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5176[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m5:26:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtest-logout.html[22m
+[2m6:41:07 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m6[2m11:24:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33m@mui/icons-material/Message, @mui/icons-material/Logout, @mui/material/Typography, @mui/material/Divider, @mui/material/ListItemIcon, @mui/material/Dialog, @mui/material/DialogActions, @mui/material/DialogContent, @mui/material/DialogContentText, @mui/material/DialogTitle, @mui/material/Button, @mui/icons-material/SupervisorAccount, @mui/icons-material/AdminPanelSettings[32m[39m
+[2m11:24:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+rc/pages/messaging/index.tsx[39m:21:7
+[33m  35 |    DatePicker,
+  36 |    Switch
+  37 |  } from "antd";
+     |          ^
+  38 |  import {
+  39 |    MessageOutlined,[39m
+      at TransformPluginContext._formatLog (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31420:43)
+      at TransformPluginContext.error (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31417:14)
+      at normalizeUrl (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29966:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:30024:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29992:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31234:14)
+      at async loadAndTransform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:26408:26)
+[2m6:54:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "antd" from "src/pages/messaging/index.tsx". Does the file exist?
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/src/pages/messaging/index.tsx[39m:21:7
+[33m  35 |    DatePicker,
+  36 |    Switch
+  37 |  } from "antd";
+     |          ^
+  38 |  import {
+  39 |    MessageOutlined,[39m
+[2m6:54:17 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "antd" from "src/pages/messaging/index.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/src/pages/messaging/index.tsx[39m:21:7
+[33m  35 |    DatePicker,
+  36 |    Switch
+  37 |  } from "antd";
+     |          ^
+  38 |  import {
+  39 |    MessageOutlined,[39m
+      at TransformPluginContext._formatLog (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31420:43)
+      at TransformPluginContext.error (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31417:14)
+      at normalizeUrl (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29966:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:30024:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29992:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31234:14)
+      at async loadAndTransform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:26408:26)
+      at async viteTransformMiddleware (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:27493:20)
+[2m6:54:17 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "antd" from "src/pages/messaging/index.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/src/pages/messaging/index.tsx[39m:21:7
+[33m  35 |    DatePicker,
+  36 |    Switch
+  37 |  } from "antd";
+     |          ^
+  38 |  import {
+  39 |    MessageOutlined,[39m
+      at TransformPluginContext._formatLog (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31420:43)
+      at TransformPluginContext.error (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31417:14)
+      at normalizeUrl (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29966:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:30024:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29992:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31234:14)
+      at async loadAndTransform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:26408:26)
+      at async viteTransformMiddleware (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:27493:20)
+[2m6:54:17 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "antd" from "src/pages/messaging/index.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/src/pages/messaging/index.tsx[39m:21:7
+[33m  35 |    DatePicker,
+  36 |    Switch
+  37 |  } from "antd";
+     |          ^
+  38 |  import {
+  39 |    MessageOutlined,[39m
+      at TransformPluginContext._formatLog (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31420:43)
+      at TransformPluginContext.error (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31417:14)
+      at normalizeUrl (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29966:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:30024:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:29992:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:31234:14)
+      at async loadAndTransform (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:26408:26)
+      at async viteTransformMiddleware (file:///Users/heifets/Desktop/MSD/PRIVATE/Development/test-dev-tool/node_modules/vite/dist/node/chunks/dep-CXCa-anf.js:27493:20)
+[2m6:56:27 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33m@mui/icons-material/Message[32m[39m
+[2m6:56:27 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m6:59:36 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m7:17:44 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m7:18:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m7:19:28 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:37:55 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:38:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:39:31 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:39:58 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:40:12 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:41:49 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:48:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:48:54 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:49:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:50:49 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:53:21 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m11:20:08 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/login.tsx[22m
+[2m11:20:35 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/login.tsx[22m

@@ -1,3 +1,6 @@
+**Status**: CRITICAL SECURITY DOCUMENT | **Location**: Moved from root | **Last Updated**: July 10, 2025
+**ACTION REQUIRED**: Contains CVSS 9.8 vulnerabilities requiring immediate fixes
+---
 # Test-Dev-Tool Client Application - Comprehensive Evaluation
 
 ## Executive Summary

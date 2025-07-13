@@ -80,6 +80,7 @@
     "settings": "Settings",
     "apps_pages": "APPS & PAGES",
     "marketing": "MARKETING",
+    "messaging": "SMS Messaging",
     "landing_pages": "Landing Pages"
   },
   
@@ -205,5 +206,48 @@
     "quick_actions": "Quick Actions",
     "schedule_event": "Schedule Event",
     "send_alert": "Send Alert"
+  },
+
+  "messaging": {
+    "title": "SMS Messaging",
+    "send_message": "Send Message",
+    "message_history": "Message History",
+    "recipient_type": "Recipient Type",
+    "recipients": "Recipients",
+    "message_content": "Message Content",
+    "enter_message": "Enter your SMS message...",
+    "preview_send": "Preview & Send",
+    "preview_message": "Preview Message",
+    "message_details": "Message Details",
+    "character_count": "Character Count",
+    "sms_count": "SMS Count",
+    "message_preview": "Message Preview",
+    "individual": "Individual",
+    "group": "Group (Role-based)",
+    "course_participants": "Course Participants",
+    "participants": "participants",
+    "message": "Message",
+    "type": "Type",
+    "target": "Target",
+    "status": "Status",
+    "sent_at": "Sent At",
+    "no_messages": "No messages found",
+    "multiple_sms_warning": "This will be sent as {{count}} SMS messages",
+    "multiple_sms_cost_warning": "⚠️ This message will be sent as {{count}} SMS messages due to length.",
+    "select_recipients": "Select Recipients",
+    "selected": "selected",
+    "search_recipients": "Search recipients...",
+    "role_based_group": "Role-based group",
+    "stats": {
+      "sent_this_month": "Sent This Month",
+      "remaining_sms": "Remaining SMS",
+      "delivery_rate": "Delivery Rate",
+      "failed_this_month": "Failed This Month"
+    },
+    "groups": {
+      "admins": "All Admins",
+      "managers": "All Managers", 
+      "users": "All Users"
+    }
   }
 } 

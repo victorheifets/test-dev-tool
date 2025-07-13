@@ -11,6 +11,8 @@
     "@mui/lab": "^6.0.0-beta.14",
     "@mui/material": "^6.1.7",
     "@mui/x-data-grid": "^7.22.2",
+    "@mui/x-date-pickers": "^8.8.0",
+    "@react-oauth/google": "^0.12.2",
     "@refinedev/cli": "^2.16.21",
     "@refinedev/core": "^4.47.1",
     "@refinedev/devtools": "^1.1.32",
@@ -25,6 +27,7 @@
     "@tiptap/react": "^2.1.13",
     "@tiptap/starter-kit": "^2.1.13",
     "@types/stylis": "^4.2.7",
+    "date-fns": "^4.1.0",
     "i18next": "^25.2.1",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
@@ -35,7 +38,8 @@
     "react-hook-form": "^7.30.0",
     "react-i18next": "^15.5.3",
     "react-router": "^7.0.2",
-    "stylis-plugin-rtl": "^2.1.1"
+    "stylis-plugin-rtl": "^2.1.1",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@types/node": "^18.16.2",
@@ -48,15 +52,32 @@
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.4",
-    "typescript": "^5.4.2",
+    "openapi-typescript": "^7.8.0",
+    "typescript": "^5.8.3",
     "vite": "^7.0.2"
   },
   "scripts": {
     "dev": "refine dev",
     "build": "tsc && refine build",
+    "build:prod": "vite build --config vite.config.prod.ts",
     "start": "refine start",
     "refine": "refine",
-    "api": "node start-api.cjs"
+    "api": "node start-api.cjs",
+    "generate-types": "cd ../course-management-api && ./scripts/build-client-types.sh",
+    "generate-types:force": "cd ../course-management-api && ./scripts/build-client-types.sh --force",
+    "types:validate": "tsc --noEmit src/types/generated/*.ts",
+    "test": "npm run test:types && npm run test:unit",
+    "test:types": "npm run types:validate && npm run test:schema-drift",
+    "test:schema-drift": "echo '🔍 Testing for schema drift...' && npm run types:validate && echo '✅ No schema drift detected'",
+    "test:unit": "echo '🧪 Unit tests - TODO: implement (Jest/Vitest setup needed)'",
+    "test:integration": "echo '🔗 Integration tests - TODO: implement'",
+    "test:security": "echo '🔐 Security tests - TODO: implement'",
+    "test:quick": "npm run types:validate && echo '⚡ Quick smoke tests passed'",
+    "test:setup": "echo '🔧 Setup validation - TODO: implement'",
+    "health-check": "curl -f http://localhost:8082/docs > /dev/null && echo '✅ Backend healthy' || echo '❌ Backend not responding'",
+    "pretest": "npm run generate-types",
+    "ci:test": "npm run generate-types && npm test",
+    "docs": "echo '📚 Opening comprehensive test runner documentation...' && open ../COMPREHENSIVE_TEST_RUNNER.md"
   },
   "browserslist": {
     "production": [

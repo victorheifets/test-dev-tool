@@ -1,13 +1,24 @@
 import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
 import Language from "@mui/icons-material/Language";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import { useGetIdentity } from "@refinedev/core";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
+import { useGetIdentity, useLogout } from "@refinedev/core";
 import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,8 +26,10 @@ import { ThemeContext } from "../../contexts/color-mode";
 import { Menu, MenuItem } from "@mui/material";
 
 type IUser = {
-  id: number;
+  id: string;
   name: string;
+  email: string;
+  role: string;
   avatar: string;
 };
 
@@ -26,19 +39,46 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { mode, setMode } = useContext(ThemeContext);
   const { i18n } = useTranslation();
   const { data: user } = useGetIdentity<IUser>();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { mutate: logout } = useLogout();
+  
+  // Separate state for language and user menus
+  const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
+  const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleLanguageClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setLanguageAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleUserClick = (event: React.MouseEvent<HTMLElement>) => {
+    setUserAnchorEl(event.currentTarget);
+  };
+
+  const handleLanguageClose = () => {
+    setLanguageAnchorEl(null);
+  };
+
+  const handleUserClose = () => {
+    setUserAnchorEl(null);
   };
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
-    handleClose();
+    handleLanguageClose();
+  };
+
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
+    handleUserClose();
+  };
+
+  const handleLogoutConfirm = () => {
+    logout();
+    setLogoutDialogOpen(false);
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
   };
 
   return (
@@ -51,7 +91,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             color="inherit"
             aria-controls="language-menu"
             aria-haspopup="true"
-            onClick={handleClick}
+            onClick={handleLanguageClick}
             sx={(theme) => ({
               mx: 0.5,
               '& .MuiSvgIcon-root': {
@@ -63,9 +103,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
           </IconButton>
           <Menu
             id="language-menu"
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
+            anchorEl={languageAnchorEl}
+            open={Boolean(languageAnchorEl)}
+            onClose={handleLanguageClose}
           >
             <MenuItem onClick={() => changeLanguage("en")}>
               🇺🇸 {i18n.t("common.english")}
@@ -77,9 +117,111 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
           <IconButton color="inherit" onClick={setMode} sx={{ mx: 0.5 }}>
             {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
           </IconButton>
-          <Avatar src={user?.avatar} alt={user?.name} sx={(theme) => ({
-            [theme.direction === 'rtl' ? 'mr' : 'ml']: 1
-          })} />
+          
+          {/* User Avatar with Menu */}
+          <IconButton 
+            onClick={handleUserClick}
+            size="small"
+            sx={{ ml: 2 }}
+            aria-controls="user-menu"
+            aria-haspopup="true"
+          >
+            <Avatar 
+              src={user?.avatar} 
+              alt={user?.name}
+              sx={{ 
+                width: 32, 
+                height: 32,
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8
+                }
+              }}
+            />
+          </IconButton>
+          
+          {/* User Menu */}
+          <Menu
+            id="user-menu"
+            anchorEl={userAnchorEl}
+            open={Boolean(userAnchorEl)}
+            onClose={handleUserClose}
+            PaperProps={{
+              elevation: 3,
+              sx: {
+                minWidth: 200,
+                '& .MuiAvatar-root': {
+                  width: 32,
+                  height: 32,
+                  ml: -0.5,
+                  mr: 1,
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          >
+            {/* User Info */}
+            <MenuItem disabled>
+              <Avatar src={user?.avatar} alt={user?.name} />
+              <Box>
+                <Typography variant="subtitle2" noWrap>
+                  {user?.name || 'User'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  {user?.email || 'No email'}
+                </Typography>
+                {user?.role && (
+                  <Typography variant="caption" color="primary" noWrap sx={{ display: 'block' }}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </Typography>
+                )}
+              </Box>
+            </MenuItem>
+            
+            <Divider />
+            
+            {/* Profile Option */}
+            <MenuItem onClick={handleUserClose}>
+              <ListItemIcon>
+                <PersonIcon fontSize="small" />
+              </ListItemIcon>
+              Profile
+            </MenuItem>
+            
+            {/* Logout Option */}
+            <MenuItem onClick={handleLogoutClick}>
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+
+          {/* Logout Confirmation Dialog */}
+          <Dialog
+            open={logoutDialogOpen}
+            onClose={handleLogoutCancel}
+            aria-labelledby="logout-dialog-title"
+            aria-describedby="logout-dialog-description"
+          >
+            <DialogTitle id="logout-dialog-title">
+              Confirm Logout
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="logout-dialog-description">
+                Are you sure you want to logout? You will need to sign in again to access the application.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleLogoutCancel} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleLogoutConfirm} color="primary" variant="contained" autoFocus>
+                Logout
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Stack>
       </Toolbar>
     </AppBar>

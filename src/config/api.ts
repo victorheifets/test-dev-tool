@@ -13,13 +13,13 @@ export const API_CONFIG = {
   // Base API URL - different for development and production
   baseURL: isDevelopment 
     ? 'http://localhost:8082/api' 
-    : process.env.VITE_API_URL || 'https://api.coursemanagement.com/api',
+    : 'https://im7swzql6i.execute-api.eu-west-1.amazonaws.com/prod/api',
   
   // API timeout in milliseconds
   timeout: 10000,
   
   // Provider ID for development (will be replaced with JWT token data)
-  defaultProviderId: getProviderId(),
+  defaultProviderId: 'af333f3e-1007-424c-93d5-4dfde7407674',
   
   // API endpoints
   endpoints: {
@@ -74,3 +74,4 @@ export const getAuthHeaders = (): Record<string, string> => {
 
   return headers;
 };
+

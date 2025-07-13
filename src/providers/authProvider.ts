@@ -15,6 +15,10 @@ interface LoginParams {
   password: string;
 }
 
+interface GoogleLoginParams {
+  google_token: string;
+}
+
 interface UserInfo {
   user_id: string;
   email: string;
@@ -28,11 +32,19 @@ interface LoginResponse {
   refresh_token: string;
   token_type: string;
   expires_in: number;
+  user?: UserInfo;
 }
 
 export const authProvider: AuthProvider = {
-  // Login method
-  login: async ({ email, password }: LoginParams) => {
+  // Login method - supports both email/password and Google auth
+  login: async (params: LoginParams | GoogleLoginParams) => {
+    // Check if this is Google authentication
+    if ('google_token' in params) {
+      return await loginWithGoogle(params);
+    }
+    
+    // Regular email/password login
+    const { email, password } = params as LoginParams;
     try {
       console.log("[Auth] Attempting login for:", email);
       
@@ -139,13 +151,6 @@ export const authProvider: AuthProvider = {
 
   // Check authentication status
   check: async () => {
-    // For development, bypass authentication
-    if (process.env.NODE_ENV === 'development') {
-      console.log("[Auth] Development mode - bypassing authentication");
-      return {
-        authenticated: true,
-      };
-    }
     
     const token = localStorage.getItem(TOKEN_KEY);
     
@@ -211,16 +216,6 @@ export const authProvider: AuthProvider = {
 
   // Get user identity
   getIdentity: async () => {
-    // For development, return a mock user
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        id: 'dev-user-123',
-        name: 'Development User',
-        email: 'dev@example.com',
-        role: 'admin',
-        avatar: 'https://ui-avatars.com/api/?name=Development+User&background=1976d2&color=fff',
-      };
-    }
     
     try {
       const userInfo = localStorage.getItem(USER_KEY);
@@ -287,6 +282,61 @@ export const authProvider: AuthProvider = {
     return {};
   },
 };
+
+// Google authentication function
+async function loginWithGoogle(params: GoogleLoginParams) {
+  try {
+    console.log("[Auth] Attempting Google login");
+    
+    const response = await fetch(`${API_CONFIG.baseURL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ google_token: params.google_token }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = errorData.message || errorData.detail || "Google login failed";
+      console.error("[Auth] Google login failed:", errorMessage);
+      return {
+        success: false,
+        error: {
+          message: errorMessage,
+          name: "GoogleLoginError",
+        },
+      };
+    }
+
+    const data: LoginResponse = await response.json();
+    console.log("[Auth] Google login successful");
+
+    // Store tokens
+    localStorage.setItem(TOKEN_KEY, data.access_token);
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token);
+
+    // Store user info from response
+    if (data.user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      console.log("[Auth] Google user info stored:", data.user);
+    }
+
+    return {
+      success: true,
+      redirectTo: "/dashboard",
+    };
+  } catch (error) {
+    console.error("[Auth] Google login error:", error);
+    return {
+      success: false,
+      error: {
+        message: "Network error during Google login",
+        name: "NetworkError",
+      },
+    };
+  }
+}
 
 // Helper function to refresh access token
 async function refreshAccessToken(): Promise<boolean> {
