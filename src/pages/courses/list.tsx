@@ -344,7 +344,6 @@ export const CourseList = () => {
               values: activityData,
             }, {
               onSuccess: () => {
-                showSuccess(t('messages.course_created'));
                 setIsModalOpen(false);
                 setModalInitialData(null);
                 // Just close modal - let auto-refresh handle it
@@ -361,7 +360,6 @@ export const CourseList = () => {
               values: activityData,
             }, {
               onSuccess: () => {
-                showSuccess(t('messages.course_updated'));
                 setIsModalOpen(false);
                 setModalInitialData(null);
                 // Just close modal - let auto-refresh handle it

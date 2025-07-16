@@ -205,5 +205,109 @@
     "quick_actions": "פעולות מהירות",
     "schedule_event": "תזמן אירוע",
     "send_alert": "שלח התראה"
+  },
+
+  "landing_pages": {
+    "title": "דפי נחיתה",
+    "create_new": "צור דף חדש",
+    "template": "תבנית",
+    "theme": "ערכת נושא",
+    "rtl_layout": "פריסה RTL",
+    "preview": "תצוגה מקדימה",
+    "save": "שמור",
+    "publish": "פרסם",
+    "download_html": "הורד HTML",
+    "back_to_list": "חזור לרשימה",
+    "edit": "ערוך",
+    "visit": "בקר",
+    "duplicate": "שכפל",
+    "delete": "מחק",
+    "swimming_lessons": "שיעורי שחייה",
+    "yoga_wellness": "יוגה ובריאות",
+    "fitness_center": "מכון כושר",
+    "dance_studio": "אולפן ריקוד",
+    "martial_arts": "אומנויות לחימה",
+    "views": "צפיות",
+    "edit_page": "ערוך דף",
+    "delete_page_title": "מחק דף נחיתה",
+    "forms": {
+      "full_name": "שם מלא",
+      "your_name": "השם שלך",
+      "email": "אימייל",
+      "email_address": "כתובת אימייל",
+      "phone": "טלפון",
+      "phone_number": "מספר טלפון",
+      "message": "הודעה",
+      "fitness_goals": "מטרות כושר",
+      "yoga_experience": "ספר לנו על הניסיון שלך ביוגה",
+      "submit": "שלח",
+      "contact_us": "צור קשר"
+    }
+  },
+
+  "templates": {
+    "swimming": {
+      "expert_instructors": "מדריכים מומחים",
+      "safety_first": "בטיחות קודם כל",
+      "flexible_schedule": "לוח זמנים גמיש"
+    },
+    "yoga": {
+      "mindfulness": "מיינדפולנס",
+      "flexibility": "גמישות",
+      "inner_peace": "שלווה פנימית"
+    },
+    "gym": {
+      "expert_trainers": "מאמנים מומחים",
+      "premium_equipment": "ציוד מתקדם",
+      "personal_training": "אימון אישי"
+    },
+    "dance": {
+      "all_music_styles": "כל סגנונות המוזיקה",
+      "professional_instructors": "מדריכים מקצועיים",
+      "fun_environment": "סביבה כיפית"
+    },
+    "martial_arts": {
+      "self_defense": "הגנה עצמית",
+      "mental_discipline": "משמעת נפשית",
+      "physical_fitness": "כושר גופני"
+    }
+  },
+
+  "buttons": {
+    "save_changes": "שמור שינויים",
+    "cancel": "בטל",
+    "back": "חזור",
+    "next": "הבא",
+    "finish": "סיים",
+    "send": "שלח",
+    "clear": "נקה",
+    "refresh": "רענן",
+    "preview": "תצוגה מקדימה",
+    "publish": "פרסם",
+    "save": "שמור",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "view": "צפה",
+    "explore": "חקור",
+    "my_learning": "הלמידה שלי",
+    "undo": "בטל",
+    "redo": "בצע שוב"
+  },
+
+  "login": {
+    "title": "מנהל קורסים",
+    "welcome": "ברוך הבא! אנא התחבר כדי להמשיך",
+    "or": "או",
+    "demo_accounts": "חשבונות הדגמה",
+    "admin": "מנהל",
+    "manager": "מנהל",
+    "user": "משתמש",
+    "google_signin_tip": "💡 עבור התחברות Google: השתמש בכל אחת מכתובות האימייל הללו עם חשבון Google שלך"
+  },
+
+  "header": {
+    "profile": "פרופיל",
+    "logout": "התנתק",
+    "confirm_logout": "אשר התנתקות"
   }
 }

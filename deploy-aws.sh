@@ -6,7 +6,7 @@ set -e
 # Configuration
 BUCKET_NAME="course-management-frontend-$(date +%s)"
 REGION="eu-west-1"
-API_URL="https://im7swzql6i.execute-api.eu-west-1.amazonaws.com/prod"
+API_URL="https://lph40ds6v8.execute-api.eu-west-1.amazonaws.com/prod"
 
 echo "🚀 Deploying frontend to AWS..."
 

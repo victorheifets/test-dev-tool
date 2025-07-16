@@ -79,9 +79,7 @@
     "providers": "Providers",
     "settings": "Settings",
     "apps_pages": "APPS & PAGES",
-    "marketing": "MARKETING",
-    "messaging": "SMS Messaging",
-    "landing_pages": "Landing Pages"
+    "marketing": "MARKETING"
   },
   
   "common": {
@@ -208,46 +206,107 @@
     "send_alert": "Send Alert"
   },
 
-  "messaging": {
-    "title": "SMS Messaging",
-    "send_message": "Send Message",
-    "message_history": "Message History",
-    "recipient_type": "Recipient Type",
-    "recipients": "Recipients",
-    "message_content": "Message Content",
-    "enter_message": "Enter your SMS message...",
-    "preview_send": "Preview & Send",
-    "preview_message": "Preview Message",
-    "message_details": "Message Details",
-    "character_count": "Character Count",
-    "sms_count": "SMS Count",
-    "message_preview": "Message Preview",
-    "individual": "Individual",
-    "group": "Group (Role-based)",
-    "course_participants": "Course Participants",
-    "participants": "participants",
-    "message": "Message",
-    "type": "Type",
-    "target": "Target",
-    "status": "Status",
-    "sent_at": "Sent At",
-    "no_messages": "No messages found",
-    "multiple_sms_warning": "This will be sent as {{count}} SMS messages",
-    "multiple_sms_cost_warning": "⚠️ This message will be sent as {{count}} SMS messages due to length.",
-    "select_recipients": "Select Recipients",
-    "selected": "selected",
-    "search_recipients": "Search recipients...",
-    "role_based_group": "Role-based group",
-    "stats": {
-      "sent_this_month": "Sent This Month",
-      "remaining_sms": "Remaining SMS",
-      "delivery_rate": "Delivery Rate",
-      "failed_this_month": "Failed This Month"
-    },
-    "groups": {
-      "admins": "All Admins",
-      "managers": "All Managers", 
-      "users": "All Users"
+  "landing_pages": {
+    "title": "Landing Pages",
+    "create_new": "Create New Page",
+    "template": "Template",
+    "theme": "Theme",
+    "rtl_layout": "RTL Layout",
+    "preview": "Preview",
+    "save": "Save",
+    "publish": "Publish",
+    "download_html": "Download HTML",
+    "back_to_list": "Back to List",
+    "edit": "Edit",
+    "visit": "Visit",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "swimming_lessons": "Swimming Lessons",
+    "yoga_wellness": "Yoga & Wellness",
+    "fitness_center": "Fitness Center",
+    "dance_studio": "Dance Studio",
+    "martial_arts": "Martial Arts",
+    "views": "Views",
+    "edit_page": "Edit Page",
+    "delete_page_title": "Delete Landing Page",
+    "forms": {
+      "full_name": "Full Name",
+      "your_name": "Your Name",
+      "email": "Email",
+      "email_address": "Email Address",
+      "phone": "Phone",
+      "phone_number": "Phone Number",
+      "message": "Message",
+      "fitness_goals": "Fitness Goals",
+      "yoga_experience": "Tell us about your yoga experience",
+      "submit": "Submit",
+      "contact_us": "Contact Us"
     }
+  },
+
+  "templates": {
+    "swimming": {
+      "expert_instructors": "Expert Instructors",
+      "safety_first": "Safety First",
+      "flexible_schedule": "Flexible Schedule"
+    },
+    "yoga": {
+      "mindfulness": "Mindfulness",
+      "flexibility": "Flexibility",
+      "inner_peace": "Inner Peace"
+    },
+    "gym": {
+      "expert_trainers": "Expert Trainers",
+      "premium_equipment": "Premium Equipment",
+      "personal_training": "Personal Training"
+    },
+    "dance": {
+      "all_music_styles": "All Music Styles",
+      "professional_instructors": "Professional Instructors",
+      "fun_environment": "Fun Environment"
+    },
+    "martial_arts": {
+      "self_defense": "Self Defense",
+      "mental_discipline": "Mental Discipline",
+      "physical_fitness": "Physical Fitness"
+    }
+  },
+
+  "buttons": {
+    "save_changes": "Save Changes",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "send": "Send",
+    "clear": "Clear",
+    "refresh": "Refresh",
+    "preview": "Preview",
+    "publish": "Publish",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "explore": "Explore",
+    "my_learning": "My Learning",
+    "undo": "Undo",
+    "redo": "Redo"
+  },
+
+  "login": {
+    "title": "Course Manager",
+    "welcome": "Welcome back! Please sign in to continue",
+    "or": "OR",
+    "demo_accounts": "Demo Accounts",
+    "admin": "Admin",
+    "manager": "Manager",
+    "user": "User",
+    "google_signin_tip": "💡 For Google Sign-In: Use any of these email addresses with your Google account"
+  },
+
+  "header": {
+    "profile": "Profile",
+    "logout": "Logout",
+    "confirm_logout": "Confirm Logout"
   }
 } 

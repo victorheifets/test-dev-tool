@@ -37,7 +37,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   sticky = true,
 }) => {
   const { mode, setMode } = useContext(ThemeContext);
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
   
@@ -186,7 +186,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
               <ListItemIcon>
                 <PersonIcon fontSize="small" />
               </ListItemIcon>
-              Profile
+              {t('header.profile')}
             </MenuItem>
             
             {/* Logout Option */}
@@ -194,7 +194,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
               <ListItemIcon>
                 <LogoutIcon fontSize="small" />
               </ListItemIcon>
-              Logout
+              {t('header.logout')}
             </MenuItem>
           </Menu>
 
@@ -206,7 +206,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             aria-describedby="logout-dialog-description"
           >
             <DialogTitle id="logout-dialog-title">
-              Confirm Logout
+              {t('header.confirm_logout')}
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="logout-dialog-description">
@@ -215,10 +215,10 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             </DialogContent>
             <DialogActions>
               <Button onClick={handleLogoutCancel} color="primary">
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button onClick={handleLogoutConfirm} color="primary" variant="contained" autoFocus>
-                Logout
+                {t('header.logout')}
               </Button>
             </DialogActions>
           </Dialog>
