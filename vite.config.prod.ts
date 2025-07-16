@@ -19,7 +19,7 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': '"production"',
-    'process.env.VITE_API_URL': '"https://im7swzql6i.execute-api.eu-west-1.amazonaws.com/prod"'
+    'process.env.VITE_API_URL': '"https://lph40ds6v8.execute-api.eu-west-1.amazonaws.com/prod"'
   },
   base: '/',
   server: {
