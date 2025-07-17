@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { useLogin } from '@refinedev/core';
-import { API_CONFIG } from '../../config/api';
-
-interface GoogleConfig {
-  google_enabled: boolean;
-  client_id: string | null;
-}
+import { useTranslation } from 'react-i18next';
 
 interface GoogleSignInProps {
   onSuccess?: () => void;
@@ -18,38 +13,17 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
   onSuccess, 
   onError 
 }) => {
-  const [googleConfig, setGoogleConfig] = useState<GoogleConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
   const { mutate: login } = useLogin();
 
-  useEffect(() => {
-    // Fetch Google configuration from backend
-    const fetchGoogleConfig = async () => {
-      try {
-        const response = await fetch(`${API_CONFIG.baseURL}/auth/google/config`);
-        if (response.ok) {
-          const config = await response.json();
-          setGoogleConfig(config);
-        } else {
-          setError('Failed to load Google authentication configuration');
-        }
-      } catch (err) {
-        setError('Failed to connect to authentication service');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGoogleConfig();
-  }, []);
+  // Use environment variable or fallback to a demo client ID
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-google-client-id-here';
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     const googleToken = credentialResponse.credential;
     
     if (!googleToken) {
-      const errorMsg = 'No Google token received';
-      setError(errorMsg);
+      const errorMsg = t('auth.errors.no_google_token');
       onError?.(errorMsg);
       return;
     }
@@ -63,9 +37,8 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
           onSuccess?.();
         },
         onError: (error: any) => {
-          const errorMsg = error?.message || error?.detail || 'Google login failed';
+          const errorMsg = error?.message || error?.detail || t('auth.errors.google_login_failed');
           console.error('Google login failed:', errorMsg);
-          setError(errorMsg);
           onError?.(errorMsg);
         },
       }
@@ -73,43 +46,24 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
   };
 
   const handleGoogleError = () => {
-    const errorMsg = 'Google Sign-In failed';
-    setError(errorMsg);
+    const errorMsg = t('auth.errors.google_signin_failed');
     onError?.(errorMsg);
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={2}>
-        <CircularProgress size={20} />
-        <Typography variant="body2" sx={{ ml: 1 }}>
-          Loading Google Sign-In...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert severity="error" sx={{ mt: 1 }}>
-        {error}
-      </Alert>
-    );
-  }
-
-  if (!googleConfig?.google_enabled || !googleConfig?.client_id) {
+  // Check if Google Client ID is properly configured
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     return (
       <Alert severity="info" sx={{ mt: 1 }}>
-        Google Sign-In is not configured
+        {t('auth.errors.google_client_id_missing')}
       </Alert>
     );
   }
 
   return (
-    <GoogleOAuthProvider clientId={googleConfig.client_id}>
+    <GoogleOAuthProvider clientId={clientId}>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Or sign in with Google
+          {t('auth.google_signin_label')}
         </Typography>
         <GoogleLogin
           onSuccess={handleGoogleSuccess}

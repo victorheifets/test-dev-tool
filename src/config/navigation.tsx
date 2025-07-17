@@ -6,6 +6,7 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import WebIcon from '@mui/icons-material/Web';
 import MessageIcon from '@mui/icons-material/Message';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { useTranslation } from 'react-i18next';
 
 import type { RefineProps } from '@refinedev/core';
@@ -70,16 +71,16 @@ export const useResources = (): RefineProps['resources'] => {
       name: 'simple-sms',
       list: '/simple-sms',
       meta: {
-        label: 'SMS Messaging',
+        label: t('navigation.sms_messaging'),
         icon: <MessageIcon />,
       },
     },
     {
-      name: 'landing-pages-examples',
-      list: '/landing-pages-examples',
+      name: 'registration-form',
+      list: '/registration-form',
       meta: {
-        label: 'Landing Page Examples',
-        icon: <WebIcon />,
+        label: t('navigation.registration_form'),
+        icon: <AppRegistrationIcon />,
       },
     },
   ];

@@ -43,6 +43,7 @@ import { EnrollmentsList } from './pages/enrollments/list';
 import { LeadsList } from './pages/leads/list';
 import SimpleSMS from './pages/messaging/SimpleSMS';
 import { LandingPagesExamples } from './pages/landing-pages-examples';
+import RegistrationForm from './pages/registration-form';
 import CustomLoginPage from './pages/login';
 
 const Title = ({ collapsed }: { collapsed: boolean }) => {
@@ -128,6 +129,7 @@ const AppContent = () => {
                     <Route path="/leads" element={<LeadsList />} />
                     <Route path="/simple-sms" element={<SimpleSMS />} />
                     <Route path="/landing-pages-examples" element={<LandingPagesExamples />} />
+                    <Route path="/registration-form" element={<RegistrationForm />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                   <Route

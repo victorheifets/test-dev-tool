@@ -27,7 +27,8 @@
     "cancel": "Cancel",
     "loading": "Loading...",
     "refresh": "Refresh",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "close": "Close"
   },
   
   "messages": {
@@ -307,13 +308,18 @@
   "header": {
     "profile": "Profile",
     "logout": "Logout",
-    "confirm_logout": "Confirm Logout"
+    "confirm_logout": "Confirm Logout",
+    "logout_confirmation": "Are you sure you want to logout? You will need to sign in again to access the application."
   },
 
   "registrationForm": {
     "title": "Registration Form Builder",
     "defaultTitle": "Course Registration",
     "defaultDescription": "Sign up for our amazing courses and start your learning journey today!",
+    "preview": "Form Preview",
+    "publishedUrl": "Published URL",
+    "publishConfirmation": "Are you sure you want to publish this form? Once published, it will be available online.",
+    "publishing": "Publishing...",
     "fields": {
       "fullName": "Full Name",
       "fullNamePlaceholder": "Enter your full name",
@@ -322,7 +328,9 @@
       "phone": "Phone Number",
       "phonePlaceholder": "Enter your phone number",
       "company": "Company",
-      "companyPlaceholder": "Enter your company name"
+      "companyPlaceholder": "Enter your company name",
+      "title": "Form Title",
+      "description": "Form Description"
     },
     "buttons": {
       "preview": "Preview",
@@ -331,11 +339,176 @@
       "addField": "Add Field",
       "removeField": "Remove Field"
     },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
     "messages": {
       "saved": "Form saved successfully",
       "published": "Form published successfully", 
       "fieldAdded": "Field added successfully",
-      "fieldRemoved": "Field removed successfully"
+      "fieldRemoved": "Field removed successfully",
+      "submit_failed": "Failed to submit form",
+      "publishing_failed": "Failed to publish form"
+    }
+  },
+
+  "validation": {
+    "first_name_required": "First name is required",
+    "last_name_required": "Last name is required",
+    "email_required": "Email is required",
+    "email_invalid": "Invalid email format",
+    "phone_min_length": "Phone number must be at least 10 digits",
+    "source_required": "Source is required",
+    "notes_max_length": "Notes cannot exceed 2000 characters"
+  },
+
+  "auth": {
+    "google_signin_label": "Or sign in with Google",
+    "errors": {
+      "no_google_token": "No Google token received",
+      "google_login_failed": "Google login failed",
+      "google_signin_failed": "Google Sign-In failed",
+      "google_client_id_missing": "Google Sign-In requires VITE_GOOGLE_CLIENT_ID environment variable"
+    }
+  },
+
+  "errors": {
+    "network_failed": "Network connection failed. Please check your internet connection.",
+    "unexpected": "An unexpected error occurred",
+    "generic": "An error occurred",
+    "unknown": "An unknown error occurred",
+    "title": {
+      "default": "Error",
+      "connection": "Connection Error",
+      "validation": "Validation Error",
+      "authentication": "Authentication Error",
+      "permission": "Permission Error",
+      "client": "Client Error",
+      "server": "Server Error"
+    }
+  },
+
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "participants": "Students",
+    "enrollments": "Enrollments",
+    "leads": "Leads",
+    "providers": "Providers",
+    "settings": "Settings",
+    "apps_pages": "APPS & PAGES",
+    "marketing": "MARKETING",
+    "sms_messaging": "SMS Messaging",
+    "landing_page_examples": "Landing Page Examples",
+    "registration_form": "Registration Form"
+  },
+
+  "sms": {
+    "title": "SMS Messaging",
+    "stats": {
+      "total_messages": "Total Messages",
+      "sent": "Sent", 
+      "failed": "Failed",
+      "total_cost": "Total Cost"
+    },
+    "buttons": {
+      "send_sms": "Send SMS",
+      "new_message": "New Message",
+      "clear": "Clear",
+      "cancel": "Cancel",
+      "send": "Send SMS",
+      "sending": "Sending...",
+      "view": "View",
+      "resend": "Resend"
+    },
+    "labels": {
+      "status": "Status",
+      "message": "Message",
+      "recipients": "Recipients",
+      "recipient_type": "Recipient Type",
+      "search_recipients": "Search recipients...",
+      "select_all": "Select All",
+      "character_count": "Character count",
+      "estimated_cost": "Estimated cost",
+      "people_count": " people",
+      "recipients_selected": " recipients selected",
+      "sent_at": "Sent: ",
+      "sms_count": " SMS",
+      "sent": "Sent"
+    },
+    "columns": {
+      "date_time": "Date & Time",
+      "message": "Message",
+      "recipients": "Recipients",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "search": {
+      "placeholder": "Search messages...",
+      "recipients_placeholder": "Search by name, phone, or course..."
+    },
+    "placeholders": {
+      "select_recipients": "Click to select recipients...",
+      "message": "Type your message here..."
+    },
+    "help": {
+      "recipient_selection": "Search for individuals, courses, or lead groups. Use checkboxes to select multiple."
+    },
+    "status": {
+      "sent": "Sent",
+      "sending": "Sending", 
+      "failed": "Failed",
+      "pending": "Pending"
+    },
+    "recipient_types": {
+      "all": "All Recipients",
+      "individual": "Individual",
+      "course": "Course Groups", 
+      "lead_group": "Lead Groups"
+    },
+    "dialogs": {
+      "send_title": "Send SMS Message",
+      "resend_title": "Resend Message",
+      "resend_description": "Are you sure you want to resend this message?",
+      "message_details": "SMS Message Details",
+      "view_title": "SMS Message Details"
+    },
+    "messages": {
+      "success": "SMS sent successfully",
+      "success_detailed": "SMS sent successfully to {successCount}/{totalSent} recipients. Cost: ${cost}",
+      "failed": "Failed to send SMS",
+      "failed_all": "Failed to send SMS to all recipients",
+      "failed_unknown": "Failed to send SMS: Unknown error",
+      "no_recipients": "Please select at least one recipient",
+      "empty_message": "Please enter a message"
+    },
+    "templates": {
+      "quick_templates": "Quick Templates",
+      "welcome": {
+        "name": "Welcome",
+        "content": "Welcome to our course! We're excited to have you join us."
+      },
+      "class_reminder": {
+        "name": "Class Reminder",
+        "content": "Reminder: Your class starts tomorrow at [TIME]. Please don't forget!"
+      },
+      "cancellation": {
+        "name": "Cancellation",
+        "content": "Unfortunately, today's class has been cancelled. We'll reschedule soon."
+      },
+      "promotion": {
+        "name": "Promotion",
+        "content": "🎉 Special offer! Get 20% off your next enrollment. Limited time only!"
+      },
+      "completion": {
+        "name": "Completion",
+        "content": "Congratulations! You've successfully completed the course."
+      },
+      "follow_up": {
+        "name": "Follow Up",
+        "content": "How are you finding the course so far? We'd love your feedback!"
+      }
     }
   }
 } 

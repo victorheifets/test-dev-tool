@@ -40,8 +40,9 @@ node_modules/
 *.sw?
 # OS specific
 
+.mcp.json
+claude_desktop_config.json
+
 # Task files
 # tasks.json
 # tasks/ 
-.mcp.json
-claude_desktop_config.json

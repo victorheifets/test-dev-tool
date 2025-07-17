@@ -43,7 +43,7 @@ export const parseError = (error: any): ApiError => {
   // Network or fetch errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
     return {
-      message: 'Network connection failed. Please check your internet connection.',
+      message: 'errors.network_failed',
       status: 0,
       code: 'NETWORK_ERROR',
     };
@@ -52,7 +52,7 @@ export const parseError = (error: any): ApiError => {
   // Generic Error object
   if (error instanceof Error) {
     return {
-      message: error.message || 'An unexpected error occurred',
+      message: error.message || 'errors.unexpected',
       code: 'GENERIC_ERROR',
     };
   }
@@ -68,7 +68,7 @@ export const parseError = (error: any): ApiError => {
   // API error response
   if (error && typeof error === 'object') {
     return {
-      message: error.message || error.detail || 'An error occurred',
+      message: error.message || error.detail || 'errors.generic',
       status: error.status || error.statusCode,
       code: error.code || error.error_code,
       details: error.details || error,
@@ -77,7 +77,7 @@ export const parseError = (error: any): ApiError => {
 
   // Fallback
   return {
-    message: 'An unknown error occurred',
+    message: 'errors.unknown',
     code: 'UNKNOWN_ERROR',
   };
 };
@@ -85,32 +85,37 @@ export const parseError = (error: any): ApiError => {
 /**
  * Convert error to notification parameters
  */
-export const errorToNotification = (error: any): OpenNotificationParams => {
+export const errorToNotification = (error: any, t?: (key: string) => string): OpenNotificationParams => {
   const parsedError = parseError(error);
   
-  let message = 'Error';
+  let message = t ? t('errors.title.default') : 'Error';
   let description = parsedError.message;
+  
+  // If we have a translation function, translate the description if it's a key
+  if (t && description.startsWith('errors.')) {
+    description = t(description);
+  }
   
   // Customize messages based on error types
   switch (parsedError.code) {
     case 'NETWORK_ERROR':
-      message = 'Connection Error';
+      message = t ? t('errors.title.connection') : 'Connection Error';
       break;
     case 'VALIDATION_ERROR':
-      message = 'Validation Error';
+      message = t ? t('errors.title.validation') : 'Validation Error';
       break;
     case 'AUTH_ERROR':
-      message = 'Authentication Error';
+      message = t ? t('errors.title.authentication') : 'Authentication Error';
       break;
     case 'PERMISSION_ERROR':
-      message = 'Permission Error';
+      message = t ? t('errors.title.permission') : 'Permission Error';
       break;
     default:
       if (parsedError.status) {
         if (parsedError.status >= 400 && parsedError.status < 500) {
-          message = 'Client Error';
+          message = t ? t('errors.title.client') : 'Client Error';
         } else if (parsedError.status >= 500) {
-          message = 'Server Error';
+          message = t ? t('errors.title.server') : 'Server Error';
         }
       }
   }

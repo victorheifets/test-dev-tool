@@ -210,7 +210,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="logout-dialog-description">
-                Are you sure you want to logout? You will need to sign in again to access the application.
+                {t('header.logout_confirmation')}
               </DialogContentText>
             </DialogContent>
             <DialogActions>

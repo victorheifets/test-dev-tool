@@ -30,7 +30,8 @@ export const API_CONFIG = {
     instructors: '/trainers', // Note: not in swagger but keeping for future
     providers: '/providers',
     statistics: '/statistics',
-    auth: '/auth'
+    auth: '/auth',
+    sms: '/sms'
   },
   
   // Request headers

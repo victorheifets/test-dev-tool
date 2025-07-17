@@ -87,7 +87,9 @@ const resourceMap: Record<string, keyof typeof API_CONFIG.endpoints> = {
   'enrollments': 'enrollments',
   'leads': 'marketing',
   'marketing': 'marketing',
-  'instructors': 'instructors'
+  'instructors': 'instructors',
+  'sms': 'sms',
+  'sms/history': 'sms'
 };
 
 export const dataProvider: DataProvider = {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Box, 
@@ -27,7 +27,8 @@ import {
 } from '@mui/material';
 import { sendSMSBatch, SMSRecipient } from '../../services/smsService';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useDelete, useCreate, useUpdate } from '@refinedev/core';
+import { useDelete, useCreate, useUpdate, useList } from '@refinedev/core';
+import { dataProvider } from '../../providers/dataProvider';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { StatCard } from '../../components/StatCard';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
@@ -73,67 +74,23 @@ interface SMSMessage {
   recipient_type: string;
 }
 
-// Mock data
-const mockRecipients: Recipient[] = [
-  { id: '1', name: 'John Doe', phone: '+1-555-0123', type: 'individual' },
-  { id: '2', name: 'Sarah Wilson', phone: '+1-555-0124', type: 'individual' },
-  { id: '3', name: 'Mike Johnson', phone: '+1-555-0125', type: 'individual' },
-  { id: '4', name: 'Emma Brown', phone: '+1-555-0126', type: 'individual' },
-  { id: '5', name: 'React Course Students', phone: 'course-123', type: 'course', count: 45 },
-  { id: '6', name: 'Vue.js Course Students', phone: 'course-456', type: 'course', count: 32 },
-  { id: '7', name: 'Python Basics', phone: 'course-789', type: 'course', count: 28 },
-  { id: '8', name: 'New Leads', phone: 'leads-new', type: 'lead_group', count: 23 },
-  { id: '9', name: 'Qualified Leads', phone: 'leads-qualified', type: 'lead_group', count: 15 },
-  { id: '10', name: 'Hot Leads', phone: 'leads-hot', type: 'lead_group', count: 8 },
+// Test phone numbers for SMS sandbox
+const testPhoneNumbers: Recipient[] = [
+  { id: 'test1', name: 'Test Phone 1', phone: '+972545456489', type: 'individual' },
+  { id: 'test2', name: 'Test Phone 2', phone: '+972544660397', type: 'individual' },
+  { id: 'manual', name: 'Manual Phone Entry', phone: '', type: 'individual' },
 ];
 
-const messageTemplates = [
-  { id: 'welcome', name: 'Welcome', content: 'Welcome to our course! We\'re excited to have you join us.' },
-  { id: 'reminder', name: 'Class Reminder', content: 'Reminder: Your class starts tomorrow at [TIME]. Please don\'t forget!' },
-  { id: 'cancellation', name: 'Cancellation', content: 'Unfortunately, today\'s class has been cancelled. We\'ll reschedule soon.' },
-  { id: 'promotion', name: 'Promotion', content: '🎉 Special offer! Get 20% off your next enrollment. Limited time only!' },
-  { id: 'completion', name: 'Completion', content: 'Congratulations! You\'ve successfully completed the course.' },
-  { id: 'follow_up', name: 'Follow Up', content: 'How are you finding the course so far? We\'d love your feedback!' },
+const getMessageTemplates = (t: (key: string) => string) => [
+  { id: 'welcome', name: t('sms.templates.welcome.name'), content: t('sms.templates.welcome.content') },
+  { id: 'reminder', name: t('sms.templates.class_reminder.name'), content: t('sms.templates.class_reminder.content') },
+  { id: 'cancellation', name: t('sms.templates.cancellation.name'), content: t('sms.templates.cancellation.content') },
+  { id: 'promotion', name: t('sms.templates.promotion.name'), content: t('sms.templates.promotion.content') },
+  { id: 'completion', name: t('sms.templates.completion.name'), content: t('sms.templates.completion.content') },
+  { id: 'follow_up', name: t('sms.templates.follow_up.name'), content: t('sms.templates.follow_up.content') },
 ];
 
-const mockHistory: SMSMessage[] = [
-  {
-    id: '1',
-    message: 'Welcome to our React course! Class starts tomorrow at 9 AM.',
-    recipients: ['course-123'],
-    sentAt: new Date('2025-07-14T10:00:00'),
-    status: 'sent',
-    totalCount: 45,
-    deliveredCount: 43,
-    failedCount: 2,
-    cost: 2.70,
-    recipient_type: 'course',
-  },
-  {
-    id: '2',
-    message: 'Special offer: 20% off next enrollment!',
-    recipients: ['leads-new', 'leads-qualified'],
-    sentAt: new Date('2025-07-13T15:30:00'),
-    status: 'sent',
-    totalCount: 38,
-    deliveredCount: 35,
-    failedCount: 3,
-    cost: 2.28,
-    recipient_type: 'lead_group',
-  },
-  {
-    id: '3',
-    message: 'Class reminder: Python basics class starts in 30 minutes.',
-    recipients: ['course-789'],
-    sentAt: new Date('2025-07-12T09:30:00'),
-    status: 'failed',
-    totalCount: 28,
-    deliveredCount: 0,
-    failedCount: 28,
-    cost: 0,
-    recipient_type: 'course',
-  },
-];
+// No mock history - will load from API
 
 const SimpleSMS: React.FC = () => {
   const { t } = useTranslation();
@@ -144,7 +101,9 @@ const SimpleSMS: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<SMSMessage | null>(null);
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
   const [messageToResend, setMessageToResend] = useState<SMSMessage | null>(null);
-  const [history, setHistory] = useState<SMSMessage[]>(mockHistory);
+  const [history, setHistory] = useState<SMSMessage[]>([]);
+  const [recipients, setRecipients] = useState<Recipient[]>(testPhoneNumbers);
+  const [manualPhoneNumber, setManualPhoneNumber] = useState('');
   
   // Send SMS Modal State
   const [message, setMessage] = useState('');
@@ -159,10 +118,97 @@ const SimpleSMS: React.FC = () => {
   const { mutate: deleteMessage } = useDelete();
   const { mutate: createMessage } = useCreate();
   
+  // Load SMS history from API - use custom endpoint
+  const [smsHistoryData, setSmsHistoryData] = useState<any>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  
+  const loadSmsHistory = useCallback(async () => {
+    console.log('🔍 [SimpleSMS] loadSmsHistory called');
+    setHistoryLoading(true);
+    try {
+      console.log('🔍 [SimpleSMS] Making API call to /sms/history');
+      const result = await dataProvider.custom!({
+        url: '/sms/history',
+        method: 'get'
+      });
+      console.log('🔍 [SimpleSMS] API response:', result);
+      setSmsHistoryData(result);
+    } catch (error) {
+      console.error('❌ [SimpleSMS] Failed to load SMS history:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+  
+  // Load real recipients from API
+  const { data: participantsData } = useList({ resource: 'participants' });
+  const { data: activitiesData } = useList({ resource: 'activities' });
+  
   const maxLength = 160;
   const smsCount = Math.ceil(message.length / maxLength);
   const totalRecipients = selectedRecipients.reduce((sum, r) => sum + (r.count || 1), 0);
   const estimatedCost = (smsCount * totalRecipients * 0.06).toFixed(2);
+  
+  // Load SMS history on component mount
+  useEffect(() => {
+    console.log('🔍 [SimpleSMS] Component mounted, calling loadSmsHistory');
+    loadSmsHistory();
+  }, [loadSmsHistory]);
+  
+  // Process SMS history data when it changes
+  useEffect(() => {
+    console.log('🔍 [SimpleSMS] Processing SMS history data:', smsHistoryData);
+    if (smsHistoryData?.data) {
+      const formattedHistory = smsHistoryData.data.messages?.map((item: any) => ({
+        id: item.id,
+        message: item.message,
+        recipients: item.phone_numbers || [],
+        sentAt: new Date(item.created_at),
+        status: item.status,
+        totalCount: item.total_recipients || 0,
+        deliveredCount: item.sent_count || 0,
+        failedCount: item.failed_count || 0,
+        cost: (item.total_recipients || 0) * 0.1,
+        recipient_type: 'individual'
+      })) || [];
+      console.log('🔍 [SimpleSMS] Formatted history:', formattedHistory);
+      setHistory(formattedHistory);
+    }
+  }, [smsHistoryData]);
+  
+  // Update recipients with real data
+  useEffect(() => {
+    const realRecipients = [...testPhoneNumbers];
+    
+    // Add participants as individuals
+    if (participantsData?.data) {
+      participantsData.data.forEach((participant: any) => {
+        if (participant.phone) {
+          realRecipients.push({
+            id: `participant-${participant.id}`,
+            name: participant.name,
+            phone: participant.phone,
+            type: 'individual'
+          });
+        }
+      });
+    }
+    
+    // Add activities as courses
+    if (activitiesData?.data) {
+      activitiesData.data.forEach((activity: any) => {
+        realRecipients.push({
+          id: `course-${activity.id}`,
+          name: activity.name,
+          phone: `course-${activity.id}`,
+          type: 'course',
+          count: activity.participant_count || 0
+        });
+      });
+    }
+    
+    setRecipients(realRecipients);
+  }, [participantsData, activitiesData]);
   
   // Apply filtering
   const filteredHistory = history.filter(msg => {
@@ -175,7 +221,7 @@ const SimpleSMS: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
   
-  const filteredRecipients = mockRecipients.filter(r => {
+  const filteredRecipients = recipients.filter((r: Recipient) => {
     const matchesType = recipientFilter === 'all' || r.type === recipientFilter;
     const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesType && matchesSearch;
@@ -220,10 +266,23 @@ const SimpleSMS: React.FC = () => {
 
   
   const handleTemplateSelect = (templateId: string) => {
-    const template = messageTemplates.find(t => t.id === templateId);
+    const template = getMessageTemplates(t).find(t => t.id === templateId);
     if (template) {
       setMessage(template.content);
       setSelectedTemplate(templateId);
+    }
+  };
+  
+  const handleAddManualPhone = () => {
+    if (manualPhoneNumber.trim()) {
+      const newRecipient: Recipient = {
+        id: `manual-${Date.now()}`,
+        name: `Manual: ${manualPhoneNumber}`,
+        phone: manualPhoneNumber.trim(),
+        type: 'individual'
+      };
+      setSelectedRecipients([...selectedRecipients, newRecipient]);
+      setManualPhoneNumber('');
     }
   };
   
@@ -237,12 +296,14 @@ const SimpleSMS: React.FC = () => {
       const smsRecipients: SMSRecipient[] = selectedRecipients.map(recipient => ({
         id: recipient.id,
         name: recipient.name,
-        phone: recipient.phone || recipient.contact || '', // Handle different phone field names
+        phone: recipient.phone || '', // Handle different phone field names
         type: recipient.type
       }));
       
       // Send SMS using AWS SNS
+      console.log('🔍 [SimpleSMS] Sending SMS batch to recipients:', smsRecipients);
       const result = await sendSMSBatch(smsRecipients, message.trim());
+      console.log('🔍 [SimpleSMS] SMS batch result:', result);
       
       const newMessage: SMSMessage = {
         id: Date.now().toString(),
@@ -257,20 +318,23 @@ const SimpleSMS: React.FC = () => {
         recipient_type: selectedRecipients.length === 1 ? selectedRecipients[0].type : 'mixed',
       };
       
-      setHistory([newMessage, ...history]);
+      // Reload SMS history from API instead of using local state
+      console.log('🔍 [SimpleSMS] Reloading SMS history after send');
+      await loadSmsHistory();
+      
       resetSendModal();
       setSending(false);
       setSendModalOpen(false);
       
       if (result.successCount > 0) {
-        showSuccess(`SMS sent successfully to ${result.successCount}/${result.totalSent} recipients. Cost: $${result.cost.toFixed(4)}`);
+        showSuccess(t('sms.messages.success_detailed', { successCount: result.successCount, totalSent: result.totalSent, cost: result.cost.toFixed(4) }));
              } else {
-         handleError(new Error('Failed to send SMS to all recipients'));
+         handleError(new Error(t('sms.messages.failed_all')));
        }
       
       // Log detailed results for debugging
       console.log('SMS Batch Results:', result);
-      result.results.forEach(res => {
+      result.results.forEach((res: any) => {
         if (!res.success) {
           console.error(`Failed to send to ${res.phone} (${res.name}):`, res.error);
         }
@@ -279,7 +343,7 @@ const SimpleSMS: React.FC = () => {
     } catch (error) {
       console.error('SMS sending error:', error);
       setSending(false);
-      handleError(error instanceof Error ? error : new Error('Failed to send SMS: Unknown error'));
+      handleError(error instanceof Error ? error : new Error(t('sms.messages.failed_unknown')));
     }
   };
   
@@ -289,6 +353,7 @@ const SimpleSMS: React.FC = () => {
     setSelectedTemplate('');
     setRecipientFilter('all');
     setSearchTerm('');
+    setManualPhoneNumber('');
   };
   
 
@@ -305,7 +370,7 @@ const SimpleSMS: React.FC = () => {
   const columns: GridColDef[] = [
     {
       field: 'sentAt',
-      headerName: 'Date & Time',
+      headerName: t('sms.columns.date_time'),
       flex: 1.5,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -315,7 +380,7 @@ const SimpleSMS: React.FC = () => {
     },
     {
       field: 'message',
-      headerName: 'Message',
+      headerName: t('sms.columns.message'),
       flex: 2,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -325,7 +390,7 @@ const SimpleSMS: React.FC = () => {
     },
     {
       field: 'totalCount',
-      headerName: 'Recipients',
+      headerName: t('sms.columns.recipients'),
       flex: 1,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 'medium', display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -335,7 +400,7 @@ const SimpleSMS: React.FC = () => {
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('sms.columns.status'),
       flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -345,14 +410,14 @@ const SimpleSMS: React.FC = () => {
     },
     {
       field: 'action',
-      headerName: 'Actions',
+      headerName: t('sms.columns.actions'),
       flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
           <ActionMenu
             onEdit={() => handleView(params.row.id)}
             onDuplicate={() => handleDuplicate(params.row.id)}
-            editLabel="View"
+            editLabel={t('actions.view')}
             useViewIcon={true}
           />
         </Box>
@@ -366,7 +431,7 @@ const SimpleSMS: React.FC = () => {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Total Messages" 
+            title={t('sms.stats.total_messages')} 
             value={history.length.toString()} 
             icon={<MessageIcon sx={{ fontSize: 40 }} />} 
             color="primary" 
@@ -374,7 +439,7 @@ const SimpleSMS: React.FC = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Sent" 
+            title={t('sms.stats.sent')} 
             value={history.filter(m => m.status === 'sent').length.toString()} 
             icon={<DeliveredIcon sx={{ fontSize: 40 }} />} 
             color="success" 
@@ -382,7 +447,7 @@ const SimpleSMS: React.FC = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Failed" 
+            title={t('sms.stats.failed')} 
             value={history.filter(m => m.status === 'failed').length.toString()} 
             icon={<ErrorIcon sx={{ fontSize: 40 }} />} 
             color="error" 
@@ -390,7 +455,7 @@ const SimpleSMS: React.FC = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Total Cost" 
+            title={t('sms.stats.total_cost')} 
             value={`$${history.reduce((sum, msg) => sum + msg.cost, 0).toFixed(2)}`} 
             icon={<PriorityIcon sx={{ fontSize: 40 }} />} 
             color="info" 
@@ -403,12 +468,12 @@ const SimpleSMS: React.FC = () => {
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button variant="contained" startIcon={<SendIcon />} onClick={() => setSendModalOpen(true)}>
-              Send SMS
+              {t('sms.buttons.send_sms')}
             </Button>
           </Box>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
-              placeholder="Search messages..."
+              placeholder={t('sms.search.placeholder')}
               variant="outlined"
               size="small"
               sx={{ minWidth: 250 }}
@@ -416,16 +481,16 @@ const SimpleSMS: React.FC = () => {
               onChange={(e) => setSearchText(e.target.value)}
             />
             <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
+              <InputLabel>{t('sms.labels.status')}</InputLabel>
               <Select
-                label="Status"
+                label={t('sms.labels.status')}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="sent">Sent</MenuItem>
-                <MenuItem value="sending">Sending</MenuItem>
-                <MenuItem value="failed">Failed</MenuItem>
+                <MenuItem value="">{t('common.all')}</MenuItem>
+                <MenuItem value="sent">{t('sms.status.sent')}</MenuItem>
+                <MenuItem value="sending">{t('sms.status.sending')}</MenuItem>
+                <MenuItem value="failed">{t('sms.status.failed')}</MenuItem>
 
               </Select>
             </FormControl>
@@ -444,7 +509,7 @@ const SimpleSMS: React.FC = () => {
       
       {/* Send SMS Modal */}
       <Dialog open={sendModalOpen} onClose={() => { setSendModalOpen(false); resetSendModal(); }} maxWidth="lg" fullWidth>
-        <DialogTitle>Send SMS Message</DialogTitle>
+        <DialogTitle>{t('sms.dialogs.send_title')}</DialogTitle>
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 1 }}>
             {/* Left Column - Recipients */}
@@ -452,14 +517,14 @@ const SimpleSMS: React.FC = () => {
               <Card sx={{ boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PersonIcon /> Recipients
+                    <PersonIcon /> {t('sms.labels.recipients')}
                   </Typography>
 
                   {/* Search and Filter Row */}
                   <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
                     <TextField
                       size="small"
-                      placeholder="Search by name, phone, or course..."
+                      placeholder={t('sms.search.recipients_placeholder')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       InputProps={{
@@ -478,35 +543,35 @@ const SimpleSMS: React.FC = () => {
                         onChange={(e) => setRecipientFilter(e.target.value)}
                         displayEmpty
                         renderValue={(selected) => {
-                          if (selected === 'all') return 'All Types';
-                          if (selected === 'individual') return 'Individuals';
-                          if (selected === 'course') return 'Courses';
-                          if (selected === 'lead_group') return 'Lead Groups';
-                          return 'All Types';
+                          if (selected === 'all') return t('sms.recipient_types.all');
+                          if (selected === 'individual') return t('sms.recipient_types.individual');
+                          if (selected === 'course') return t('sms.recipient_types.course');
+                          if (selected === 'lead_group') return t('sms.recipient_types.lead_group');
+                          return t('sms.recipient_types.all');
                         }}
                       >
                         <MenuItem value="all">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PersonIcon fontSize="small" />
-                            All Types
+                            {t('sms.recipient_types.all')}
                           </Box>
                         </MenuItem>
                         <MenuItem value="individual">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PersonIcon fontSize="small" />
-                            Individuals
+                            {t('sms.recipient_types.individual')}
                           </Box>
                         </MenuItem>
                         <MenuItem value="course">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <SchoolIcon fontSize="small" />
-                            Courses
+                            {t('sms.recipient_types.course')}
                           </Box>
                         </MenuItem>
                         <MenuItem value="lead_group">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <LeadIcon fontSize="small" />
-                            Lead Groups
+                            {t('sms.recipient_types.lead_group')}
                           </Box>
                         </MenuItem>
                       </Select>
@@ -536,7 +601,7 @@ const SimpleSMS: React.FC = () => {
                               {option.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {option.type.replace('_', ' ')} {option.count ? `• ${option.count} people` : ''}
+                              {option.type.replace('_', ' ')} {option.count ? `• ${option.count}${t('sms.labels.people_count')}` : ''}
                             </Typography>
                           </Box>
                         </Box>
@@ -556,21 +621,46 @@ const SimpleSMS: React.FC = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        placeholder="Click to select recipients..."
+                        placeholder={t('sms.placeholders.select_recipients')}
                         variant="outlined"
-                        helperText="Search for individuals, courses, or lead groups. Use checkboxes to select multiple."
+                        helperText={t('sms.help.recipient_selection')}
                       />
                     )}
                   />
+
+                  {/* Manual Phone Number Input */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Add Phone Number Manually
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <TextField
+                        size="small"
+                        placeholder="+972XXXXXXXXX"
+                        value={manualPhoneNumber}
+                        onChange={(e) => setManualPhoneNumber(e.target.value)}
+                        helperText="Enter phone number in international format"
+                        sx={{ flex: 1 }}
+                      />
+                      <Button
+                        variant="outlined"
+                        onClick={handleAddManualPhone}
+                        disabled={!manualPhoneNumber.trim()}
+                        sx={{ height: 40 }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Box>
 
                   {/* Selected Summary */}
                   {selectedRecipients.length > 0 && (
                     <Alert severity="info" sx={{ mt: 2 }}>
                       <Typography variant="body2">
-                        <strong>{totalRecipients} recipients selected</strong>
+                        <strong>{totalRecipients}{t('sms.labels.recipients_selected')}</strong>
                       </Typography>
                       <Typography variant="caption">
-                        Estimated cost: ${estimatedCost} ({smsCount} SMS × {totalRecipients} recipients)
+                        {t('sms.labels.estimated_cost')}${estimatedCost} ({smsCount}{t('sms.labels.sms_count')} × {totalRecipients} recipients)
                       </Typography>
                     </Alert>
                   )}
@@ -583,16 +673,16 @@ const SimpleSMS: React.FC = () => {
               <Card sx={{ boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <EditIcon /> Message
+                    <EditIcon /> {t('sms.labels.message')}
                   </Typography>
 
                   {/* Templates */}
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      Quick Templates
+                      {t('sms.templates.quick_templates')}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                      {messageTemplates.map((template) => (
+                      {getMessageTemplates(t).map((template) => (
                         <Chip
                           key={template.id}
                           label={template.name}
@@ -613,8 +703,8 @@ const SimpleSMS: React.FC = () => {
                     rows={6}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message here..."
-                    helperText={`${message.length}/${maxLength} characters • ${smsCount} SMS`}
+                    placeholder={t('sms.placeholders.message')}
+                    helperText={`${message.length}/${maxLength}${t('sms.labels.character_count')} • ${smsCount}${t('sms.labels.sms_count')}`}
                     sx={{ mb: 2 }}
                   />
 
@@ -639,14 +729,14 @@ const SimpleSMS: React.FC = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { setSendModalOpen(false); resetSendModal(); }}>Cancel</Button>
+          <Button onClick={() => { setSendModalOpen(false); resetSendModal(); }}>{t('actions.cancel')}</Button>
           <Button
             variant="contained"
             startIcon={<SendIcon />}
             onClick={handleSendSMS}
             disabled={!message.trim() || selectedRecipients.length === 0 || sending}
           >
-            {sending ? 'Sending...' : 'Send SMS'}
+            {sending ? t('sms.buttons.sending') : t('sms.buttons.send_sms')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -656,38 +746,38 @@ const SimpleSMS: React.FC = () => {
         open={resendDialogOpen}
         onClose={() => setResendDialogOpen(false)}
         onConfirm={confirmResend}
-        title="Resend Message"
-        description="Are you sure you want to resend this message?"
+        title={t('sms.dialogs.resend_title')}
+        description={t('sms.dialogs.resend_description')}
       />
       
       {/* View Dialog */}
       <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>SMS Message Details</DialogTitle>
+        <DialogTitle>{t('sms.dialogs.view_title')}</DialogTitle>
         <DialogContent>
           {selectedMessage && (
             <Box sx={{ pt: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Sent: {selectedMessage.sentAt.toLocaleString()}
+                {t('sms.labels.sent')}: {selectedMessage.sentAt.toLocaleString()}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Status: <StatusChip status={selectedMessage.status} />
+                {t('sms.labels.status')}: <StatusChip status={selectedMessage.status} />
               </Typography>
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" gutterBottom>
-                Message:
+                {t('sms.labels.message')}:
               </Typography>
               <Typography variant="body1" paragraph>
                 {selectedMessage.message}
               </Typography>
               <Divider sx={{ my: 2 }} />
               <Typography variant="body2" color="text.secondary">
-                Recipients: {selectedMessage.totalCount}
+                {t('sms.labels.recipients')}: {selectedMessage.totalCount}
               </Typography>
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setViewDialogOpen(false)}>{t('actions.close')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

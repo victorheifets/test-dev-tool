@@ -27,7 +27,8 @@
     "cancel": "בטל",
     "loading": "טוען...",
     "refresh": "רענן",
-    "duplicate": "שכפל"
+    "duplicate": "שכפל",
+    "close": "סגור"
   },
   
   "messages": {
@@ -80,7 +81,10 @@
     "settings": "הגדרות",
     "apps_pages": "אפליקציות ודפים",
     "marketing": "שיווק",
-    "landing_pages": "דפי נחיתה"
+    "landing_pages": "דפי נחיתה",
+    "sms_messaging": "הודעות SMS",
+    "landing_page_examples": "דוגמאות דפי נחיתה",
+    "registration_form": "טופס הרשמה"
   },
   
   "common": {
@@ -308,13 +312,18 @@
   "header": {
     "profile": "פרופיל",
     "logout": "התנתק",
-    "confirm_logout": "אשר התנתקות"
+    "confirm_logout": "אשר התנתקות",
+    "logout_confirmation": "האם אתה בטוח שברצונך להתנתק? יהיה עליך להתחבר שוב כדי לגשת לאפליקציה."
   },
 
   "registrationForm": {
     "title": "בונה טפסי הרשמה",
     "defaultTitle": "הרשמה לקורס",
     "defaultDescription": "הירשמו לקורסים המדהימים שלנו והתחילו את מסע הלמידה שלכם היום!",
+    "preview": "תצוגה מקדימה של הטופס",
+    "publishedUrl": "כתובת URL מפורסמת",
+    "publishConfirmation": "האם אתה בטוח שברצונך לפרסם טופס זה? לאחר הפרסום, הוא יהיה זמין באינטרנט.",
+    "publishing": "מפרסם...",
     "fields": {
       "fullName": "שם מלא",
       "fullNamePlaceholder": "הזינו את השם המלא שלכם",
@@ -323,7 +332,9 @@
       "phone": "מספר טלפון",
       "phonePlaceholder": "הזינו את מספר הטלפון שלכם",
       "company": "חברה",
-      "companyPlaceholder": "הזינו את שם החברה שלכם"
+      "companyPlaceholder": "הזינו את שם החברה שלכם",
+      "title": "כותרת הטופס",
+      "description": "תיאור הטופס"
     },
     "buttons": {
       "preview": "תצוגה מקדימה",
@@ -332,11 +343,161 @@
       "addField": "הוסף שדה",
       "removeField": "הסר שדה"
     },
+    "status": {
+      "draft": "טיוטה",
+      "published": "מפורסם"
+    },
     "messages": {
       "saved": "הטופס נשמר בהצלחה",
       "published": "הטופס פורסם בהצלחה",
       "fieldAdded": "השדה נוסף בהצלחה",
-      "fieldRemoved": "השדה הוסר בהצלחה"
+      "fieldRemoved": "השדה הוסר בהצלחה",
+      "submit_failed": "שליחת הטופס נכשלה",
+      "publishing_failed": "פרסום הטופס נכשל"
+    }
+  },
+
+  "validation": {
+    "first_name_required": "שם פרטי נדרש",
+    "last_name_required": "שם משפחה נדרש",
+    "email_required": "אימייל נדרש",
+    "email_invalid": "פורמט אימייל לא תקין",
+    "phone_min_length": "מספר הטלפון חייב להיות לפחות 10 ספרות",
+    "source_required": "מקור נדרש",
+    "notes_max_length": "הערות לא יכולות לעבור 2000 תווים"
+  },
+
+  "auth": {
+    "google_signin_label": "או התחבר עם גוגל",
+    "errors": {
+      "no_google_token": "לא התקבל טוקן גוגל",
+      "google_login_failed": "התחברות גוגל נכשלה",
+      "google_signin_failed": "התחברות עם גוגל נכשלה",
+      "google_client_id_missing": "התחברות עם גוגל דורשת משתנה סביבה VITE_GOOGLE_CLIENT_ID"
+    }
+  },
+
+  "errors": {
+    "network_failed": "חיבור רשת נכשל. אנא בדוק את חיבור האינטרנט שלך.",
+    "unexpected": "אירעה שגיאה בלתי צפויה",
+    "generic": "אירעה שגיאה",
+    "unknown": "אירעה שגיאה לא ידועה",
+    "title": {
+      "default": "שגיאה",
+      "connection": "שגיאת חיבור",
+      "validation": "שגיאת אימות",
+      "authentication": "שגיאת הזדהות",
+      "permission": "שגיאת הרשאה",
+      "client": "שגיאת לקוח",
+      "server": "שגיאת שרת"
+    }
+  },
+
+  "sms": {
+    "title": "הודעות SMS",
+    "stats": {
+      "total_messages": "סך הודעות",
+      "sent": "נשלחו", 
+      "failed": "נכשלו",
+      "total_cost": "עלות כוללת"
+    },
+    "buttons": {
+      "send_sms": "שלח SMS",
+      "new_message": "הודעה חדשה",
+      "clear": "נקה",
+      "cancel": "בטל",
+      "send": "שלח SMS",
+      "sending": "שולח...",
+      "view": "צפה",
+      "resend": "שלח שוב"
+    },
+    "labels": {
+      "status": "סטטוס",
+      "message": "הודעה",
+      "recipients": "נמענים",
+      "recipient_type": "סוג נמען",
+      "search_recipients": "חפש נמענים...",
+      "select_all": "בחר הכל",
+      "character_count": "ספירת תווים",
+      "estimated_cost": "עלות משוערת",
+      "people_count": " אנשים",
+      "recipients_selected": " נמענים נבחרו",
+      "sent_at": "נשלח: ",
+      "sms_count": " SMS",
+      "sent": "נשלח"
+    },
+    "columns": {
+      "date_time": "תאריך ושעה",
+      "message": "הודעה",
+      "recipients": "נמענים",
+      "status": "סטטוס",
+      "actions": "פעולות"
+    },
+    "search": {
+      "placeholder": "חפש הודעות...",
+      "recipients_placeholder": "חפש לפי שם, טלפון או קורס..."
+    },
+    "placeholders": {
+      "select_recipients": "לחץ לבחירת נמענים...",
+      "message": "הקלד כאן את ההודעה שלך..."
+    },
+    "help": {
+      "recipient_selection": "חפש יחידים, קורסים או קבוצות לידים. השתמש בתיבות סימון לבחירת מספר פריטים."
+    },
+    "status": {
+      "sent": "נשלח",
+      "sending": "שולח", 
+      "failed": "נכשל",
+      "pending": "ממתין"
+    },
+    "recipient_types": {
+      "all": "כל הנמענים",
+      "individual": "יחיד",
+      "course": "קבוצות קורס", 
+      "lead_group": "קבוצות ליד"
+    },
+    "dialogs": {
+      "send_title": "שלח הודעת SMS",
+      "resend_title": "שלח הודעה שוב",
+      "resend_description": "האם אתה בטוח שברצונך לשלוח הודעה זו שוב?",
+      "message_details": "פרטי הודעת SMS",
+      "view_title": "פרטי הודעת SMS"
+    },
+    "messages": {
+      "success": "SMS נשלח בהצלחה",
+      "success_detailed": "SMS נשלח בהצלחה ל-{successCount}/{totalSent} נמענים. עלות: ${cost}",
+      "failed": "שליחת SMS נכשלה",
+      "failed_all": "שליחת SMS נכשלה לכל הנמענים",
+      "failed_unknown": "שליחת SMS נכשלה: שגיאה לא ידועה",
+      "no_recipients": "אנא בחר לפחות נמען אחד",
+      "empty_message": "אנא הכנס הודעה"
+    },
+    "templates": {
+      "quick_templates": "תבניות מהירות",
+      "welcome": {
+        "name": "ברוכים הבאים",
+        "content": "ברוכים הבאים לקורס שלנו! אנחנו נרגשים שהצטרפתם אלינו."
+      },
+      "class_reminder": {
+        "name": "תזכורת לשיעור",
+        "content": "תזכורת: השיעור שלכם מתחיל מחר ב-[זמן]. אנא אל תשכחו!"
+      },
+      "cancellation": {
+        "name": "ביטול",
+        "content": "לצערנו, השיעור של היום בוטל. נקבע תאריך חדש בקרוב."
+      },
+      "promotion": {
+        "name": "מבצע",
+        "content": "🎉 הצעה מיוחדת! קבלו 20% הנחה על ההרשמה הבאה. לזמן מוגבל בלבד!"
+      },
+      "completion": {
+        "name": "השלמה",
+        "content": "מזל טוב! השלמתם בהצלחה את הקורס."
+      },
+      "follow_up": {
+        "name": "מעקב",
+        "content": "איך אתם מוצאים את הקורס עד כה? נשמח לשמוע את המשוב שלכם!"
+      }
     }
   }
 }

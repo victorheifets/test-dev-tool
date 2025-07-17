@@ -6,8 +6,11 @@ import SchoolIcon from '@mui/icons-material/School';
 import PersonIcon from '@mui/icons-material/Person';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { useTranslation } from 'react-i18next';
 
 const CustomLoginPage: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <Box
       sx={{
@@ -61,7 +64,7 @@ const CustomLoginPage: React.FC = () => {
                 mb: 1,
               }}
             >
-              Course Manager
+              {t('login.title')}
             </Typography>
             <Typography 
               variant="body1" 
@@ -69,7 +72,7 @@ const CustomLoginPage: React.FC = () => {
               textAlign="center"
               sx={{ fontWeight: 500 }}
             >
-              Welcome back! Please sign in to continue
+              {t('login.welcome')}
             </Typography>
           </Box>
 
@@ -91,7 +94,7 @@ const CustomLoginPage: React.FC = () => {
                 <Box sx={{ my: 3 }}>
                   <Divider>
                     <Typography variant="body2" color="text.secondary">
-                      OR
+                      {t('login.or')}
                     </Typography>
                   </Divider>
                 </Box>
@@ -113,7 +116,7 @@ const CustomLoginPage: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <PersonIcon sx={{ color: '#7367F0', mr: 1, fontSize: '1.2rem' }} />
                     <Typography variant="subtitle2" color="primary" fontWeight={600}>
-                      Demo Accounts
+                      {t('login.demo_accounts')}
                     </Typography>
                   </Box>
                   
@@ -121,7 +124,7 @@ const CustomLoginPage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip 
                         icon={<AdminPanelSettingsIcon />}
-                        label="Admin" 
+                        label={t('login.admin')} 
                         size="small" 
                         color="error"
                         variant="outlined"
@@ -134,7 +137,7 @@ const CustomLoginPage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip 
                         icon={<SupervisorAccountIcon />}
-                        label="Manager" 
+                        label={t('login.manager')} 
                         size="small" 
                         color="warning"
                         variant="outlined"
@@ -147,7 +150,7 @@ const CustomLoginPage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip 
                         icon={<PersonIcon />}
-                        label="User" 
+                        label={t('login.user')} 
                         size="small" 
                         color="info"
                         variant="outlined"
@@ -161,7 +164,7 @@ const CustomLoginPage: React.FC = () => {
                   <Divider sx={{ my: 2 }} />
                   
                   <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                    💡 For Google Sign-In: Use any of these email addresses with your Google account
+                    {t('login.google_signin_tip')}
                   </Typography>
                 </Paper>
               </Box>
