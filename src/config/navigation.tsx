@@ -67,18 +67,18 @@ export const useResources = (): RefineProps['resources'] => {
       }
     },
     {
-      name: 'messaging',
-      list: '/messaging',
+      name: 'simple-sms',
+      list: '/simple-sms',
       meta: {
-        label: t('navigation.messaging'),
+        label: 'SMS Messaging',
         icon: <MessageIcon />,
       },
     },
     {
-      name: 'landing-builder',
-      list: '/landing-builder',
+      name: 'landing-pages-examples',
+      list: '/landing-pages-examples',
       meta: {
-        label: t('navigation.landing_pages'),
+        label: 'Landing Page Examples',
         icon: <WebIcon />,
       },
     },

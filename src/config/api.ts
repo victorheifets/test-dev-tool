@@ -6,7 +6,7 @@
 import { getProviderId } from './provider';
 
 // Environment configuration
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = import.meta.env.DEV;
 
 // API Configuration
 export const API_CONFIG = {

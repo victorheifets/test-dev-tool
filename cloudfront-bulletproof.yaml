@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Bulletproof CloudFront distribution for test-dev-tool frontend'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+  
+  BucketName:
+    Type: String
+    Default: ''
+    Description: 'S3 bucket name (leave empty to create new)'
+
+Conditions:
+  CreateNewBucket: !Equals [!Ref BucketName, '']
+
+Resources:
+  # S3 Bucket for static hosting (only if not exists)
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateNewBucket
+    Properties:
+      BucketName: !Sub 'test-dev-tool-${Environment}-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # Origin Access Control for CloudFront
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-OAC'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # CloudFront Distribution
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub 'Test-dev-tool frontend - ${Environment}'
+        DefaultRootObject: index.html
+        
+        Origins:
+          - Id: S3Origin
+            DomainName: !If 
+              - CreateNewBucket
+              - !GetAtt FrontendBucket.RegionalDomainName
+              - !Sub '${BucketName}.s3.${AWS::Region}.amazonaws.com'
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+        
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # Managed-CORS-S3Origin
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03  # Managed-SecurityHeadersPolicy
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+        
+        # Custom error pages for SPA
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 300
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 300
+        
+        PriceClass: PriceClass_100  # US, Canada, Europe
+        HttpVersion: http2
+        IPV6Enabled: true
+
+  # Lambda function to update bucket policy after CF creation
+  BucketPolicyUpdater:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-bucket-policy-updater'
+      Runtime: python3.9
+      Handler: index.handler
+      Role: !GetAtt BucketPolicyUpdaterRole.Arn
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import cfnresponse
+
+          def handler(event, context):
+              s3 = boto3.client('s3')
+              
+              try:
+                  if event['RequestType'] == 'Delete':
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                      return
+                  
+                  bucket_name = event['ResourceProperties']['BucketName']
+                  distribution_arn = event['ResourceProperties']['DistributionArn']
+                  
+                  policy = {
+                      "Version": "2012-10-17",
+                      "Statement": [{
+                          "Sid": "AllowCloudFrontServicePrincipal",
+                          "Effect": "Allow",
+                          "Principal": {
+                              "Service": "cloudfront.amazonaws.com"
+                          },
+                          "Action": "s3:GetObject",
+                          "Resource": f"arn:aws:s3:::{bucket_name}/*",
+                          "Condition": {
+                              "StringEquals": {
+                                  "AWS:SourceArn": distribution_arn
+                              }
+                          }
+                      }]
+                  }
+                  
+                  s3.put_bucket_policy(
+                      Bucket=bucket_name,
+                      Policy=json.dumps(policy)
+                  )
+                  
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+  BucketPolicyUpdaterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3BucketPolicyUpdate
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutBucketPolicy'
+                  - 's3:GetBucketPolicy'
+                Resource: !Sub 'arn:aws:s3:::test-dev-tool-${Environment}-*'
+
+  # Custom resource to update bucket policy
+  UpdateBucketPolicy:
+    Type: Custom::UpdateBucketPolicy
+    DependsOn: CloudFrontDistribution
+    Properties:
+      ServiceToken: !GetAtt BucketPolicyUpdater.Arn
+      BucketName: !If 
+        - CreateNewBucket
+        - !Ref FrontendBucket
+        - !Ref BucketName
+      DistributionArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+Outputs:
+  BucketName:
+    Description: 'S3 bucket for frontend assets'
+    Value: !If 
+      - CreateNewBucket
+      - !Ref FrontendBucket
+      - !Ref BucketName
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+  
+  DistributionId:
+    Description: 'CloudFront distribution ID'
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-DistributionId'
+  
+  DistributionDomainName:
+    Description: 'CloudFront distribution domain'
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-DomainName'
+  
+  DeploymentCommand:
+    Description: 'Command to deploy frontend'
+    Value: !Sub |
+      aws s3 sync dist/ s3://${FrontendBucket}/ --delete && 
+      aws cloudfront create-invalidation --distribution-id ${CloudFrontDistribution} --paths "/*"

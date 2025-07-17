@@ -1,0 +1,14 @@
+{
+  "master": {
+    "tasks": [],
+    "metadata": {
+      "version": "1.0.0",
+      "createdAt": "2025-07-15T20:44:00.000Z",
+      "updatedAt": "2025-07-15T20:44:00.000Z",
+      "totalTasks": 0,
+      "completedTasks": 0,
+      "project": "Test Dev Tool Frontend",
+      "description": "Refine React frontend for course management platform"
+    }
+  }
+}

@@ -40,12 +40,12 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  # CloudFront Distribution - DISABLED by default
+  # CloudFront Distribution - ENABLED by default
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Enabled: false  # DISABLED - enable manually when ready
+        Enabled: true  # ENABLED - ready for production
         Comment: !Sub 'Test-dev-tool frontend - ${Environment}'
         DefaultRootObject: index.html
         
@@ -78,22 +78,20 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
 
-  # Bucket policy for CloudFront access
-  BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref FrontendBucket
-      PolicyDocument:
-        Statement:
-          - Sid: AllowCloudFrontServicePrincipal
-            Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub '${FrontendBucket}/*'
-            Condition:
-              StringEquals:
-                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+  # Bucket policy for CloudFront access - handled separately
+  # BucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   DependsOn: CloudFrontDistribution
+  #   Properties:
+  #     Bucket: !Ref FrontendBucket
+  #     PolicyDocument:
+  #       Statement:
+  #         - Sid: AllowCloudFrontServicePrincipal
+  #           Effect: Allow
+  #           Principal:
+  #             Service: cloudfront.amazonaws.com
+  #           Action: s3:GetObject
+  #           Resource: !Sub '${FrontendBucket}/*'
 
 Outputs:
   BucketName:

@@ -24,3 +24,22 @@ _.ntvs_
 _.njsproj
 _.sln
 \*.sw?
+
+*.log
+npm-debug.log*
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 
