@@ -308,5 +308,34 @@
     "profile": "Profile",
     "logout": "Logout",
     "confirm_logout": "Confirm Logout"
+  },
+
+  "registrationForm": {
+    "title": "Registration Form Builder",
+    "defaultTitle": "Course Registration",
+    "defaultDescription": "Sign up for our amazing courses and start your learning journey today!",
+    "fields": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "email": "Email Address", 
+      "emailPlaceholder": "Enter your email address",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Enter your phone number",
+      "company": "Company",
+      "companyPlaceholder": "Enter your company name"
+    },
+    "buttons": {
+      "preview": "Preview",
+      "save": "Save Form",
+      "publish": "Publish",
+      "addField": "Add Field",
+      "removeField": "Remove Field"
+    },
+    "messages": {
+      "saved": "Form saved successfully",
+      "published": "Form published successfully", 
+      "fieldAdded": "Field added successfully",
+      "fieldRemoved": "Field removed successfully"
+    }
   }
 } 

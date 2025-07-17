@@ -309,5 +309,34 @@
     "profile": "פרופיל",
     "logout": "התנתק",
     "confirm_logout": "אשר התנתקות"
+  },
+
+  "registrationForm": {
+    "title": "בונה טפסי הרשמה",
+    "defaultTitle": "הרשמה לקורס",
+    "defaultDescription": "הירשמו לקורסים המדהימים שלנו והתחילו את מסע הלמידה שלכם היום!",
+    "fields": {
+      "fullName": "שם מלא",
+      "fullNamePlaceholder": "הזינו את השם המלא שלכם",
+      "email": "כתובת אימייל",
+      "emailPlaceholder": "הזינו את כתובת האימייל שלכם",
+      "phone": "מספר טלפון",
+      "phonePlaceholder": "הזינו את מספר הטלפון שלכם",
+      "company": "חברה",
+      "companyPlaceholder": "הזינו את שם החברה שלכם"
+    },
+    "buttons": {
+      "preview": "תצוגה מקדימה",
+      "save": "שמור טופס",
+      "publish": "פרסם",
+      "addField": "הוסף שדה",
+      "removeField": "הסר שדה"
+    },
+    "messages": {
+      "saved": "הטופס נשמר בהצלחה",
+      "published": "הטופס פורסם בהצלחה",
+      "fieldAdded": "השדה נוסף בהצלחה",
+      "fieldRemoved": "השדה הוסר בהצלחה"
+    }
   }
 }

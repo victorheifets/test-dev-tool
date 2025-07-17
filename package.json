@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.848.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",

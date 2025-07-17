@@ -25,6 +25,7 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
+import { sendSMSBatch, SMSRecipient } from '../../services/smsService';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useDelete, useCreate, useUpdate } from '@refinedev/core';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -231,36 +232,55 @@ const SimpleSMS: React.FC = () => {
     
     setSending(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const newMessage: SMSMessage = {
-      id: Date.now().toString(),
-      message: message.trim(),
-      recipients: selectedRecipients.map(r => r.id),
-      sentAt: new Date(),
-      status: 'sending',
-      totalCount: totalRecipients,
-      deliveredCount: 0,
-      failedCount: 0,
-      cost: parseFloat(estimatedCost),
-      recipient_type: selectedRecipients.length === 1 ? selectedRecipients[0].type : 'mixed',
-    };
-    
-    setHistory([newMessage, ...history]);
-    resetSendModal();
-    setSending(false);
-    setSendModalOpen(false);
-    showSuccess('SMS sent successfully');
-    
-    // Simulate status update
-    setTimeout(() => {
-      setHistory(prev => prev.map(msg => 
-        msg.id === newMessage.id 
-          ? { ...msg, status: 'sent', deliveredCount: Math.floor(totalRecipients * 0.95), failedCount: Math.floor(totalRecipients * 0.05) }
-          : msg
-      ));
-    }, 5000);
+    try {
+      // Convert selectedRecipients to SMSRecipient format
+      const smsRecipients: SMSRecipient[] = selectedRecipients.map(recipient => ({
+        id: recipient.id,
+        name: recipient.name,
+        phone: recipient.phone || recipient.contact || '', // Handle different phone field names
+        type: recipient.type
+      }));
+      
+      // Send SMS using AWS SNS
+      const result = await sendSMSBatch(smsRecipients, message.trim());
+      
+      const newMessage: SMSMessage = {
+        id: Date.now().toString(),
+        message: message.trim(),
+        recipients: selectedRecipients.map(r => r.id),
+        sentAt: new Date(),
+        status: result.successCount > 0 ? 'sent' : 'failed',
+        totalCount: result.totalSent,
+        deliveredCount: result.successCount,
+        failedCount: result.failedCount,
+        cost: result.cost,
+        recipient_type: selectedRecipients.length === 1 ? selectedRecipients[0].type : 'mixed',
+      };
+      
+      setHistory([newMessage, ...history]);
+      resetSendModal();
+      setSending(false);
+      setSendModalOpen(false);
+      
+      if (result.successCount > 0) {
+        showSuccess(`SMS sent successfully to ${result.successCount}/${result.totalSent} recipients. Cost: $${result.cost.toFixed(4)}`);
+             } else {
+         handleError(new Error('Failed to send SMS to all recipients'));
+       }
+      
+      // Log detailed results for debugging
+      console.log('SMS Batch Results:', result);
+      result.results.forEach(res => {
+        if (!res.success) {
+          console.error(`Failed to send to ${res.phone} (${res.name}):`, res.error);
+        }
+      });
+      
+    } catch (error) {
+      console.error('SMS sending error:', error);
+      setSending(false);
+      handleError(error instanceof Error ? error : new Error('Failed to send SMS: Unknown error'));
+    }
   };
   
   const resetSendModal = () => {
