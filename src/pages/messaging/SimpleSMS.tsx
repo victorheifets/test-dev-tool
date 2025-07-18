@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Box, 
@@ -92,8 +92,7 @@ const getMessageTemplates = (t: (key: string) => string) => [
 
 // No mock history - will load from API
 
-const SimpleSMS: React.FC = () => {
-  console.log('🚀 [SimpleSMS] Component is rendering');
+const SimpleSMS: React.FC = React.memo(() => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -124,18 +123,15 @@ const SimpleSMS: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   
   const loadSmsHistory = useCallback(async () => {
-    console.log('🔍 [SimpleSMS] loadSmsHistory called');
     setHistoryLoading(true);
     try {
-      console.log('🔍 [SimpleSMS] Making API call to /sms/history');
       const result = await dataProvider.custom!({
         url: '/sms/history',
         method: 'get'
       });
-      console.log('🔍 [SimpleSMS] API response:', result);
       setSmsHistoryData(result);
     } catch (error) {
-      console.error('❌ [SimpleSMS] Failed to load SMS history:', error);
+      console.error('Failed to load SMS history:', error);
     } finally {
       setHistoryLoading(false);
     }
@@ -145,27 +141,27 @@ const SimpleSMS: React.FC = () => {
   const { data: participantsData } = useList({ resource: 'participants' });
   const { data: activitiesData } = useList({ resource: 'activities' });
   
-  const maxLength = 160;
-  const smsCount = Math.ceil(message.length / maxLength);
-  const totalRecipients = selectedRecipients.reduce((sum, r) => sum + (r.count || 1), 0);
-  const estimatedCost = (smsCount * totalRecipients * 0.06).toFixed(2);
+  // Memoize expensive calculations
+  const smsMetrics = useMemo(() => {
+    const maxLength = 160;
+    const smsCount = Math.ceil(message.length / maxLength);
+    const totalRecipients = selectedRecipients.reduce((sum, r) => sum + (r.count || 1), 0);
+    const estimatedCost = (smsCount * totalRecipients * 0.06).toFixed(2);
+    return { maxLength, smsCount, totalRecipients, estimatedCost };
+  }, [message, selectedRecipients]);
   
   // Load SMS history on component mount
   useEffect(() => {
-    console.log('🔍 [SimpleSMS] Component mounted, calling loadSmsHistory');
     const loadData = async () => {
-      console.log('🔍 [SimpleSMS] Starting to load SMS history');
       setHistoryLoading(true);
       try {
-        console.log('🔍 [SimpleSMS] Making API call to /sms/history');
         const result = await dataProvider.custom!({
           url: '/sms/history',
           method: 'get'
         });
-        console.log('🔍 [SimpleSMS] API response:', result);
         setSmsHistoryData(result);
       } catch (error) {
-        console.error('❌ [SimpleSMS] Failed to load SMS history:', error);
+        console.error('Failed to load SMS history:', error);
       } finally {
         setHistoryLoading(false);
       }
@@ -175,7 +171,6 @@ const SimpleSMS: React.FC = () => {
   
   // Process SMS history data when it changes
   useEffect(() => {
-    console.log('🔍 [SimpleSMS] Processing SMS history data:', smsHistoryData);
     if (smsHistoryData?.data) {
       const formattedHistory = smsHistoryData.data.messages?.map((item: any) => ({
         id: item.id,
@@ -189,7 +184,6 @@ const SimpleSMS: React.FC = () => {
         cost: (item.total_recipients || 0) * 0.1,
         recipient_type: 'individual'
       })) || [];
-      console.log('🔍 [SimpleSMS] Formatted history:', formattedHistory);
       setHistory(formattedHistory);
     }
   }, [smsHistoryData]);
@@ -228,22 +222,26 @@ const SimpleSMS: React.FC = () => {
     setRecipients(realRecipients);
   }, [participantsData, activitiesData]);
   
-  // Apply filtering
-  const filteredHistory = history.filter(msg => {
-    const matchesSearch = !searchText || 
-      msg.message.toLowerCase().includes(searchText.toLowerCase()) ||
-      msg.recipient_type.toLowerCase().includes(searchText.toLowerCase());
-    
-    const matchesStatus = !statusFilter || msg.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  // Memoize filtered data to prevent unnecessary re-calculations
+  const filteredHistory = useMemo(() => {
+    return history.filter(msg => {
+      const matchesSearch = !searchText || 
+        msg.message.toLowerCase().includes(searchText.toLowerCase()) ||
+        msg.recipient_type.toLowerCase().includes(searchText.toLowerCase());
+      
+      const matchesStatus = !statusFilter || msg.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [history, searchText, statusFilter]);
   
-  const filteredRecipients = recipients.filter((r: Recipient) => {
-    const matchesType = recipientFilter === 'all' || r.type === recipientFilter;
-    const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  const filteredRecipients = useMemo(() => {
+    return recipients.filter((r: Recipient) => {
+      const matchesType = recipientFilter === 'all' || r.type === recipientFilter;
+      const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesType && matchesSearch;
+    });
+  }, [recipients, recipientFilter, searchTerm]);
   
   const handleView = (id: string) => {
     const messageToView = history.find(m => m.id === id);
@@ -320,12 +318,7 @@ const SimpleSMS: React.FC = () => {
   };
   
   const handleSendSMS = async () => {
-    console.log('🚨 [SimpleSMS] handleSendSMS called!');
-    console.log('🚨 [SimpleSMS] Message:', message);
-    console.log('🚨 [SimpleSMS] Recipients:', selectedRecipients);
-    
     if (!message.trim() || selectedRecipients.length === 0) {
-      console.log('🚨 [SimpleSMS] Validation failed - empty message or no recipients');
       return;
     }
     
@@ -341,12 +334,9 @@ const SimpleSMS: React.FC = () => {
       }));
       
       // Send SMS using AWS SNS
-      console.log('🔍 [SimpleSMS] Sending SMS batch to recipients:', smsRecipients);
       const result = await sendSMSBatch(smsRecipients, message.trim());
-      console.log('🔍 [SimpleSMS] SMS batch result:', result);
       
       // Reload SMS history from API instead of using local state
-      console.log('🔍 [SimpleSMS] Reloading SMS history after send');
       await loadSmsHistory();
       
       resetSendModal();
@@ -358,14 +348,6 @@ const SimpleSMS: React.FC = () => {
       } else {
         handleError(new Error(t('sms.messages.failed_all')));
       }
-      
-      // Log detailed results for debugging
-      console.log('SMS Batch Results:', result);
-      result.results.forEach((res: any) => {
-        if (!res.success) {
-          console.error(`Failed to send to ${res.phone} (${res.name}):`, res.error);
-        }
-      });
       
     } catch (error) {
       console.error('SMS sending error:', error);
@@ -453,6 +435,14 @@ const SimpleSMS: React.FC = () => {
     },
   ];
   
+  // Memoize stats calculations
+  const stats = useMemo(() => ({
+    totalMessages: history.length,
+    sentCount: history.filter(m => m.status === 'sent').length,
+    failedCount: history.filter(m => m.status === 'failed').length,
+    totalCost: history.reduce((sum, msg) => sum + msg.cost, 0)
+  }), [history]);
+
   return (
     <Box sx={{ width: '100%' }}>
       {/* Stats Cards */}
@@ -460,7 +450,7 @@ const SimpleSMS: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title={t('sms.stats.total_messages')} 
-            value={history.length.toString()} 
+            value={stats.totalMessages.toString()} 
             icon={<MessageIcon sx={{ fontSize: 40 }} />} 
             color="primary" 
           />
@@ -468,7 +458,7 @@ const SimpleSMS: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title={t('sms.stats.sent')} 
-            value={history.filter(m => m.status === 'sent').length.toString()} 
+            value={stats.sentCount.toString()} 
             icon={<DeliveredIcon sx={{ fontSize: 40 }} />} 
             color="success" 
           />
@@ -476,7 +466,7 @@ const SimpleSMS: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title={t('sms.stats.failed')} 
-            value={history.filter(m => m.status === 'failed').length.toString()} 
+            value={stats.failedCount.toString()} 
             icon={<ErrorIcon sx={{ fontSize: 40 }} />} 
             color="error" 
           />
@@ -484,7 +474,7 @@ const SimpleSMS: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title={t('sms.stats.total_cost')} 
-            value={`$${history.reduce((sum, msg) => sum + msg.cost, 0).toFixed(2)}`} 
+            value={`$${stats.totalCost.toFixed(2)}`} 
             icon={<PriorityIcon sx={{ fontSize: 40 }} />} 
             color="info" 
           />
@@ -685,10 +675,10 @@ const SimpleSMS: React.FC = () => {
                   {selectedRecipients.length > 0 && (
                     <Alert severity="info" sx={{ mt: 2 }}>
                       <Typography variant="body2">
-                        <strong>{totalRecipients}{t('sms.labels.recipients_selected')}</strong>
+                        <strong>{smsMetrics.totalRecipients}{t('sms.labels.recipients_selected')}</strong>
                       </Typography>
                       <Typography variant="caption">
-                        {t('sms.labels.estimated_cost')}${estimatedCost} ({smsCount}{t('sms.labels.sms_count')} × {totalRecipients} recipients)
+                        {t('sms.labels.estimated_cost')}${smsMetrics.estimatedCost} ({smsMetrics.smsCount}{t('sms.labels.sms_count')} × {smsMetrics.totalRecipients} recipients)
                       </Typography>
                     </Alert>
                   )}
@@ -732,20 +722,20 @@ const SimpleSMS: React.FC = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={t('sms.placeholders.message')}
-                    helperText={`${message.length}/${maxLength}${t('sms.labels.character_count')} • ${smsCount}${t('sms.labels.sms_count')}`}
+                    helperText={`${message.length}/${smsMetrics.maxLength}${t('sms.labels.character_count')} • ${smsMetrics.smsCount}${t('sms.labels.sms_count')}`}
                     sx={{ mb: 2 }}
                   />
 
                   {/* Character Progress */}
                   <LinearProgress
                     variant="determinate"
-                    value={(message.length / maxLength) * 100}
+                    value={(message.length / smsMetrics.maxLength) * 100}
                     sx={{ 
                       mb: 2, 
                       height: 6, 
                       borderRadius: 3,
                       '& .MuiLinearProgress-bar': {
-                        backgroundColor: message.length > maxLength ? 'error.main' : 'primary.main'
+                        backgroundColor: message.length > smsMetrics.maxLength ? 'error.main' : 'primary.main'
                       }
                     }}
                   />
@@ -810,6 +800,8 @@ const SimpleSMS: React.FC = () => {
       </Dialog>
     </Box>
   );
-};
+});
+
+SimpleSMS.displayName = 'SimpleSMS';
 
 export default SimpleSMS;
