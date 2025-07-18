@@ -22,13 +22,15 @@
     "create": "Create",
     "edit": "Edit",
     "delete": "Delete",
+    "bulk_delete": "Bulk Delete",
     "view": "View",
     "save": "Save",
     "cancel": "Cancel",
     "loading": "Loading...",
     "refresh": "Refresh",
     "duplicate": "Duplicate",
-    "close": "Close"
+    "close": "Close",
+    "resend": "Resend"
   },
   
   "messages": {
@@ -37,6 +39,8 @@
     "loading": "Loading data...",
     "no_data": "No data available",
     "confirm_delete": "Are you sure you want to delete this item?",
+    "confirm_bulk_delete": "Are you sure you want to delete {count} items?",
+    "bulk_delete_success": "{count} items deleted successfully",
     "course_created": "Course created successfully",
     "course_updated": "Course updated successfully",
     "enrollment_deleted": "Enrollment deleted successfully!",
@@ -435,7 +439,10 @@
       "recipients_selected": " recipients selected",
       "sent_at": "Sent: ",
       "sms_count": " SMS",
-      "sent": "Sent"
+      "sent": "Sent",
+      "manual_phone_entry": "Add Phone Number Manually",
+      "manual_entry": "Manual Phone Entry",
+      "add_button": "Add"
     },
     "columns": {
       "date_time": "Date & Time",
@@ -450,7 +457,9 @@
     },
     "placeholders": {
       "select_recipients": "Click to select recipients...",
-      "message": "Type your message here..."
+      "message": "Type your message here...",
+      "manual_phone": "+972XXXXXXXXX",
+      "manual_phone_helper": "Enter phone number in international format"
     },
     "help": {
       "recipient_selection": "Search for individuals, courses, or lead groups. Use checkboxes to select multiple."
@@ -481,7 +490,10 @@
       "failed_all": "Failed to send SMS to all recipients",
       "failed_unknown": "Failed to send SMS: Unknown error",
       "no_recipients": "Please select at least one recipient",
-      "empty_message": "Please enter a message"
+      "empty_message": "Please enter a message",
+      "delete_success": "SMS message deleted successfully",
+      "delete_failed": "Failed to delete SMS message",
+      "delete_operation_failed": "Delete operation failed"
     },
     "templates": {
       "quick_templates": "Quick Templates",
@@ -509,6 +521,9 @@
         "name": "Follow Up",
         "content": "How are you finding the course so far? We'd love your feedback!"
       }
+    },
+    "labels": {
+      "messages": "messages"
     }
   }
 } 

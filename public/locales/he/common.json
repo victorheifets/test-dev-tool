@@ -20,15 +20,17 @@
   
   "actions": {
     "create": "צור",
-    "edit": "ערוך",
+    "edit": "ערוך", 
     "delete": "מחק",
+    "bulk_delete": "מחיקה קבוצתית",
     "view": "צפה",
     "save": "שמור",
     "cancel": "בטל",
     "loading": "טוען...",
     "refresh": "רענן",
     "duplicate": "שכפל",
-    "close": "סגור"
+    "close": "סגור",
+    "resend": "שלח שוב"
   },
   
   "messages": {
@@ -37,6 +39,8 @@
     "loading": "טוען נתונים...",
     "no_data": "אין נתונים זמינים",
     "confirm_delete": "האם אתה בטוח שברצונך למחוק פריט זה?",
+    "confirm_bulk_delete": "האם אתה בטוח שברצונך למחוק {count} פריטים?",
+    "bulk_delete_success": "{count} פריטים נמחקו בהצלחה",
     "course_created": "הקורס נוצר בהצלחה",
     "course_updated": "הקורס עודכן בהצלחה",
     "enrollment_deleted": "הרשמה נמחקה בהצלחה!",
@@ -424,7 +428,10 @@
       "recipients_selected": " נמענים נבחרו",
       "sent_at": "נשלח: ",
       "sms_count": " SMS",
-      "sent": "נשלח"
+      "sent": "נשלח",
+      "manual_phone_entry": "הוסף מספר טלפון ידנית",
+      "manual_entry": "הזנת טלפון ידנית",
+      "add_button": "הוסף"
     },
     "columns": {
       "date_time": "תאריך ושעה",
@@ -439,7 +446,9 @@
     },
     "placeholders": {
       "select_recipients": "לחץ לבחירת נמענים...",
-      "message": "הקלד כאן את ההודעה שלך..."
+      "message": "הקלד כאן את ההודעה שלך...",
+      "manual_phone": "+972XXXXXXXXX",
+      "manual_phone_helper": "הכנס מספר טלפון בפורמט בינלאומי"
     },
     "help": {
       "recipient_selection": "חפש יחידים, קורסים או קבוצות לידים. השתמש בתיבות סימון לבחירת מספר פריטים."
@@ -470,7 +479,10 @@
       "failed_all": "שליחת SMS נכשלה לכל הנמענים",
       "failed_unknown": "שליחת SMS נכשלה: שגיאה לא ידועה",
       "no_recipients": "אנא בחר לפחות נמען אחד",
-      "empty_message": "אנא הכנס הודעה"
+      "empty_message": "אנא הכנס הודעה",
+      "delete_success": "הודעת SMS נמחקה בהצלחה",
+      "delete_failed": "מחיקת הודעת SMS נכשלה",
+      "delete_operation_failed": "פעולת המחיקה נכשלה"
     },
     "templates": {
       "quick_templates": "תבניות מהירות",
@@ -498,6 +510,9 @@
         "name": "מעקב",
         "content": "איך אתם מוצאים את הקורס עד כה? נשמח לשמוע את המשוב שלכם!"
       }
+    },
+    "labels": {
+      "messages": "הודעות"
     }
   }
 }

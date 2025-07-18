@@ -25,7 +25,7 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import { sendSMSBatch, SMSRecipient } from '../../services/smsService';
+import { sendSMSBatch, deleteSMSMessage, resendSMSMessage, SMSRecipient } from '../../services/smsService';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useDelete, useCreate, useUpdate, useList } from '@refinedev/core';
 import { dataProvider } from '../../providers/dataProvider';
@@ -48,6 +48,7 @@ import {
   Delete as DeleteIcon,
   FileCopy as CopyIcon,
   PriorityHigh as PriorityIcon,
+  Refresh as RefreshIcon,
   CheckCircle as DeliveredIcon,
   Error as ErrorIcon,
   Visibility as ViewIcon,
@@ -74,12 +75,7 @@ interface SMSMessage {
   recipient_type: string;
 }
 
-// Test phone numbers for SMS sandbox
-const testPhoneNumbers: Recipient[] = [
-  { id: 'test1', name: 'Test Phone 1', phone: '+972545456489', type: 'individual' },
-  { id: 'test2', name: 'Test Phone 2', phone: '+972544660397', type: 'individual' },
-  { id: 'manual', name: 'Manual Phone Entry', phone: '', type: 'individual' },
-];
+// Test phone numbers for SMS sandbox - now using translation function
 
 const getMessageTemplates = (t: (key: string) => string) => [
   { id: 'welcome', name: t('sms.templates.welcome.name'), content: t('sms.templates.welcome.content') },
@@ -88,6 +84,12 @@ const getMessageTemplates = (t: (key: string) => string) => [
   { id: 'promotion', name: t('sms.templates.promotion.name'), content: t('sms.templates.promotion.content') },
   { id: 'completion', name: t('sms.templates.completion.name'), content: t('sms.templates.completion.content') },
   { id: 'follow_up', name: t('sms.templates.follow_up.name'), content: t('sms.templates.follow_up.content') },
+];
+
+const getTestPhoneNumbers = (t: (key: string) => string) => [
+  { id: 'test1', name: 'Test Phone 1', phone: '+972545456489', type: 'individual' },
+  { id: 'test2', name: 'Test Phone 2', phone: '+972544660397', type: 'individual' },
+  { id: 'manual', name: t('sms.labels.manual_entry'), phone: '', type: 'individual' },
 ];
 
 // No mock history - will load from API
@@ -102,8 +104,10 @@ const SimpleSMS: React.FC = React.memo(() => {
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
   const [messageToResend, setMessageToResend] = useState<SMSMessage | null>(null);
   const [history, setHistory] = useState<SMSMessage[]>([]);
-  const [recipients, setRecipients] = useState<Recipient[]>(testPhoneNumbers);
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [manualPhoneNumber, setManualPhoneNumber] = useState('');
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   // Send SMS Modal State
   const [message, setMessage] = useState('');
@@ -190,7 +194,7 @@ const SimpleSMS: React.FC = React.memo(() => {
   
   // Update recipients with real data
   useEffect(() => {
-    const realRecipients = [...testPhoneNumbers];
+    const realRecipients = [...getTestPhoneNumbers(t)];
     
     // Add participants as individuals
     if (participantsData?.data) {
@@ -220,7 +224,7 @@ const SimpleSMS: React.FC = React.memo(() => {
     }
     
     setRecipients(realRecipients);
-  }, [participantsData, activitiesData]);
+  }, [participantsData, activitiesData, t]);
   
   // Memoize filtered data to prevent unnecessary re-calculations
   const filteredHistory = useMemo(() => {
@@ -259,12 +263,22 @@ const SimpleSMS: React.FC = React.memo(() => {
     }
   };
   
-  const confirmResend = () => {
+  const confirmResend = async () => {
     if (messageToResend) {
-      setMessage(messageToResend.message);
-      // In a real app, you would resolve recipient IDs back to recipient objects
-      // For now, we'll just show the modal
-      setSendModalOpen(true);
+      try {
+        setSending(true);
+        await resendSMSMessage(messageToResend.recipients, messageToResend.message);
+        
+        // Refresh history
+        await loadSmsHistory();
+        
+        showSuccess(`SMS resent successfully to ${messageToResend.recipients.length} recipients`);
+      } catch (error) {
+        console.error('Resend failed:', error);
+        handleError(new Error('Failed to resend SMS'));
+      } finally {
+        setSending(false);
+      }
     }
     setResendDialogOpen(false);
     setMessageToResend(null);
@@ -278,6 +292,64 @@ const SimpleSMS: React.FC = React.memo(() => {
       // For now, we'll just show the modal
       setSendModalOpen(true);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setSending(true);
+      const success = await deleteSMSMessage(id);
+      
+      if (success) {
+        // Refresh history
+        await loadSmsHistory();
+        
+        showSuccess(t('sms.messages.delete_success'));
+      } else {
+        throw new Error(t('sms.messages.delete_operation_failed'));
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+      handleError(new Error(t('sms.messages.delete_failed')));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+    
+    console.log('Bulk deleting SMS messages with IDs:', selectedRows);
+    let deleteCount = 0;
+    let errorCount = 0;
+
+    setSending(true);
+    
+    for (const id of selectedRows) {
+      try {
+        const success = await deleteSMSMessage(id);
+        if (success) {
+          deleteCount++;
+        } else {
+          errorCount++;
+        }
+      } catch (error) {
+        console.error(`Delete error for ID ${id}:`, error);
+        errorCount++;
+      }
+    }
+
+    if (deleteCount > 0) {
+      showSuccess(t('messages.bulk_delete_success', { count: deleteCount }));
+      // Refresh history
+      await loadSmsHistory();
+    }
+    if (errorCount > 0) {
+      handleError(new Error(`${errorCount} items failed to delete`), t('actions.bulk_delete'));
+    }
+
+    setBulkDeleteDialogOpen(false);
+    setSelectedRows([]);
+    setSending(false);
   };
 
   
@@ -427,8 +499,16 @@ const SimpleSMS: React.FC = React.memo(() => {
           <ActionMenu
             onEdit={() => handleView(params.row.id)}
             onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDelete(params.row.id)}
             editLabel={t('actions.view')}
             useViewIcon={true}
+            additionalActions={[
+              {
+                label: t('actions.resend'),
+                icon: <RefreshIcon color="primary" />,
+                onClick: () => handleResend(params.row.id)
+              }
+            ]}
           />
         </Box>
       ),
@@ -488,6 +568,16 @@ const SimpleSMS: React.FC = React.memo(() => {
             <Button variant="contained" startIcon={<SendIcon />} onClick={() => setSendModalOpen(true)}>
               {t('sms.buttons.send_sms')}
             </Button>
+            {selectedRows.length > 0 && (
+              <Button 
+                variant="outlined" 
+                color="error" 
+                onClick={() => setBulkDeleteDialogOpen(true)}
+                sx={{ textTransform: 'none' }}
+              >
+                {t('actions.delete')} ({selectedRows.length})
+              </Button>
+            )}
           </Box>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
@@ -515,10 +605,17 @@ const SimpleSMS: React.FC = React.memo(() => {
           </Box>
         </Box>
         
+        
         <Box sx={{ height: 500, width: '100%' }}>
           <DataGrid
             rows={filteredHistory}
             columns={columns}
+            checkboxSelection
+            disableRowSelectionOnClick
+            onRowSelectionModelChange={(newSelectionModel) => {
+              setSelectedRows(newSelectionModel as string[]);
+            }}
+            rowSelectionModel={selectedRows}
             pageSizeOptions={[5, 10, 25, 50]}
             sx={{ border: 'none' }}
           />
@@ -619,7 +716,7 @@ const SimpleSMS: React.FC = React.memo(() => {
                               {option.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {option.type.replace('_', ' ')} {option.count ? `• ${option.count}${t('sms.labels.people_count')}` : ''}
+                              {t(`sms.recipient_types.${option.type}`, option.type.replace('_', ' '))} {option.count ? `• ${option.count}${t('sms.labels.people_count')}` : ''}
                             </Typography>
                           </Box>
                         </Box>
@@ -649,15 +746,15 @@ const SimpleSMS: React.FC = React.memo(() => {
                   {/* Manual Phone Number Input */}
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      Add Phone Number Manually
+                      {t('sms.labels.manual_phone_entry')}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <TextField
                         size="small"
-                        placeholder="+972XXXXXXXXX"
+                        placeholder={t('sms.placeholders.manual_phone')}
                         value={manualPhoneNumber}
                         onChange={(e) => setManualPhoneNumber(e.target.value)}
-                        helperText="Enter phone number in international format"
+                        helperText={t('sms.placeholders.manual_phone_helper')}
                         sx={{ flex: 1 }}
                       />
                       <Button
@@ -666,7 +763,7 @@ const SimpleSMS: React.FC = React.memo(() => {
                         disabled={!manualPhoneNumber.trim()}
                         sx={{ height: 40 }}
                       >
-                        Add
+                        {t('sms.labels.add_button')}
                       </Button>
                     </Box>
                   </Box>
@@ -798,6 +895,15 @@ const SimpleSMS: React.FC = React.memo(() => {
           <Button onClick={() => setViewDialogOpen(false)}>{t('actions.close')}</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={bulkDeleteDialogOpen}
+        onClose={() => setBulkDeleteDialogOpen(false)}
+        onConfirm={confirmBulkDelete}
+        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('sms.labels.messages')}`}
+        description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
+      />
     </Box>
   );
 });

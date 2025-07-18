@@ -16,9 +16,11 @@ i18n
     },
     backend: {
       loadPath: "/locales/{{lng}}/common.json",
+      addPath: "/locales/{{lng}}/common.json",
+      crossDomain: false,
     },
     react: {
-      useSuspense: true,
+      useSuspense: false,
     },
   });
 
