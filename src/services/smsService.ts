@@ -32,10 +32,9 @@ export const sendSMSBatch = async (
   try {
     // Extract phone numbers from recipients
     const phoneNumbers = recipients.map(r => r.phone);
-    console.log('📤 [smsService] Sending SMS to phone numbers:', phoneNumbers);
+    console.log('📤 [smsService] Sending SMS to:', phoneNumbers);
     
     // Call the SMS API endpoint
-    console.log('📤 [smsService] Making API call to /sms/send');
     const response = await dataProvider.custom!({
       url: '/sms/send',
       method: 'post',
@@ -46,19 +45,23 @@ export const sendSMSBatch = async (
         sms_type: 'Promotional'
       }
     });
-    console.log('📤 [smsService] API response:', response);
+    console.log('📤 [smsService] SMS sent successfully:', response);
+    
+    // Check if the SMS was actually sent successfully
+    const isSuccess = response.data.status === 'sent' || response.data.status === 'success';
     
     // Map API response to expected format
     const results: SMSResult[] = recipients.map(recipient => ({
-      success: true, // Assume success for now - API doesn't return per-recipient status
+      success: isSuccess,
       messageId: response.data.message_id,
       phone: recipient.phone,
-      name: recipient.name
+      name: recipient.name,
+      error: !isSuccess ? `SMS failed: ${response.data.status}` : undefined
     }));
     
-    const successCount = response.data.total_recipients;
-    const failedCount = 0; // API doesn't provide failure count yet
-    const cost = successCount * 0.1; // Rough estimate - $0.1 per SMS
+    const successCount = isSuccess ? response.data.total_recipients : 0;
+    const failedCount = isSuccess ? 0 : response.data.total_recipients;
+    const cost = successCount * 0.1; // Only charge for successful messages
     
     return {
       totalSent: recipients.length,
@@ -71,20 +74,7 @@ export const sendSMSBatch = async (
   } catch (error) {
     console.error('SMS API error:', error);
     
-    // Return error response
-    const results: SMSResult[] = recipients.map(recipient => ({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      phone: recipient.phone,
-      name: recipient.name
-    }));
-    
-    return {
-      totalSent: recipients.length,
-      successCount: 0,
-      failedCount: recipients.length,
-      results,
-      cost: 0
-    };
+    // Re-throw the error so it's properly handled by the UI
+    throw error;
   }
 };

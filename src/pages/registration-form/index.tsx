@@ -34,10 +34,10 @@ interface FormData {
   first_name: string;
   last_name: string;
   email: string;
-  phone: string;
+  phone?: string;
   source: string;
-  activity_of_interest: string;
-  notes: string;
+  activity_of_interest?: string;
+  notes?: string;
 }
 
 interface FormSettings {
@@ -73,14 +73,14 @@ const RegistrationForm: React.FC = () => {
   });
 
   // Create validation schema with translated messages
-  const validationSchemaWithTranslation = yup.object({
+  const validationSchemaWithTranslation: yup.ObjectSchema<FormData> = yup.object().shape({
     first_name: yup.string().required(t('validation.first_name_required')).min(1).max(100),
     last_name: yup.string().required(t('validation.last_name_required')).min(1).max(100),
     email: yup.string().email(t('validation.email_invalid')).required(t('validation.email_required')),
-    phone: yup.string().min(10, t('validation.phone_min_length')),
+    phone: yup.string().optional().min(10, t('validation.phone_min_length')),
     source: yup.string().required(t('validation.source_required')),
-    activity_of_interest: yup.string(),
-    notes: yup.string().max(2000, t('validation.notes_max_length'))
+    activity_of_interest: yup.string().optional(),
+    notes: yup.string().optional().max(2000, t('validation.notes_max_length'))
   });
 
   const {

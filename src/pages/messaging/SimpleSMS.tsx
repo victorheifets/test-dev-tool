@@ -93,6 +93,7 @@ const getMessageTemplates = (t: (key: string) => string) => [
 // No mock history - will load from API
 
 const SimpleSMS: React.FC = () => {
+  console.log('🚀 [SimpleSMS] Component is rendering');
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -152,8 +153,25 @@ const SimpleSMS: React.FC = () => {
   // Load SMS history on component mount
   useEffect(() => {
     console.log('🔍 [SimpleSMS] Component mounted, calling loadSmsHistory');
-    loadSmsHistory();
-  }, [loadSmsHistory]);
+    const loadData = async () => {
+      console.log('🔍 [SimpleSMS] Starting to load SMS history');
+      setHistoryLoading(true);
+      try {
+        console.log('🔍 [SimpleSMS] Making API call to /sms/history');
+        const result = await dataProvider.custom!({
+          url: '/sms/history',
+          method: 'get'
+        });
+        console.log('🔍 [SimpleSMS] API response:', result);
+        setSmsHistoryData(result);
+      } catch (error) {
+        console.error('❌ [SimpleSMS] Failed to load SMS history:', error);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    loadData();
+  }, []); // Simplified dependencies
   
   // Process SMS history data when it changes
   useEffect(() => {
@@ -275,10 +293,25 @@ const SimpleSMS: React.FC = () => {
   
   const handleAddManualPhone = () => {
     if (manualPhoneNumber.trim()) {
+      // Clean and format the phone number
+      let cleanPhone = manualPhoneNumber.trim();
+      
+      // Remove any non-digit characters except +
+      cleanPhone = cleanPhone.replace(/[^\d+]/g, '');
+      
+      // If it doesn't start with +, add +972 for Israeli numbers
+      if (!cleanPhone.startsWith('+')) {
+        // If it starts with 0, remove it (Israeli local format)
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = cleanPhone.substring(1);
+        }
+        cleanPhone = '+972' + cleanPhone;
+      }
+      
       const newRecipient: Recipient = {
         id: `manual-${Date.now()}`,
-        name: `Manual: ${manualPhoneNumber}`,
-        phone: manualPhoneNumber.trim(),
+        name: `Manual: ${cleanPhone}`,
+        phone: cleanPhone,
         type: 'individual'
       };
       setSelectedRecipients([...selectedRecipients, newRecipient]);
@@ -287,7 +320,14 @@ const SimpleSMS: React.FC = () => {
   };
   
   const handleSendSMS = async () => {
-    if (!message.trim() || selectedRecipients.length === 0) return;
+    console.log('🚨 [SimpleSMS] handleSendSMS called!');
+    console.log('🚨 [SimpleSMS] Message:', message);
+    console.log('🚨 [SimpleSMS] Recipients:', selectedRecipients);
+    
+    if (!message.trim() || selectedRecipients.length === 0) {
+      console.log('🚨 [SimpleSMS] Validation failed - empty message or no recipients');
+      return;
+    }
     
     setSending(true);
     
@@ -305,19 +345,6 @@ const SimpleSMS: React.FC = () => {
       const result = await sendSMSBatch(smsRecipients, message.trim());
       console.log('🔍 [SimpleSMS] SMS batch result:', result);
       
-      const newMessage: SMSMessage = {
-        id: Date.now().toString(),
-        message: message.trim(),
-        recipients: selectedRecipients.map(r => r.id),
-        sentAt: new Date(),
-        status: result.successCount > 0 ? 'sent' : 'failed',
-        totalCount: result.totalSent,
-        deliveredCount: result.successCount,
-        failedCount: result.failedCount,
-        cost: result.cost,
-        recipient_type: selectedRecipients.length === 1 ? selectedRecipients[0].type : 'mixed',
-      };
-      
       // Reload SMS history from API instead of using local state
       console.log('🔍 [SimpleSMS] Reloading SMS history after send');
       await loadSmsHistory();
@@ -328,9 +355,9 @@ const SimpleSMS: React.FC = () => {
       
       if (result.successCount > 0) {
         showSuccess(t('sms.messages.success_detailed', { successCount: result.successCount, totalSent: result.totalSent, cost: result.cost.toFixed(4) }));
-             } else {
-         handleError(new Error(t('sms.messages.failed_all')));
-       }
+      } else {
+        handleError(new Error(t('sms.messages.failed_all')));
+      }
       
       // Log detailed results for debugging
       console.log('SMS Batch Results:', result);
@@ -343,6 +370,7 @@ const SimpleSMS: React.FC = () => {
     } catch (error) {
       console.error('SMS sending error:', error);
       setSending(false);
+      // Don't close modal or reset form on error - let user try again
       handleError(error instanceof Error ? error : new Error(t('sms.messages.failed_unknown')));
     }
   };

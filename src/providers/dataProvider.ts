@@ -312,9 +312,10 @@ export const dataProvider: DataProvider = {
   
   // Custom method for additional functionality
   custom: async ({ url, method, filters, sorters, payload, query, headers, meta }) => {
-    console.log(`[DataProvider] custom called:`, { url, method });
+    console.log(`[DataProvider] custom called:`, { url, method, payload });
     
     const fullUrl = url.startsWith('http') ? url : `${API_CONFIG.baseURL}${url}`;
+    console.log(`[DataProvider] Full URL: ${fullUrl}`);
     
     const config: RequestInit = {
       method: method?.toUpperCase() || 'GET',
@@ -326,14 +327,17 @@ export const dataProvider: DataProvider = {
     
     if (payload) {
       config.body = JSON.stringify(payload);
+      console.log(`[DataProvider] Payload:`, JSON.stringify(payload, null, 2));
     }
     
     try {
+      console.log(`[DataProvider] Making request to: ${fullUrl}`);
       const response = await httpClient(fullUrl, config);
-      console.log(`[DataProvider] custom success`);
+      console.log(`[DataProvider] custom success - Response:`, response);
       return { data: response };
       
     } catch (error) {
+      console.error(`[DataProvider] custom failed:`, error);
       logError(error, `DataProvider.custom(${method} ${url})`);
       throw error;
     }
