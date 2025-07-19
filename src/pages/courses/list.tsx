@@ -18,6 +18,8 @@ import BusinessIcon from '@mui/icons-material/Business';
 
 export const CourseList = () => {
   const { t } = useTranslation();
+  // Desktop version - should show Create Course button and proper search layout
+  console.log('DESKTOP COURSES PAGE LOADED'); // Debug log
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -255,9 +257,24 @@ export const CourseList = () => {
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('course')}</Button>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+              <Button 
+                variant="contained" 
+                onClick={handleAddNew}
+                sx={{ 
+                  whiteSpace: 'nowrap',
+                  minWidth: 140,
+                  backgroundColor: '#1976d2 !important',
+                  color: 'white !important',
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: '#1565c0 !important',
+                  }
+                }}
+              >
+                + {t('actions.create')} {t('course')}
+              </Button>
               {selectedRows.length > 0 && (
                 <Button 
                   variant="outlined" 
@@ -269,18 +286,22 @@ export const CourseList = () => {
                 </Button>
               )}
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 1, minWidth: 0 }}>
               <TextField
                 placeholder={t('search.placeholder_courses')}
                 variant="outlined"
                 size="small"
-                sx={{ minWidth: 250 }}
+                sx={{ 
+                  minWidth: 200,
+                  maxWidth: 300,
+                  flexShrink: 1
+                }}
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
                 }}
               />
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
                 <InputLabel>{t('course_fields.status')}</InputLabel>
                 <Select
                   label={t('course_fields.status')}

@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box, useTheme } from "@mui/material";
+import { Card, CardContent, Typography, Box, useTheme, useMediaQuery } from "@mui/material";
 
 interface StatCardProps {
   icon: JSX.Element;
@@ -9,6 +9,7 @@ interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const paletteColor = theme.palette[color as keyof typeof theme.palette];
   const mainColor = typeof paletteColor === 'object' && 'main' in paletteColor ? paletteColor.main : theme.palette.primary.main;
@@ -26,12 +27,34 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
         height: '100%',
       }}
     >
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Box sx={{ color: mainColor, display: 'flex', mr: 1.5 }}>
+      <CardContent sx={{ 
+        p: isMobile ? 1.5 : 2, 
+        '&:last-child': { pb: isMobile ? 1.5 : 2 } 
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          mb: isMobile ? 0.5 : 1,
+          flexDirection: isMobile ? 'column' : 'row',
+          textAlign: isMobile ? 'center' : 'left'
+        }}>
+          <Box sx={{ 
+            color: mainColor, 
+            display: 'flex', 
+            mr: isMobile ? 0 : 1.5,
+            mb: isMobile ? 0.5 : 0
+          }}>
             {icon}
           </Box>
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+          <Typography 
+            variant="body1" 
+            color="text.secondary" 
+            sx={{ 
+              fontSize: isMobile ? '0.85rem' : '1.1rem', 
+              fontWeight: 500,
+              lineHeight: 1.2
+            }}
+          >
             {title}
           </Typography>
         </Box>
@@ -40,8 +63,9 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
           component="div" 
           fontWeight="bold" 
           sx={{ 
-            fontSize: '1.8rem',
-            textAlign: isRTL ? 'left' : 'right'
+            fontSize: isMobile ? '1.4rem' : '1.8rem',
+            textAlign: isMobile ? 'center' : (isRTL ? 'left' : 'right'),
+            lineHeight: 1
           }}
         >
           {value}

@@ -2,6 +2,10 @@
 
 ## 🚀 Overview
 
+**⚠️ NOTICE**: This guide has been consolidated into the main deployment documentation.
+
+**Please use the new single deployment guide**: `/course-management-api/DEPLOYMENT_GUIDE.md`
+
 This guide provides a comprehensive, bulletproof deployment strategy for the Course Management Frontend. All common issues have been identified, documented, and resolved.
 
 ## 📋 Pre-Deployment Checklist
@@ -190,7 +194,7 @@ DistributionConfig:
 ### Health Checks
 ```bash
 # CloudFront Distribution
-curl https://d12i0z6ii7wcu2.cloudfront.net/
+curl https://d3ld4gkanad66u.cloudfront.net/
 
 # Expected: React application loads successfully
 # Status: 200 OK
@@ -202,6 +206,7 @@ curl https://d12i0z6ii7wcu2.cloudfront.net/
 curl https://test-dev-tool-prod-764414385399.s3.eu-west-1.amazonaws.com/index.html
 
 # Expected: 403 Forbidden (correctly secured)
+# S3 bucket is private with all public access blocked
 ```
 
 ### Debugging Commands
@@ -210,13 +215,13 @@ curl https://test-dev-tool-prod-764414385399.s3.eu-west-1.amazonaws.com/index.ht
 aws cloudformation describe-stacks --stack-name course-management-frontend
 
 # CloudFront Distribution Status
-aws cloudfront get-distribution --id E7357PV9IYYE3
+aws cloudfront get-distribution --id E2MY7WM6N3WVGB
 
 # S3 Bucket Contents
 aws s3 ls s3://test-dev-tool-prod-764414385399/ --recursive
 
 # CloudFront Cache Status
-aws cloudfront get-invalidation --distribution-id E7357PV9IYYE3 --id <invalidation-id>
+aws cloudfront get-invalidation --distribution-id E2MY7WM6N3WVGB --id <invalidation-id>
 ```
 
 ## 🚨 Emergency Procedures
@@ -231,7 +236,7 @@ git checkout <previous-commit>
 # Rebuild and deploy
 npm run build
 aws s3 sync ./dist s3://test-dev-tool-prod-764414385399/ --delete
-aws cloudfront create-invalidation --distribution-id E7357PV9IYYE3 --paths "/*"
+aws cloudfront create-invalidation --distribution-id E2MY7WM6N3WVGB --paths "/*"
 ```
 
 #### Method 2: CloudFormation Rollback
@@ -295,10 +300,11 @@ export default defineConfig({
 ## 🔐 Security Considerations
 
 ### Infrastructure Security
-- **S3 Bucket**: Private with CloudFront OAC only
+- **S3 Bucket**: Private with CloudFront OAC only (all public access blocked)
 - **CloudFront**: HTTPS redirect enabled
 - **Origin Access Control**: Replaces legacy OAI
 - **Security Headers**: Implemented via response headers policy
+- **Public Access**: Completely blocked at S3 level for maximum security
 
 ### Application Security
 - **Content Security Policy**: Configured for React app

@@ -17,6 +17,8 @@ import {
   Tooltip,
   Typography,
   Box,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 
@@ -38,6 +40,7 @@ import { useResources } from "./config/navigation";
 import { useTranslation } from "react-i18next";
 import { Dashboard } from "./pages/dashboard";
 import { CourseList } from './pages/courses/list';
+import { CourseList as CourseListMobile } from './pages/courses/list-mobile';
 import { ParticipantsList } from './pages/participants/list';
 import { EnrollmentsList } from './pages/enrollments/list';
 import { LeadsList } from './pages/leads/list';
@@ -86,6 +89,8 @@ const Title = ({ collapsed }: { collapsed: boolean }) => {
 const AppContent = () => {
   const resources = useResources();
   const notificationProvider = useNotificationProvider();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   return (
     <DevtoolsProvider>
@@ -111,7 +116,7 @@ const AppContent = () => {
                       >
                         <ThemedLayoutV2 
                           Header={() => <Header sticky={false} />}
-                          Sider={(props) => <ThemedSiderV2 {...props} Title={Title} />}
+                          Sider={isMobile ? () => null : (props) => <ThemedSiderV2 {...props} Title={Title} />}
                         >
                           <Outlet />
                         </ThemedLayoutV2>
@@ -124,6 +129,7 @@ const AppContent = () => {
                     />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/courses" element={<CourseList />} />
+                    <Route path="/courses-mobile" element={<CourseListMobile />} />
                     <Route path="/participants" element={<ParticipantsList />} />
                     <Route path="/enrollments" element={<EnrollmentsList />} />
                     <Route path="/leads" element={<LeadsList />} />

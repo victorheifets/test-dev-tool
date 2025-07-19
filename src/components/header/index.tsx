@@ -23,7 +23,7 @@ import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../../contexts/color-mode";
-import { Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem, useMediaQuery, useTheme } from "@mui/material";
 
 type IUser = {
   id: string;
@@ -40,6 +40,10 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { i18n, t } = useTranslation();
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
+  
+  // Check if mobile to hide hamburger menu
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Separate state for language and user menus
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
@@ -86,7 +90,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
       <Toolbar>
         <Box sx={{ flexGrow: 1 }} />
         <Stack direction="row" spacing={2} alignItems="center">
-          <HamburgerMenu />
+          {!isMobile && <HamburgerMenu />}
           <IconButton
             color="inherit"
             aria-controls="language-menu"

@@ -51,7 +51,8 @@
     "participant_updated": "Participant updated successfully!",
     "lead_deleted": "Lead deleted successfully!",
     "lead_created": "Lead created successfully!",
-    "lead_updated": "Lead updated successfully!"
+    "lead_updated": "Lead updated successfully!",
+    "data_refreshed": "Data refreshed successfully"
   },
   
   "course_status": {
@@ -111,7 +112,13 @@
     "last_name": "Last Name",
     "created_at": "Created At",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "pull_to_refresh": "Pull to refresh",
+    "release_to_refresh": "Release to refresh",
+    "not_set": "Not set",
+    "invalid_date": "Invalid date"
   },
   
   "search": {
