@@ -1,6 +1,5 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolIcon from '@mui/icons-material/School';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PeopleIcon from '@mui/icons-material/People';
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -36,14 +35,6 @@ export const useResources = (): RefineProps['resources'] => {
       meta: {
         label: t('navigation.courses'),
         icon: <SchoolIcon />,
-      },
-    },
-    {
-      name: 'courses-mobile',
-      list: '/courses-mobile',
-      meta: {
-        label: 'Courses (Mobile Demo)',
-        icon: <PhoneIphoneIcon />,
       },
     },
     {

@@ -41,23 +41,25 @@ export const usePullToRefresh = ({
   const scrollElement = useRef<HTMLElement | null>(null);
 
   // Handle touch start
-  const handleTouchStart = useCallback((e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: Event) => {
+    const touchEvent = e as TouchEvent;
     if (!enabled || !isMobile) return;
     
     const scrollTop = scrollElement.current?.scrollTop || window.scrollY;
     
     // Only start pull-to-refresh if at top of page
     if (scrollTop === 0) {
-      touchStartY.current = e.touches[0].clientY;
+      touchStartY.current = touchEvent.touches[0].clientY;
     }
   }, [enabled, isMobile]);
 
   // Handle touch move
-  const handleTouchMove = useCallback((e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: Event) => {
+    const touchEvent = e as TouchEvent;
     if (!enabled || !isMobile || state.isRefreshing) return;
     
     const scrollTop = scrollElement.current?.scrollTop || window.scrollY;
-    const currentY = e.touches[0].clientY;
+    const currentY = touchEvent.touches[0].clientY;
     const pullDistance = Math.max(0, currentY - touchStartY.current);
 
     // Only allow pull-to-refresh at top of page

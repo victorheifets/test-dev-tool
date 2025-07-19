@@ -23,12 +23,28 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Fab
+  Fab,
+  useMediaQuery,
+  useTheme,
+  Tab,
+  Tabs,
+  Slide
 } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Edit as EditIcon, Preview as PreviewIcon, Publish as PublishIcon, Save as SaveIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Preview as PreviewIcon, Publish as PublishIcon, Save as SaveIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface FormData {
   first_name: string;
@@ -49,12 +65,15 @@ interface FormSettings {
 
 const RegistrationForm: React.FC = () => {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
+  const theme = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [mobileTab, setMobileTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -476,41 +495,55 @@ const RegistrationForm: React.FC = () => {
       breadcrumb={null}
       saveButtonProps={{ style: { display: 'none' } }}
       headerButtons={
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<SaveIcon />}
-            onClick={handleSaveSettings}
-          >
-            {t('registrationForm.buttons.save')}
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<PreviewIcon />}
-            onClick={() => setPreviewOpen(true)}
-          >
-            {t('registrationForm.buttons.preview')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<PublishIcon />}
-            onClick={() => setPublishDialogOpen(true)}
-            disabled={isPublishing}
-            sx={{ 
-              backgroundColor: '#7367F0', 
-              '&:hover': { backgroundColor: '#5a52cc' },
-              '&:disabled': { backgroundColor: '#b8b2ff' }
-            }}
-          >
-            {isPublishing ? t('registrationForm.publishing') : t('registrationForm.buttons.publish')}
-          </Button>
-        </Box>
+        !isMobile && (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<SaveIcon />}
+              onClick={handleSaveSettings}
+            >
+              {t('registrationForm.buttons.save')}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<PreviewIcon />}
+              onClick={() => setPreviewOpen(true)}
+            >
+              {t('registrationForm.buttons.preview')}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<PublishIcon />}
+              onClick={() => setPublishDialogOpen(true)}
+              disabled={isPublishing}
+              sx={{ 
+                backgroundColor: '#7367F0', 
+                '&:hover': { backgroundColor: '#5a52cc' },
+                '&:disabled': { backgroundColor: '#b8b2ff' }
+              }}
+            >
+              {isPublishing ? t('registrationForm.publishing') : t('registrationForm.buttons.publish')}
+            </Button>
+          </Box>
+        )
       }
     >
-      <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
-        <Grid container spacing={3}>
-        {/* Form Settings */}
-        <Grid item xs={12} md={6}>
+      <Box sx={{ p: isMobile ? 0 : 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
+        {/* Mobile Tabs */}
+        {isMobile && (
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={mobileTab} onChange={(e, newValue) => setMobileTab(newValue)} variant="fullWidth">
+              <Tab label={t('registrationForm.settings')} icon={<SettingsIcon />} iconPosition="start" />
+              <Tab label={t('registrationForm.preview')} icon={<PreviewIcon />} iconPosition="start" />
+            </Tabs>
+          </Box>
+        )}
+        
+        {/* Desktop Layout */}
+        {!isMobile ? (
+          <Grid container spacing={3}>
+            {/* Form Settings */}
+            <Grid item xs={12} md={6}>
           <Box sx={{ p: 3 }}>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
               {t('registrationForm.title')}
@@ -686,25 +719,296 @@ const RegistrationForm: React.FC = () => {
               </Box>
           </Box>
         </Grid>
-        </Grid>
+          </Grid>
+        ) : (
+          /* Mobile Layout */
+          <Box>
+            {/* Settings Tab */}
+            {mobileTab === 0 && (
+              <Box sx={{ p: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                  {t('registrationForm.title')}
+                </Typography>
+                <Grid container spacing={2}>
+                  {/* Editable Title */}
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      p: 2, 
+                      border: '1px solid', 
+                      borderColor: 'divider', 
+                      borderRadius: 1, 
+                      backgroundColor: 'white',
+                      boxShadow: 1,
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1 
+                    }}>
+                      {editingTitle ? (
+                        <TextField
+                          fullWidth
+                          value={formSettings.title}
+                          onChange={(e) => setFormSettings(prev => ({ ...prev, title: e.target.value }))}
+                          onBlur={() => setEditingTitle(false)}
+                          onKeyPress={(e) => e.key === 'Enter' && setEditingTitle(false)}
+                          autoFocus
+                          label={t('registrationForm.fields.title')}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiInputBase-input': {
+                              fontSize: '16px', // Prevent zoom on iOS
+                            }
+                          }}
+                        />
+                      ) : (
+                        <>
+                          <Typography variant="h6" sx={{ flex: 1, fontWeight: 500 }}>
+                            {formSettings.title}
+                          </Typography>
+                          <IconButton onClick={() => setEditingTitle(true)} size="small">
+                            <EditIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
+
+                  {/* Editable Description */}
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      p: 2, 
+                      border: '1px solid', 
+                      borderColor: 'divider', 
+                      borderRadius: 1, 
+                      backgroundColor: 'white',
+                      boxShadow: 1,
+                      display: 'flex', 
+                      alignItems: 'flex-start', 
+                      gap: 1 
+                    }}>
+                      {editingDescription ? (
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={2}
+                          value={formSettings.description}
+                          onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
+                          onBlur={() => setEditingDescription(false)}
+                          autoFocus
+                          label={t('registrationForm.fields.description')}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiInputBase-input': {
+                              fontSize: '16px', // Prevent zoom on iOS
+                            }
+                          }}
+                        />
+                      ) : (
+                        <>
+                          <Typography variant="body1" color="text.secondary" sx={{ flex: 1, lineHeight: 1.5 }}>
+                            {formSettings.description}
+                          </Typography>
+                          <IconButton onClick={() => setEditingDescription(true)} size="small">
+                            <EditIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Divider />
+                  </Grid>
+
+                  {/* Publishing Status */}
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formSettings.published}
+                          disabled
+                          color="success"
+                        />
+                      }
+                      label={formSettings.published ? t('registrationForm.status.published') : t('registrationForm.status.draft')}
+                    />
+                    {formSettings.published && formSettings.publishedUrl && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {t('registrationForm.publishedUrl')}:
+                        </Typography>
+                        <Typography variant="body2" color="primary" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                          {formSettings.publishedUrl}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {/* Preview Tab */}
+            {mobileTab === 1 && (
+              <Box sx={{ p: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                  {t('registrationForm.preview')}
+                </Typography>
+                <Box sx={{ 
+                  border: '1px solid', 
+                  borderColor: 'divider', 
+                  borderRadius: 1, 
+                  p: 2, 
+                  boxShadow: 1,
+                  backgroundColor: 'white'
+                }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 500 }}>
+                    {formSettings.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph sx={{ lineHeight: 1.5 }}>
+                    {formSettings.description}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
+                        {t('registrationForm.fields.fullName')}
+                      </Typography>
+                      <TextField size="small" disabled variant="outlined" fullWidth />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
+                        {t('common.last_name')}
+                      </Typography>
+                      <TextField size="small" disabled variant="outlined" fullWidth />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
+                        {t('registrationForm.fields.email')}
+                      </Typography>
+                      <TextField size="small" disabled variant="outlined" fullWidth />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
+                        {t('registrationForm.fields.phone')}
+                      </Typography>
+                      <TextField size="small" disabled variant="outlined" fullWidth />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
+                        {t('forms.source')}
+                      </Typography>
+                      <FormControl size="small" fullWidth variant="outlined">
+                        <Select disabled value="website">
+                          <MenuItem value="website">{t('sources.website')}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Button variant="contained" disabled sx={{ height: 48, mt: 1 }}>
+                      {t('landing_pages.forms.submit')}
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Box>
+        )}
       </Box>
+
+      {/* Mobile Action Buttons */}
+      {isMobile && (
+        <Box sx={{ 
+          position: 'fixed', 
+          bottom: 16, 
+          right: 16, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 1,
+          zIndex: 1000 
+        }}>
+          <Fab
+            size="small"
+            color="default"
+            onClick={handleSaveSettings}
+            sx={{ backgroundColor: 'white', boxShadow: 2 }}
+          >
+            <SaveIcon />
+          </Fab>
+          <Fab
+            size="small"
+            color="secondary"
+            onClick={() => setPreviewOpen(true)}
+          >
+            <PreviewIcon />
+          </Fab>
+          <Fab
+            color="primary"
+            onClick={() => setPublishDialogOpen(true)}
+            disabled={isPublishing}
+            sx={{ 
+              backgroundColor: '#7367F0', 
+              '&:hover': { backgroundColor: '#5a52cc' },
+              '&:disabled': { backgroundColor: '#b8b2ff' }
+            }}
+          >
+            {isPublishing ? <CircularProgress size={24} color="inherit" /> : <PublishIcon />}
+          </Fab>
+        </Box>
+      )}
 
       {/* Preview Dialog */}
       <Dialog 
         open={previewOpen} 
         onClose={() => setPreviewOpen(false)} 
-        maxWidth="md" 
-        fullWidth
+        maxWidth={isMobile ? false : "md"} 
+        fullWidth={!isMobile}
+        fullScreen={isMobile}
+        TransitionComponent={isMobile ? Transition : undefined}
         PaperProps={{
-          sx: { boxShadow: 6, border: '1px solid', borderColor: 'divider' }
+          sx: { 
+            boxShadow: 6, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            borderRadius: isMobile ? 0 : 2,
+            margin: isMobile ? 0 : 2,
+          }
         }}
       >
-        <DialogTitle>{t('registrationForm.buttons.preview')}</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{
+          backgroundColor: isMobile ? 'primary.main' : 'transparent',
+          color: isMobile ? 'white' : 'text.primary',
+          fontWeight: 600,
+          fontSize: isMobile ? '1.25rem' : '1.5rem',
+          py: isMobile ? 2 : 1.5,
+        }}>{t('registrationForm.buttons.preview')}</DialogTitle>
+        <DialogContent sx={{
+          backgroundColor: isMobile ? '#f8f9fa' : 'background.paper',
+          px: isMobile ? 1 : 3,
+          py: isMobile ? 1 : 2,
+        }}>
           <FormPreview />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPreviewOpen(false)}>{t('actions.close')}</Button>
+        <DialogActions sx={{
+          backgroundColor: isMobile ? 'background.paper' : 'transparent',
+          px: isMobile ? 2 : 3,
+          py: isMobile ? 2 : 1,
+          borderTop: isMobile ? '1px solid' : 'none',
+          borderColor: 'divider',
+        }}>
+          <Button 
+            onClick={() => setPreviewOpen(false)}
+            variant={isMobile ? "contained" : "text"}
+            fullWidth={isMobile}
+            sx={isMobile ? {
+              height: 48,
+              minHeight: 48,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: 'none',
+            } : {}}
+          >
+            {t('actions.close')}
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -712,18 +1016,59 @@ const RegistrationForm: React.FC = () => {
       <Dialog 
         open={publishDialogOpen} 
         onClose={() => setPublishDialogOpen(false)}
+        maxWidth={isMobile ? false : "sm"}
+        fullWidth={!isMobile}
+        fullScreen={isMobile}
+        TransitionComponent={isMobile ? Transition : undefined}
         PaperProps={{
-          sx: { boxShadow: 6, border: '1px solid', borderColor: 'divider' }
+          sx: { 
+            boxShadow: 6, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            borderRadius: isMobile ? 0 : 2,
+            margin: isMobile ? 0 : 2,
+          }
         }}
       >
-        <DialogTitle>{t('registrationForm.buttons.publish')}</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{
+          backgroundColor: isMobile ? 'primary.main' : 'transparent',
+          color: isMobile ? 'white' : 'text.primary',
+          fontWeight: 600,
+          fontSize: isMobile ? '1.25rem' : '1.5rem',
+          py: isMobile ? 2 : 1.5,
+        }}>{t('registrationForm.buttons.publish')}</DialogTitle>
+        <DialogContent sx={{
+          backgroundColor: isMobile ? '#f8f9fa' : 'background.paper',
+          px: isMobile ? 2 : 3,
+          py: isMobile ? 2 : 2,
+        }}>
           <Typography>
             {t('registrationForm.publishConfirmation')}
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPublishDialogOpen(false)} disabled={isPublishing}>
+        <DialogActions sx={{
+          backgroundColor: isMobile ? 'background.paper' : 'transparent',
+          px: isMobile ? 2 : 3,
+          py: isMobile ? 2 : 1,
+          gap: 1,
+          borderTop: isMobile ? '1px solid' : 'none',
+          borderColor: 'divider',
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+        }}>
+          <Button 
+            onClick={() => setPublishDialogOpen(false)} 
+            disabled={isPublishing}
+            variant="outlined"
+            fullWidth={isMobile}
+            sx={isMobile ? {
+              height: 48,
+              minHeight: 48,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: 'none',
+            } : {}}
+          >
             {t('actions.cancel')}
           </Button>
           <Button 
@@ -731,10 +1076,19 @@ const RegistrationForm: React.FC = () => {
             variant="contained" 
             disabled={isPublishing}
             startIcon={isPublishing ? <CircularProgress size={20} /> : <PublishIcon />}
+            fullWidth={isMobile}
             sx={{ 
               backgroundColor: '#7367F0', 
               '&:hover': { backgroundColor: '#5a52cc' },
-              '&:disabled': { backgroundColor: '#b8b2ff' }
+              '&:disabled': { backgroundColor: '#b8b2ff' },
+              ...(isMobile ? {
+                height: 48,
+                minHeight: 48,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderRadius: 2,
+                textTransform: 'none',
+              } : {})
             }}
           >
             {isPublishing ? t('registrationForm.publishing') : t('registrationForm.buttons.publish')}

@@ -162,9 +162,11 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
       {/* Content */}
       <Box 
-        ref={(element) => {
-          contentRef.current = element;
-          setScrollElement(element);
+        ref={(element: HTMLDivElement | null) => {
+          if (contentRef.current !== element) {
+            (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = element;
+            setScrollElement(element);
+          }
         }}
         sx={{ 
           height: '100%',

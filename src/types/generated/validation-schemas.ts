@@ -271,6 +271,13 @@ export const ProviderCreateSchema = z.object({
 
 export type ProviderCreate = z.infer<typeof ProviderCreateSchema>;
 
+export const ProviderListResponseSchema = z.object({
+  providers: z.array(z.any()),
+  total: z.number()
+});
+
+export type ProviderListResponse = z.infer<typeof ProviderListResponseSchema>;
+
 export const ProviderUpdateSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
@@ -283,4 +290,24 @@ export const ProviderUpdateSchema = z.object({
 });
 
 export type ProviderUpdate = z.infer<typeof ProviderUpdateSchema>;
+
+export const UserCreateSchema = z.object({
+  email: ValidationPatterns.email,
+  name: createRequiredString(1, 255),
+  role: z.string().optional(),
+  is_active: z.boolean().optional(),
+  password: z.string().optional(),
+  provider_id: z.string()
+});
+
+export type UserCreate = z.infer<typeof UserCreateSchema>;
+
+export const UserUpdateSchema = z.object({
+  name: z.string().optional(),
+  role: z.string().optional(),
+  is_active: z.string().optional(),
+  password: z.string().optional()
+});
+
+export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 

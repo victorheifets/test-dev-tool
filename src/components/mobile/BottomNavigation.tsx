@@ -15,20 +15,14 @@ export const MobileBottomNavigation = () => {
     resource.list && 
     !resource.name.startsWith('section_') &&
     resource.meta?.icon
-  ).slice(0, 5) || []; // Limit to 5 items for bottom nav
+  ) || []; // Include all main navigation items
 
   const currentValue = navItems.find(item => 
-    location.pathname === item.list || 
-    (item.list === '/courses' && location.pathname === '/courses-mobile')
+    location.pathname === item.list
   )?.list || '/dashboard';
 
   const handleNavigation = (newValue: string) => {
-    // If we're on courses-mobile and clicking courses, stay on mobile version
-    if (location.pathname === '/courses-mobile' && newValue === '/courses') {
-      navigate('/courses-mobile');
-    } else {
-      navigate(newValue);
-    }
+    navigate(newValue);
   };
 
   return (
@@ -50,7 +44,13 @@ export const MobileBottomNavigation = () => {
           handleNavigation(newValue);
         }}
         showLabels
-        sx={{ height: 70 }}
+        sx={{ 
+          height: 80,
+          '& .MuiBottomNavigationAction-root': {
+            minWidth: navItems.length > 5 ? 'auto' : 64,
+            padding: navItems.length > 5 ? '6px 4px' : '6px 12px',
+          }
+        }}
       >
         {navItems.map((item) => (
           <BottomNavigationAction
@@ -59,11 +59,14 @@ export const MobileBottomNavigation = () => {
             value={item.list}
             icon={item.meta?.icon}
             sx={{
-              fontSize: '0.75rem',
+              fontSize: navItems.length > 5 ? '0.7rem' : '0.75rem',
+              '& .MuiSvgIcon-root': {
+                fontSize: navItems.length > 5 ? '1.2rem' : '1.5rem',
+              },
               '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.65rem',
+                fontSize: navItems.length > 5 ? '0.6rem' : '0.65rem',
                 '&.Mui-selected': {
-                  fontSize: '0.7rem',
+                  fontSize: navItems.length > 5 ? '0.65rem' : '0.7rem',
                 },
               },
             }}

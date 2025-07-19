@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { StatCard } from '../components/StatCard';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -50,12 +51,13 @@ const mockData = {
 
 export const Dashboard = () => {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', p: isMobile ? 1 : 0 }}>
       {/* Welcome Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+      <Box sx={{ mb: isMobile ? 3 : 4, px: isMobile ? 1 : 0 }}>
+        <Typography variant={isMobile ? "h5" : "h4"} sx={{ fontWeight: 600, mb: 1 }}>
           {t('dashboard.welcome')} 👋
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -64,28 +66,28 @@ export const Dashboard = () => {
       </Box>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('courses')} value="12" icon={<SchoolIcon sx={{ fontSize: 40 }} />} color="primary" />
+      <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 3 : 4, px: isMobile ? 1 : 0 }}>
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard title={t('courses')} value="12" icon={<SchoolIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} color="primary" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('dashboard.active_students')} value="156" icon={<PeopleIcon sx={{ fontSize: 40 }} />} color="success" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard title={t('dashboard.active_students')} value="156" icon={<PeopleIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} color="success" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('dashboard.course_completion')} value="89%" icon={<TrendingUpIcon sx={{ fontSize: 40 }} />} color="info" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard title={t('dashboard.course_completion')} value="89%" icon={<TrendingUpIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} color="info" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('dashboard.revenue')} value="$12.4k" icon={<AttachMoneyIcon sx={{ fontSize: 40 }} />} color="warning" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard title={t('dashboard.revenue')} value="$12.4k" icon={<AttachMoneyIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} color="warning" />
         </Grid>
       </Grid>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={isMobile ? 2 : 3} sx={{ px: isMobile ? 1 : 0 }}>
         {/* Recent Activity */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600 }}>
                   {t('dashboard.recent_activity')}
                 </Typography>
                 <IconButton size="small">
@@ -95,16 +97,16 @@ export const Dashboard = () => {
               <List sx={{ width: '100%' }}>
                 {mockData.recentActivity.map((activity, index) => (
                   <React.Fragment key={activity.id}>
-                    <ListItem alignItems="flex-start" sx={{ px: 0 }}>
+                    <ListItem alignItems="flex-start" sx={{ px: 0, py: isMobile ? 1 : 1.5 }}>
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                        <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
                           {activity.avatar}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.875rem' : '0.875rem' }}>
                               {activity.student}
                             </Typography>
                             <Chip 
@@ -112,15 +114,16 @@ export const Dashboard = () => {
                               size="small" 
                               color={activity.type === 'completion' ? 'success' : 'primary'}
                               variant="outlined"
+                              sx={{ fontSize: isMobile ? '0.75rem' : '0.8125rem' }}
                             />
                           </Box>
                         }
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                               {activity.course}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: isMobile ? '0.75rem' : '0.75rem' }}>
                               {activity.time}
                             </Typography>
                           </Box>
@@ -138,17 +141,17 @@ export const Dashboard = () => {
         {/* Top Courses */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+              <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600, mb: 2 }}>
                 {t('dashboard.top_courses')}
               </Typography>
               {mockData.topCourses.map((course, index) => (
-                <Box key={index} sx={{ mb: 3 }}>
+                <Box key={index} sx={{ mb: isMobile ? 2.5 : 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.875rem' : '0.875rem' }}>
                       {course.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: isMobile ? '0.875rem' : '0.875rem' }}>
                       {course.enrolled}/{course.capacity}
                     </Typography>
                   </Box>
@@ -156,7 +159,7 @@ export const Dashboard = () => {
                     variant="determinate" 
                     value={course.progress} 
                     sx={{ 
-                      height: 8, 
+                      height: isMobile ? 6 : 8, 
                       borderRadius: 4,
                       backgroundColor: 'grey.200',
                       '& .MuiLinearProgress-bar': {
@@ -164,7 +167,7 @@ export const Dashboard = () => {
                       }
                     }}
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontSize: isMobile ? '0.75rem' : '0.75rem' }}>
                     {course.progress}% {t('dashboard.enrolled')}
                   </Typography>
                 </Box>
@@ -176,19 +179,19 @@ export const Dashboard = () => {
         {/* Upcoming Events */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600 }}>
                   {t('dashboard.upcoming_events')}
                 </Typography>
-                <EventIcon color="primary" />
+                <EventIcon color="primary" sx={{ fontSize: isMobile ? 20 : 24 }} />
               </Box>
               {mockData.upcomingEvents.map((event, index) => (
-                <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                <Box key={index} sx={{ mb: 2, p: isMobile ? 1.5 : 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.875rem' : '0.875rem' }}>
                     {event.title}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: isMobile ? '0.75rem' : '0.75rem' }}>
                     {event.date} at {event.time}
                   </Typography>
                 </Box>
@@ -200,23 +203,23 @@ export const Dashboard = () => {
         {/* Quick Actions */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+              <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600, mb: 2 }}>
                 {t('dashboard.quick_actions')}
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={isMobile ? 1.5 : 2}>
                 <Grid item xs={6}>
                   <Paper 
                     sx={{ 
-                      p: 2, 
+                      p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
                   >
-                    <SchoolIcon color="primary" sx={{ fontSize: 32, mb: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <SchoolIcon color="primary" sx={{ fontSize: isMobile ? 24 : 32, mb: isMobile ? 0.5 : 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                       {t('actions.create')} {t('course')}
                     </Typography>
                   </Paper>
@@ -224,15 +227,15 @@ export const Dashboard = () => {
                 <Grid item xs={6}>
                   <Paper 
                     sx={{ 
-                      p: 2, 
+                      p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
                   >
-                    <PersonIcon color="success" sx={{ fontSize: 32, mb: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <PersonIcon color="success" sx={{ fontSize: isMobile ? 24 : 32, mb: isMobile ? 0.5 : 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                       {t('actions.create')} {t('student')}
                     </Typography>
                   </Paper>
@@ -240,15 +243,15 @@ export const Dashboard = () => {
                 <Grid item xs={6}>
                   <Paper 
                     sx={{ 
-                      p: 2, 
+                      p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
                   >
-                    <EventIcon color="info" sx={{ fontSize: 32, mb: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <EventIcon color="info" sx={{ fontSize: isMobile ? 24 : 32, mb: isMobile ? 0.5 : 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                       {t('dashboard.schedule_event')}
                     </Typography>
                   </Paper>
@@ -256,15 +259,15 @@ export const Dashboard = () => {
                 <Grid item xs={6}>
                   <Paper 
                     sx={{ 
-                      p: 2, 
+                      p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
                   >
-                    <NotificationsIcon color="warning" sx={{ fontSize: 32, mb: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <NotificationsIcon color="warning" sx={{ fontSize: isMobile ? 24 : 32, mb: isMobile ? 0.5 : 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                       {t('dashboard.send_alert')}
                     </Typography>
                   </Paper>

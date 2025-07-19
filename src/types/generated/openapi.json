@@ -4317,6 +4317,48 @@
         }
       }
     },
+    "/api/auth/google": {
+      "post": {
+        "tags": [
+          "Google Authentication"
+        ],
+        "summary": "Google Login",
+        "description": "Authenticate a provisioned user via Google token\n\nThis endpoint validates Google ID tokens and authenticates users\nwho have been pre-provisioned in the system. It does NOT allow\npublic registration - users must be added by administrators first.\n\nArgs:\n    request: Google authentication request with ID token\n    \nReturns:\n    JWT tokens and user information\n    \nRaises:\n    HTTPException: If authentication fails for any reason",
+        "operationId": "google_login_api_auth_google_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleLoginResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/refresh": {
       "post": {
         "tags": [
@@ -4373,7 +4415,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "$ref": "#/components/schemas/app__api__endpoints__auth__UserResponse"
                 }
               }
             }
@@ -4409,6 +4451,954 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/auth/google/config": {
+      "get": {
+        "tags": [
+          "Google Authentication"
+        ],
+        "summary": "Get Google Config",
+        "description": "Get Google authentication configuration for frontend\n\nReturns:\n    Dictionary with Google client configuration",
+        "operationId": "get_google_config_api_auth_google_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Google Config Api Auth Google Config Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/": {
+      "post": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Create User",
+        "description": "Create a new user (Admin only)\n\nOnly provider administrators can create new users.\nThe new user will be associated with the admin's provider.",
+        "operationId": "create_user_api_admin_users__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__user__UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "List Users",
+        "description": "List all users in the provider (Admin only)\n\nReturns paginated list of users in the admin's provider.",
+        "operationId": "list_users_api_admin_users__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__user__UserListResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}": {
+      "get": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Get User",
+        "description": "Get a specific user (Admin only)",
+        "operationId": "get_user_api_admin_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__user__UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Update User",
+        "description": "Update a user (Admin only)\n\nAdmins can update user details including role and active status.",
+        "operationId": "update_user_api_admin_users__user_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__user__UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Delete User",
+        "description": "Delete/Deactivate a user (Admin only)\n\nThis performs a soft delete by setting is_active to False.",
+        "operationId": "delete_user_api_admin_users__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}/reset-password": {
+      "post": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Reset User Password",
+        "description": "Reset a user's password (Admin only)\n\nGenerates a temporary password that must be changed on first login.",
+        "operationId": "reset_user_password_api_admin_users__user_id__reset_password_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Reset User Password Api Admin Users  User Id  Reset Password Post"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sms/send": {
+      "post": {
+        "tags": [
+          "SMS"
+        ],
+        "summary": "Send Sms",
+        "description": "Send SMS to specified phone numbers via AWS SNS.",
+        "operationId": "send_sms_api_sms_send_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleSMSSendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleSMSSendResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sms/history": {
+      "get": {
+        "tags": [
+          "SMS"
+        ],
+        "summary": "Get Sms History",
+        "description": "Get SMS message history from DynamoDB.",
+        "operationId": "get_sms_history_api_sms_history_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Number of messages to return",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Number of messages to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of messages to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of messages to skip"
+          },
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleSMSHistoryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sms/{message_id}": {
+      "get": {
+        "tags": [
+          "SMS"
+        ],
+        "summary": "Get Sms Message",
+        "description": "Get details for a specific SMS message from DynamoDB.",
+        "operationId": "get_sms_message_api_sms__message_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Message Id"
+            }
+          },
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleSMSMessage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SMS"
+        ],
+        "summary": "Delete Sms Message",
+        "description": "Delete an SMS message from DynamoDB.",
+        "operationId": "delete_sms_message_api_sms__message_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Message Id"
+            }
+          },
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/users/invite": {
+      "post": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "Invite User",
+        "description": "Invite a new user to a provider organization\nCreates user in database without password (Google auth only)",
+        "operationId": "invite_user_api_super_admin_users_invite_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/super-admin/users": {
+      "get": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "List All Users",
+        "description": "List all users across all providers (or filter by provider)",
+        "operationId": "list_all_users_api_super_admin_users_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "provider_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__endpoints__super_admin__UserListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/users/{user_id}/status": {
+      "put": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "Toggle User Status",
+        "description": "Activate or suspend a user",
+        "operationId": "toggle_user_status_api_super_admin_users__user_id__status_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "provider_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/users/{user_id}": {
+      "delete": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "Delete User",
+        "description": "Delete a user permanently",
+        "operationId": "delete_user_api_super_admin_users__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "provider_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/providers": {
+      "get": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "List All Providers",
+        "description": "List all provider organizations",
+        "operationId": "list_all_providers_api_super_admin_providers_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/providers/{provider_id}": {
+      "delete": {
+        "tags": [
+          "super-admin"
+        ],
+        "summary": "Delete Provider",
+        "description": "Delete a provider and all associated data",
+        "operationId": "delete_provider_api_super_admin_providers__provider_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "provider_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/dev/auth/providers": {
@@ -4573,6 +5563,25 @@
         "summary": "Dev Login Page",
         "description": "Serve the dev login page",
         "operationId": "dev_login_page_dev_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin": {
+      "get": {
+        "summary": "Super Admin Panel",
+        "description": "Serve the super admin panel",
+        "operationId": "super_admin_panel_super_admin_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5558,6 +6567,53 @@
         "type": "object",
         "title": "EnrollmentUpdate",
         "description": "Schema for updating enrollment information"
+      },
+      "GoogleLoginRequest": {
+        "properties": {
+          "google_token": {
+            "type": "string",
+            "title": "Google Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "google_token"
+        ],
+        "title": "GoogleLoginRequest"
+      },
+      "GoogleLoginResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "default": 1800
+          },
+          "user": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "User"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "user"
+        ],
+        "title": "GoogleLoginResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -6679,6 +7735,28 @@
           "address": "123 Health St, Wellness City, WC 12345"
         }
       },
+      "ProviderListResponse": {
+        "properties": {
+          "providers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "providers",
+          "total"
+        ],
+        "title": "ProviderListResponse"
+      },
       "ProviderUpdate": {
         "properties": {
           "name": {
@@ -6794,6 +7872,216 @@
         ],
         "title": "RefreshTokenRequest"
       },
+      "SMSStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "sending",
+          "sent",
+          "failed"
+        ],
+        "title": "SMSStatus",
+        "description": "Simplified SMS message status."
+      },
+      "SimpleSMSHistoryResponse": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/SimpleSMSMessage"
+            },
+            "type": "array",
+            "title": "Messages",
+            "description": "List of SMS messages"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of messages"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Requested limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "description": "Requested offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "SimpleSMSHistoryResponse",
+        "description": "Simplified SMS history response."
+      },
+      "SimpleSMSMessage": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Message identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Message content"
+          },
+          "phone_numbers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Phone Numbers",
+            "description": "List of phone numbers"
+          },
+          "total_recipients": {
+            "type": "integer",
+            "title": "Total Recipients",
+            "description": "Number of recipients"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SMSStatus",
+            "description": "Message status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When message was created"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At",
+            "description": "When message was sent"
+          },
+          "aws_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aws Message Id",
+            "description": "AWS SNS message ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "message",
+          "phone_numbers",
+          "total_recipients",
+          "status",
+          "created_at"
+        ],
+        "title": "SimpleSMSMessage",
+        "description": "Simplified SMS message for API responses."
+      },
+      "SimpleSMSSendRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 1600,
+            "minLength": 1,
+            "title": "Message",
+            "description": "SMS message content"
+          },
+          "phone_numbers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Phone Numbers",
+            "description": "List of phone numbers in E.164 format"
+          },
+          "sender_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Id",
+            "description": "Optional sender ID"
+          },
+          "sms_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sms Type",
+            "description": "SMS type: Promotional or Transactional",
+            "default": "Promotional"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "phone_numbers"
+        ],
+        "title": "SimpleSMSSendRequest",
+        "description": "Simplified request to send SMS message."
+      },
+      "SimpleSMSSendResponse": {
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "description": "Unique message identifier"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SMSStatus",
+            "description": "Current message status"
+          },
+          "total_recipients": {
+            "type": "integer",
+            "title": "Total Recipients",
+            "description": "Number of recipients"
+          },
+          "aws_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aws Message Id",
+            "description": "AWS SNS message ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_id",
+          "status",
+          "total_recipients"
+        ],
+        "title": "SimpleSMSSendResponse",
+        "description": "Simplified SMS send response."
+      },
       "TokenResponse": {
         "properties": {
           "access_token": {
@@ -6822,7 +8110,190 @@
         ],
         "title": "TokenResponse"
       },
-      "UserResponse": {
+      "UserCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "manager",
+              "user"
+            ],
+            "title": "Role",
+            "default": "user"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "provider_id": {
+            "type": "string",
+            "title": "Provider Id",
+            "description": "Provider ID this user belongs to"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "name",
+          "provider_id"
+        ],
+        "title": "UserCreate",
+        "description": "Properties for user creation by admin"
+      },
+      "UserInvitationRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "manager",
+              "user"
+            ],
+            "title": "Role"
+          },
+          "provider_id": {
+            "type": "string",
+            "title": "Provider Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "name",
+          "role",
+          "provider_id"
+        ],
+        "title": "UserInvitationRequest"
+      },
+      "UserUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "manager",
+                  "user"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate",
+        "description": "Properties for user update"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "app__api__endpoints__auth__UserResponse": {
         "properties": {
           "user_id": {
             "type": "string",
@@ -6861,38 +8332,135 @@
         ],
         "title": "UserResponse"
       },
-      "ValidationError": {
+      "app__api__endpoints__super_admin__UserListResponse": {
         "properties": {
-          "loc": {
+          "users": {
             "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
+              "additionalProperties": true,
+              "type": "object"
             },
             "type": "array",
-            "title": "Location"
+            "title": "Users"
           },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
+          "total": {
+            "type": "integer",
+            "title": "Total"
           }
         },
         "type": "object",
         "required": [
-          "loc",
-          "msg",
-          "type"
+          "users",
+          "total"
         ],
-        "title": "ValidationError"
+        "title": "UserListResponse"
+      },
+      "app__schemas__user__UserListResponse": {
+        "properties": {
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/app__schemas__user__UserResponse"
+            },
+            "type": "array",
+            "title": "Users"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "required": [
+          "users",
+          "total"
+        ],
+        "title": "UserListResponse",
+        "description": "Response for user list endpoint"
+      },
+      "app__schemas__user__UserResponse": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "manager",
+              "user"
+            ],
+            "title": "Role",
+            "default": "user"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "provider_id": {
+            "type": "string",
+            "title": "Provider Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_login": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login"
+          },
+          "google_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Google Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "name",
+          "id",
+          "provider_id",
+          "created_at"
+        ],
+        "title": "UserResponse",
+        "description": "User properties returned to client"
       },
       "ValidationPatterns": {
         "type": "object",

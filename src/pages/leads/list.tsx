@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, useMediaQuery, useTheme, Fab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -12,13 +13,20 @@ import { ActionMenu } from '../../components/leads/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { LeadModal } from '../../components/leads/LeadModal';
 import { StatCard } from '../../components/StatCard';
+import { CompactLeadCard } from '../../components/mobile/CompactLeadCard';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LanguageIcon from '@mui/icons-material/Language';
 
+// UI Constants
+const MOBILE_ICON_SIZE = 24;
+const DESKTOP_ICON_SIZE = 40;
+
 export const LeadsList = () => {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,21 +51,23 @@ export const LeadsList = () => {
   // Get leads from dataGridProps and apply client-side filtering
   const allLeads = dataGridProps.rows || [];
   
-  // Apply client-side filtering
-  const leads = allLeads.filter(lead => {
-    // Text search filter
-    const matchesSearch = !searchText || 
-      lead.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      lead.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      lead.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-      lead.phone?.toLowerCase().includes(searchText.toLowerCase()) ||
-      lead.source?.toLowerCase().includes(searchText.toLowerCase());
-    
-    // Status filter
-    const matchesStatus = !statusFilter || lead.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  // Apply client-side filtering with useMemo for performance
+  const leads = useMemo(() => {
+    return allLeads.filter(lead => {
+      // Text search filter
+      const matchesSearch = !searchText || 
+        lead.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.phone?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.source?.toLowerCase().includes(searchText.toLowerCase());
+      
+      // Status filter
+      const matchesStatus = !statusFilter || lead.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [allLeads, searchText, statusFilter]);
   
   // Update dataGridProps with filtered data
   const filteredDataGridProps = {
@@ -244,13 +254,6 @@ export const LeadsList = () => {
       width: 120,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton 
-            onClick={() => handleEdit(params.row.id)}
-            color="primary"
-            size="small"
-          >
-            <EditIcon />
-          </IconButton>
           <ActionMenu
             onEdit={() => handleEdit(params.row.id)}
             onDuplicate={() => handleDuplicate(params.row.id)}
@@ -263,22 +266,44 @@ export const LeadsList = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('leads')} value={leads.length.toString()} icon={<PersonAddIcon sx={{ fontSize: 40 }} />} color="primary" />
+      <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: 3 }}>
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard 
+            title={t('leads')} 
+            value={leads.length.toString()} 
+            icon={<PersonAddIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="primary" 
+          />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('status_options.new')} value={leads.filter(l => l.status === 'new').length.toString()} icon={<EmailIcon sx={{ fontSize: 40 }} />} color="info" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard 
+            title={t('status_options.new')} 
+            value={leads.filter(l => l.status === 'new').length.toString()} 
+            icon={<EmailIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="info" 
+          />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('status_options.qualified')} value={leads.filter(l => l.status === 'qualified').length.toString()} icon={<PhoneIcon sx={{ fontSize: 40 }} />} color="success" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard 
+            title={t('status_options.qualified')} 
+            value={leads.filter(l => l.status === 'qualified').length.toString()} 
+            icon={<PhoneIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="success" 
+          />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title={t('status_options.converted')} value={leads.filter(l => l.status === 'converted').length.toString()} icon={<LanguageIcon sx={{ fontSize: 40 }} />} color="secondary" />
+        <Grid item xs={6} sm={6} md={3}>
+          <StatCard 
+            title={t('status_options.converted')} 
+            value={leads.filter(l => l.status === 'converted').length.toString()} 
+            icon={<LanguageIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="secondary" 
+          />
         </Grid>
       </Grid>
       <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        {/* Desktop Controls */}
+        {!isMobile && (
+          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('lead')}</Button>
               {selectedRows.length > 0 && (
@@ -321,21 +346,82 @@ export const LeadsList = () => {
                 </Select>
               </FormControl>
             </Box>
-        </Box>
-        <Box sx={{ height: 500, width: '100%' }}>
-            <DataGrid
-                {...filteredDataGridProps}
-                columns={columns}
-                checkboxSelection
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25, 50]}
-                sx={{ border: 'none' }}
-                onRowSelectionModelChange={(newSelectionModel) => {
-                  setSelectedRows(newSelectionModel as string[]);
+          </Box>
+        )}
+
+        {/* Mobile Controls */}
+        {isMobile && (
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+              <TextField
+                placeholder={t('search.placeholder_leads')}
+                variant="outlined"
+                size="small"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-input': {
+                    fontSize: '16px', // Prevent zoom on iOS
+                  }
                 }}
-                rowSelectionModel={selectedRows}
+              />
+              <FormControl size="small" fullWidth>
+                <InputLabel>{t('course_fields.status')}</InputLabel>
+                <Select
+                  label={t('course_fields.status')}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      fontSize: '16px',
+                    }
+                  }}
+                >
+                  <MenuItem value="">{t('common.all')}</MenuItem>
+                  <MenuItem value={LeadStatus.NEW}>{t('status_options.new')}</MenuItem>
+                  <MenuItem value={LeadStatus.CONTACTED}>{t('status_options.contacted')}</MenuItem>
+                  <MenuItem value={LeadStatus.QUALIFIED}>{t('status_options.qualified')}</MenuItem>
+                  <MenuItem value={LeadStatus.CONVERTED}>{t('status_options.converted')}</MenuItem>
+                  <MenuItem value={LeadStatus.LOST}>{t('status_options.lost')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        )}
+
+        {/* Desktop Table */}
+        {!isMobile && (
+          <Box sx={{ height: 500, width: '100%' }}>
+            <DataGrid
+              {...filteredDataGridProps}
+              columns={columns}
+              checkboxSelection
+              disableRowSelectionOnClick
+              pageSizeOptions={[5, 10, 25, 50]}
+              sx={{ border: 'none' }}
+              onRowSelectionModelChange={(newSelectionModel) => {
+                setSelectedRows(newSelectionModel as string[]);
+              }}
+              rowSelectionModel={selectedRows}
             />
-        </Box>
+          </Box>
+        )}
+
+        {/* Mobile Cards */}
+        {isMobile && (
+          <Box>
+            {leads.map((lead) => (
+              <CompactLeadCard
+                key={lead.id}
+                lead={lead}
+                onEdit={handleEdit}
+                onDuplicate={handleDuplicate}
+                onDelete={handleDeleteRequest}
+              />
+            ))}
+          </Box>
+        )}
       </Box>
       <ConfirmationDialog
         open={dialogOpen}
@@ -360,7 +446,25 @@ export const LeadsList = () => {
         initialData={modalInitialData}
         mode={modalMode}
         onSave={handleSave}
+        forceMobile={isMobile}
       />
+      
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          aria-label="add"
+          onClick={handleAddNew}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            zIndex: 1000,
+          }}
+        >
+          <AddIcon />
+        </Fab>
+      )}
     </Box>
   );
 } 

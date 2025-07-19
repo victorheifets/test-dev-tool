@@ -928,6 +928,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google Login
+         * @description Authenticate a provisioned user via Google token
+         *
+         *     This endpoint validates Google ID tokens and authenticates users
+         *     who have been pre-provisioned in the system. It does NOT allow
+         *     public registration - users must be added by administrators first.
+         *
+         *     Args:
+         *         request: Google authentication request with ID token
+         *
+         *     Returns:
+         *         JWT tokens and user information
+         *
+         *     Raises:
+         *         HTTPException: If authentication fails for any reason
+         */
+        post: operations["google_login_api_auth_google_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/refresh": {
         parameters: {
             query?: never;
@@ -983,6 +1016,297 @@ export interface paths {
          */
         post: operations["logout_api_auth_logout_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/google/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Google Config
+         * @description Get Google authentication configuration for frontend
+         *
+         *     Returns:
+         *         Dictionary with Google client configuration
+         */
+        get: operations["get_google_config_api_auth_google_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Users
+         * @description List all users in the provider (Admin only)
+         *
+         *     Returns paginated list of users in the admin's provider.
+         */
+        get: operations["list_users_api_admin_users__get"];
+        put?: never;
+        /**
+         * Create User
+         * @description Create a new user (Admin only)
+         *
+         *     Only provider administrators can create new users.
+         *     The new user will be associated with the admin's provider.
+         */
+        post: operations["create_user_api_admin_users__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User
+         * @description Get a specific user (Admin only)
+         */
+        get: operations["get_user_api_admin_users__user_id__get"];
+        /**
+         * Update User
+         * @description Update a user (Admin only)
+         *
+         *     Admins can update user details including role and active status.
+         */
+        put: operations["update_user_api_admin_users__user_id__put"];
+        post?: never;
+        /**
+         * Delete User
+         * @description Delete/Deactivate a user (Admin only)
+         *
+         *     This performs a soft delete by setting is_active to False.
+         */
+        delete: operations["delete_user_api_admin_users__user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset User Password
+         * @description Reset a user's password (Admin only)
+         *
+         *     Generates a temporary password that must be changed on first login.
+         */
+        post: operations["reset_user_password_api_admin_users__user_id__reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sms/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send Sms
+         * @description Send SMS to specified phone numbers via AWS SNS.
+         */
+        post: operations["send_sms_api_sms_send_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sms/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Sms History
+         * @description Get SMS message history from DynamoDB.
+         */
+        get: operations["get_sms_history_api_sms_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sms/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Sms Message
+         * @description Get details for a specific SMS message from DynamoDB.
+         */
+        get: operations["get_sms_message_api_sms__message_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Sms Message
+         * @description Delete an SMS message from DynamoDB.
+         */
+        delete: operations["delete_sms_message_api_sms__message_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/users/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invite User
+         * @description Invite a new user to a provider organization
+         *     Creates user in database without password (Google auth only)
+         */
+        post: operations["invite_user_api_super_admin_users_invite_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List All Users
+         * @description List all users across all providers (or filter by provider)
+         */
+        get: operations["list_all_users_api_super_admin_users_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/users/{user_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Toggle User Status
+         * @description Activate or suspend a user
+         */
+        put: operations["toggle_user_status_api_super_admin_users__user_id__status_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete User
+         * @description Delete a user permanently
+         */
+        delete: operations["delete_user_api_super_admin_users__user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List All Providers
+         * @description List all provider organizations
+         */
+        get: operations["list_all_providers_api_super_admin_providers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/super-admin/providers/{provider_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Provider
+         * @description Delete a provider and all associated data
+         */
+        delete: operations["delete_provider_api_super_admin_providers__provider_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1092,6 +1416,26 @@ export interface paths {
          * @description Serve the dev login page
          */
         get: operations["dev_login_page_dev_login_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/super-admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Super Admin Panel
+         * @description Serve the super admin panel
+         */
+        get: operations["super_admin_panel_super_admin_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1545,6 +1889,32 @@ export interface components {
             /** Is Active */
             is_active?: boolean | null;
         };
+        /** GoogleLoginRequest */
+        GoogleLoginRequest: {
+            /** Google Token */
+            google_token: string;
+        };
+        /** GoogleLoginResponse */
+        GoogleLoginResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Refresh Token */
+            refresh_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+            /**
+             * Expires In
+             * @default 1800
+             */
+            expires_in: number;
+            /** User */
+            user: {
+                [key: string]: unknown;
+            };
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1974,6 +2344,15 @@ export interface components {
              */
             logo_url?: string | null;
         };
+        /** ProviderListResponse */
+        ProviderListResponse: {
+            /** Providers */
+            providers: {
+                [key: string]: unknown;
+            }[];
+            /** Total */
+            total: number;
+        };
         /**
          * ProviderUpdate
          * @description Schema for updating provider information
@@ -2001,6 +2380,132 @@ export interface components {
             /** Refresh Token */
             refresh_token: string;
         };
+        /**
+         * SMSStatus
+         * @description Simplified SMS message status.
+         * @enum {string}
+         */
+        SMSStatus: "pending" | "sending" | "sent" | "failed";
+        /**
+         * SimpleSMSHistoryResponse
+         * @description Simplified SMS history response.
+         */
+        SimpleSMSHistoryResponse: {
+            /**
+             * Messages
+             * @description List of SMS messages
+             */
+            messages: components["schemas"]["SimpleSMSMessage"][];
+            /**
+             * Total
+             * @description Total number of messages
+             */
+            total: number;
+            /**
+             * Limit
+             * @description Requested limit
+             */
+            limit: number;
+            /**
+             * Offset
+             * @description Requested offset
+             */
+            offset: number;
+        };
+        /**
+         * SimpleSMSMessage
+         * @description Simplified SMS message for API responses.
+         */
+        SimpleSMSMessage: {
+            /**
+             * Id
+             * @description Message identifier
+             */
+            id: string;
+            /**
+             * Message
+             * @description Message content
+             */
+            message: string;
+            /**
+             * Phone Numbers
+             * @description List of phone numbers
+             */
+            phone_numbers: string[];
+            /**
+             * Total Recipients
+             * @description Number of recipients
+             */
+            total_recipients: number;
+            /** @description Message status */
+            status: components["schemas"]["SMSStatus"];
+            /**
+             * Created At
+             * Format: date-time
+             * @description When message was created
+             */
+            created_at: string;
+            /**
+             * Sent At
+             * @description When message was sent
+             */
+            sent_at?: string | null;
+            /**
+             * Aws Message Id
+             * @description AWS SNS message ID
+             */
+            aws_message_id?: string | null;
+        };
+        /**
+         * SimpleSMSSendRequest
+         * @description Simplified request to send SMS message.
+         */
+        SimpleSMSSendRequest: {
+            /**
+             * Message
+             * @description SMS message content
+             */
+            message: string;
+            /**
+             * Phone Numbers
+             * @description List of phone numbers in E.164 format
+             */
+            phone_numbers: string[];
+            /**
+             * Sender Id
+             * @description Optional sender ID
+             */
+            sender_id?: string | null;
+            /**
+             * Sms Type
+             * @description SMS type: Promotional or Transactional
+             * @default Promotional
+             */
+            sms_type: string | null;
+        };
+        /**
+         * SimpleSMSSendResponse
+         * @description Simplified SMS send response.
+         */
+        SimpleSMSSendResponse: {
+            /**
+             * Message Id
+             * @description Unique message identifier
+             */
+            message_id: string;
+            /** @description Current message status */
+            status: components["schemas"]["SMSStatus"];
+            /**
+             * Total Recipients
+             * @description Number of recipients
+             */
+            total_recipients: number;
+            /**
+             * Aws Message Id
+             * @description AWS SNS message ID
+             */
+            aws_message_id?: string | null;
+        };
         /** TokenResponse */
         TokenResponse: {
             /** Access Token */
@@ -2018,8 +2523,79 @@ export interface components {
              */
             expires_in: number;
         };
+        /**
+         * UserCreate
+         * @description Properties for user creation by admin
+         */
+        UserCreate: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Role
+             * @default user
+             * @enum {string}
+             */
+            role: "admin" | "manager" | "user";
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /** Password */
+            password?: string | null;
+            /**
+             * Provider Id
+             * @description Provider ID this user belongs to
+             */
+            provider_id: string;
+        };
+        /** UserInvitationRequest */
+        UserInvitationRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "admin" | "manager" | "user";
+            /** Provider Id */
+            provider_id: string;
+        };
+        /**
+         * UserUpdate
+         * @description Properties for user update
+         */
+        UserUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Role */
+            role?: ("admin" | "manager" | "user") | null;
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Password */
+            password?: string | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
         /** UserResponse */
-        UserResponse: {
+        app__api__endpoints__auth__UserResponse: {
             /** User Id */
             user_id: string;
             /** Email */
@@ -2031,14 +2607,71 @@ export interface components {
             /** Provider Id */
             provider_id?: string | null;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
+        /** UserListResponse */
+        app__api__endpoints__super_admin__UserListResponse: {
+            /** Users */
+            users: {
+                [key: string]: unknown;
+            }[];
+            /** Total */
+            total: number;
+        };
+        /**
+         * UserListResponse
+         * @description Response for user list endpoint
+         */
+        app__schemas__user__UserListResponse: {
+            /** Users */
+            users: components["schemas"]["app__schemas__user__UserResponse"][];
+            /** Total */
+            total: number;
+            /**
+             * Page
+             * @default 1
+             */
+            page: number;
+            /**
+             * Page Size
+             * @default 20
+             */
+            page_size: number;
+        };
+        /**
+         * UserResponse
+         * @description User properties returned to client
+         */
+        app__schemas__user__UserResponse: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Role
+             * @default user
+             * @enum {string}
+             */
+            role: "admin" | "manager" | "user";
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /** Id */
+            id: string;
+            /** Provider Id */
+            provider_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Login */
+            last_login?: string | null;
+            /** Google Id */
+            google_id?: string | null;
         };
         ValidationPatterns: {
             /** @description Email validation pattern */
@@ -4202,6 +4835,39 @@ export interface operations {
             };
         };
     };
+    google_login_api_auth_google_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleLoginResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     refresh_token_api_auth_refresh_post: {
         parameters: {
             query?: never;
@@ -4250,7 +4916,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": components["schemas"]["app__api__endpoints__auth__UserResponse"];
                 };
             };
         };
@@ -4271,6 +4937,595 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_google_config_api_auth_google_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    list_users_api_admin_users__get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__schemas__user__UserListResponse"];
+                };
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_user_api_admin_users__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__schemas__user__UserResponse"];
+                };
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_api_admin_users__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__schemas__user__UserResponse"];
+                };
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user_api_admin_users__user_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__schemas__user__UserResponse"];
+                };
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_api_admin_users__user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_user_password_api_admin_users__user_id__reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_sms_api_sms_send_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimpleSMSSendRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimpleSMSSendResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sms_history_api_sms_history_get: {
+        parameters: {
+            query?: {
+                /** @description Number of messages to return */
+                limit?: number;
+                /** @description Number of messages to skip */
+                offset?: number;
+            };
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimpleSMSHistoryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sms_message_api_sms__message_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimpleSMSMessage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_sms_message_api_sms__message_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invite_user_api_super_admin_users_invite_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_all_users_api_super_admin_users_get: {
+        parameters: {
+            query?: {
+                provider_id?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__api__endpoints__super_admin__UserListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    toggle_user_status_api_super_admin_users__user_id__status_put: {
+        parameters: {
+            query: {
+                provider_id: string;
+            };
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_api_super_admin_users__user_id__delete: {
+        parameters: {
+            query: {
+                provider_id: string;
+            };
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_all_providers_api_super_admin_providers_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_provider_api_super_admin_providers__provider_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -4397,6 +5652,26 @@ export interface operations {
         };
     };
     dev_login_page_dev_login_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
+        };
+    };
+    super_admin_panel_super_admin_get: {
         parameters: {
             query?: never;
             header?: never;

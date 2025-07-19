@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
+import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Stack } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -31,22 +31,14 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
   };
 
   return (
-    <>
-      <IconButton
-        aria-label="more"
-        id="long-button"
-        aria-controls={open ? 'long-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
-        aria-haspopup="true"
-        onClick={handleClick}
-      >
+    <Stack direction="row" spacing={0}>
+      <IconButton onClick={onEdit} color="primary" title={t('actions.edit')}>
+        <EditIcon />
+      </IconButton>
+      <IconButton onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
       <Menu
-        id="long-menu"
-        MenuListProps={{
-          'aria-labelledby': 'long-button',
-        }}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -64,6 +56,6 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
           <ListItemText>{t('actions.delete')}</ListItemText>
         </MenuItem>
       </Menu>
-    </>
+    </Stack>
   );
 }; 

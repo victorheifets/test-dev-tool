@@ -24,6 +24,10 @@ import { Activity, ActivityStatus, ActivityType, ActivityCreate } from '../../ty
 import { useTranslation } from 'react-i18next';
 import { format, parse, isValid } from 'date-fns';
 
+// NEW: Import validation components and schema
+import { ValidatedTextField, useValidatedForm } from '../common/validated';
+import { ActivityCreateSchema } from '../../types/generated';
+
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
@@ -76,7 +80,19 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
   const theme = useTheme();
   const isMobileDetected = useMediaQuery(theme.breakpoints.down('md'));
   const isMobile = forceMobile !== undefined ? forceMobile : isMobileDetected;
+  
+  // NEW: Replace useState with validated form
+  const { createField, handleSubmit: handleFormSubmit, reset, watch } = useValidatedForm({
+    schema: ActivityCreateSchema,
+    defaultValues: emptyActivity,
+    onSubmit: onSave,
+  });
+  
+  // Keep existing state for non-validated fields (temporary during transition)
   const [activity, setActivity] = useState<ActivityCreate>(emptyActivity);
+  
+  // Watch the name field to see validation in action
+  const nameValue = watch('name');
 
   useEffect(() => {
     if (initialData) {
@@ -96,10 +112,14 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
         category: data.category,
       };
       setActivity(activityCreate);
+      // NEW: Reset validated form with initial data
+      reset(activityCreate);
     } else {
       setActivity(emptyActivity);
+      // NEW: Reset validated form to empty state
+      reset(emptyActivity);
     }
-  }, [initialData, open]);
+  }, [initialData, open, reset]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
     const { name, value } = e.target;
@@ -140,8 +160,12 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
       return;
     }
     
-    // onSave now handles the async operation and modal closing
-    onSave(activity);
+    // NEW: Use validated form submit (will validate before calling onSave)
+    handleFormSubmit();
+    
+    // FALLBACK: For non-validated fields, still use activity state
+    // This will be removed once all fields are migrated
+    // onSave(activity);
   };
 
   const getTitle = () => {
@@ -207,13 +231,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({ open, onClose, onSave,
             },
           })}>
             <Grid item xs={12} sm={8}>
-              <TextField 
-                name="name" 
-                label={t('course_fields.name')} 
-                value={activity.name} 
-                onChange={handleChange} 
-                fullWidth 
-                required 
+              {/* NEW: Validated TextField with automatic validation */}
+              <ValidatedTextField
+                {...createField('name')}
+                label={t('course_fields.name')}
+                required
               />
             </Grid>
             <Grid item xs={12} sm={4}>

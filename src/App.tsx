@@ -40,7 +40,6 @@ import { useResources } from "./config/navigation";
 import { useTranslation } from "react-i18next";
 import { Dashboard } from "./pages/dashboard";
 import { CourseList } from './pages/courses/list';
-import { CourseList as CourseListMobile } from './pages/courses/list-mobile';
 import { ParticipantsList } from './pages/participants/list';
 import { EnrollmentsList } from './pages/enrollments/list';
 import { LeadsList } from './pages/leads/list';
@@ -48,6 +47,7 @@ import SimpleSMS from './pages/messaging/SimpleSMS';
 import { LandingPagesExamples } from './pages/landing-pages-examples';
 import RegistrationForm from './pages/registration-form';
 import CustomLoginPage from './pages/login';
+import { MobileBottomNavigation } from './components/mobile/BottomNavigation';
 
 const Title = ({ collapsed }: { collapsed: boolean }) => {
   const { t } = useTranslation();
@@ -118,7 +118,10 @@ const AppContent = () => {
                           Header={() => <Header sticky={false} />}
                           Sider={isMobile ? () => null : (props) => <ThemedSiderV2 {...props} Title={Title} />}
                         >
-                          <Outlet />
+                          <Box sx={{ pb: isMobile ? 12 : 0 }}>
+                            <Outlet />
+                          </Box>
+                          {isMobile && <MobileBottomNavigation />}
                         </ThemedLayoutV2>
                       </Authenticated>
                     }
@@ -129,7 +132,6 @@ const AppContent = () => {
                     />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/courses" element={<CourseList />} />
-                    <Route path="/courses-mobile" element={<CourseListMobile />} />
                     <Route path="/participants" element={<ParticipantsList />} />
                     <Route path="/enrollments" element={<EnrollmentsList />} />
                     <Route path="/leads" element={<LeadsList />} />
