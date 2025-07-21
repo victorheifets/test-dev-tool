@@ -14,7 +14,7 @@ interface AdditionalAction {
 }
 
 interface ActionMenuProps {
-  onEdit: () => void;
+  onEdit?: () => void;
   onDuplicate: () => void;
   onDelete?: () => void;
   editLabel?: string;
@@ -44,9 +44,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 
   return (
     <Stack direction="row" spacing={0}>
-      <IconButton onClick={onEdit} color="primary" title={typeof editLabel === 'string' ? t(editLabel) : editLabel}>
-        {useViewIcon ? <VisibilityIcon /> : <EditIcon />}
-      </IconButton>
+      {onEdit && (
+        <IconButton onClick={onEdit} color="primary" title={typeof editLabel === 'string' ? t(editLabel) : editLabel}>
+          {useViewIcon ? <VisibilityIcon /> : <EditIcon />}
+        </IconButton>
+      )}
       <IconButton onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>

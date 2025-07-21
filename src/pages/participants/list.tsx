@@ -15,7 +15,6 @@ import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { ParticipantModal } from '../../components/participants/ParticipantModal';
 import { StatCard } from '../../components/StatCard';
-import { MobileBottomNavigation } from '../../components/mobile/BottomNavigation';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
 import { CompactParticipantCard } from '../../components/mobile/CompactParticipantCard';
 import PeopleIcon from '@mui/icons-material/People';
@@ -536,7 +535,6 @@ export const ParticipantsList = () => {
         </Fab>
       )}
       
-      {isMobile && <MobileBottomNavigation />}
     </Box>
   );
 

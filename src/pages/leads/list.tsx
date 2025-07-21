@@ -24,6 +24,10 @@ import LanguageIcon from '@mui/icons-material/Language';
 const MOBILE_ICON_SIZE = 24;
 const DESKTOP_ICON_SIZE = 40;
 
+// FAB positioning constants
+const FAB_BOTTOM_OFFSET = 90; // Above bottom navigation
+const FAB_Z_INDEX = 1000;
+
 export const LeadsList = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
@@ -457,9 +461,9 @@ export const LeadsList = () => {
           onClick={handleAddNew}
           sx={{
             position: 'fixed',
-            bottom: 16,
+            bottom: FAB_BOTTOM_OFFSET,
             right: 16,
-            zIndex: 1000,
+            zIndex: FAB_Z_INDEX,
           }}
         >
           <AddIcon />

@@ -37,6 +37,10 @@ import * as yup from 'yup';
 import { Edit as EditIcon, Preview as PreviewIcon, Publish as PublishIcon, Save as SaveIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 
+// FAB positioning constants
+const FAB_BOTTOM_OFFSET = 90; // Above bottom navigation
+const FAB_Z_INDEX = 1000;
+
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
@@ -918,12 +922,12 @@ const RegistrationForm: React.FC = () => {
       {isMobile && (
         <Box sx={{ 
           position: 'fixed', 
-          bottom: 16, 
+          bottom: FAB_BOTTOM_OFFSET, 
           right: 16, 
           display: 'flex', 
           flexDirection: 'column', 
           gap: 1,
-          zIndex: 1000 
+          zIndex: FAB_Z_INDEX 
         }}>
           <Fab
             size="small"

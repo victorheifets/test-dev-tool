@@ -7,9 +7,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 
 interface ActionMenuProps {
-  onEdit: () => void;
+  onEdit?: () => void;
   onDuplicate: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onDelete }) => {
@@ -32,9 +32,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
 
   return (
     <Stack direction="row" spacing={0}>
-      <IconButton onClick={onEdit} color="primary" title={t('actions.edit')}>
-        <EditIcon />
-      </IconButton>
+      {onEdit && (
+        <IconButton onClick={onEdit} color="primary" title={t('actions.edit')}>
+          <EditIcon />
+        </IconButton>
+      )}
       <IconButton onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
@@ -49,12 +51,14 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDuplicate, onD
           </ListItemIcon>
           <ListItemText>{t('actions.duplicate')}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleAction(onDelete)}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>{t('actions.delete')}</ListItemText>
-        </MenuItem>
+        {onDelete && (
+          <MenuItem onClick={() => handleAction(onDelete)}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>{t('actions.delete')}</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
     </Stack>
   );

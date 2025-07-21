@@ -1,30 +1,31 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Button, Typography, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, Fab, InputAdornment } from '@mui/material';
+import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, Fab, InputAdornment } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { useBreakpoint } from '../../hooks/useBreakpoint';
-import { Participant, ParticipantCreate } from '../../types/participant';
-import { StatusChip } from '../../components/participants/StatusChip';
-import { ActionMenu } from '../../components/participants/ActionMenu';
+import { Lead, LeadStatus, LeadCreate } from '../../types/lead';
+import { StatusChip } from '../../components/leads/StatusChip';
+import { ActionMenu } from '../../components/leads/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
-import { ParticipantModal } from '../../components/participants/ParticipantModal';
+import { LeadModal } from '../../components/leads/LeadModal';
 import { StatCard } from '../../components/StatCard';
-import { ResponsiveDataView } from '../../components/mobile/ResponsiveDataView';
+import { SharedDataGrid } from '../../components/common/SharedDataGrid';
+import { CompactCardShell } from '../../components/mobile/CompactCardShell';
+import { CompactLeadContent } from '../../components/mobile/content/CompactLeadContent';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
-import { CompactParticipantCard } from '../../components/mobile/CompactParticipantCard';
-import PeopleIcon from '@mui/icons-material/People';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import LanguageIcon from '@mui/icons-material/Language';
 
-// UI Constants
+// UI Constants (matching original)
 const MOBILE_BOTTOM_PADDING = 10;
 const MOBILE_SIDE_PADDING = 1;
 const MOBILE_ICON_SIZE = 24;
@@ -37,13 +38,13 @@ const FAB_Z_INDEX = 1000;
 const DATA_GRID_HEIGHT = 500;
 const PULL_TO_REFRESH_THRESHOLD = 80;
 
-export const ParticipantsList = () => {
+export const LeadsListNew = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState<Participant | null>(null);
+  const [modalInitialData, setModalInitialData] = useState<Lead | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -51,85 +52,77 @@ export const ParticipantsList = () => {
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   const { handleError, showSuccess } = useErrorHandler();
-  const { mutate: deleteParticipant } = useDelete();
-  const { mutate: createParticipant } = useCreate();
-  const { mutate: updateParticipant } = useUpdate();
+  const { mutate: deleteLead } = useDelete();
+  const { mutate: createLead } = useCreate();
+  const { mutate: updateLead } = useUpdate();
   const invalidate = useInvalidate();
 
   // Use real API data via useDataGrid hook
-  const { dataGridProps } = useDataGrid<Participant>({
-    resource: 'participants',
+  const { dataGridProps } = useDataGrid<Lead>({
+    resource: 'leads',
   });
   
-  // Get participants from dataGridProps and apply client-side filtering
-  const allParticipants = dataGridProps.rows || [];
+  // Get leads from dataGridProps and apply client-side filtering
+  const allLeads = dataGridProps.rows || [];
   
-  // Apply client-side filtering with memoization
-  const participants = useMemo(() => {
-    return allParticipants.filter(participant => {
+  // Apply client-side filtering with useMemo for performance
+  const leads = useMemo(() => {
+    return allLeads.filter(lead => {
       // Text search filter
       const matchesSearch = !searchText || 
-        participant.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-        participant.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-        participant.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-        participant.phone?.toLowerCase().includes(searchText.toLowerCase());
+        lead.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.phone?.toLowerCase().includes(searchText.toLowerCase()) ||
+        lead.source?.toLowerCase().includes(searchText.toLowerCase());
       
       // Status filter
-      const matchesStatus = !statusFilter || 
-        (statusFilter === 'active' && participant.is_active) ||
-        (statusFilter === 'inactive' && !participant.is_active);
+      const matchesStatus = !statusFilter || lead.status === statusFilter;
       
       return matchesSearch && matchesStatus;
     });
-  }, [allParticipants, searchText, statusFilter]);
-  
-  // Update dataGridProps with filtered data
-  const filteredDataGridProps = {
-    ...dataGridProps,
-    rows: participants,
-  };
+  }, [allLeads, searchText, statusFilter]);
 
+  // Event handlers
   const handleEdit = (id: string) => {
-    const participantToEdit = participants.find(p => p.id === id);
-    if (participantToEdit) {
+    const leadToEdit = leads.find(l => l.id === id);
+    if (leadToEdit) {
       setModalMode('edit');
-      setModalInitialData(participantToEdit);
+      setModalInitialData(leadToEdit);
       setIsModalOpen(true);
     }
   };
 
   const handleDuplicate = (id: string) => {
-    const participantToDuplicate = participants.find(p => p.id === id);
-    if (participantToDuplicate) {
+    const leadToDuplicate = leads.find(l => l.id === id);
+    if (leadToDuplicate) {
       setModalMode('duplicate');
-      setModalInitialData(participantToDuplicate);
+      setModalInitialData(leadToDuplicate);
       setIsModalOpen(true);
     }
   };
 
   const handleDeleteRequest = (id: string) => {
-    setSelectedParticipantId(id);
+    setSelectedLeadId(id);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (selectedParticipantId) {
-      console.log('Deleting participant with ID:', selectedParticipantId);
-      deleteParticipant({
-        resource: 'participants',
-        id: selectedParticipantId,
+    if (selectedLeadId) {
+      deleteLead({
+        resource: 'leads',
+        id: selectedLeadId,
       }, {
         onSuccess: () => {
-          showSuccess(t('messages.student_deleted'));
+          showSuccess(t('messages.lead_deleted'));
         },
         onError: (error) => {
-          console.error('Delete error:', error);
-          handleError(error, t('actions.delete') + ' ' + t('student'));
+          handleError(error, t('actions.delete') + ' ' + t('lead'));
         }
       });
     }
     setDialogOpen(false);
-    setSelectedParticipantId(null);
+    setSelectedLeadId(null);
   };
 
   const handleBulkDelete = () => {
@@ -141,15 +134,14 @@ export const ParticipantsList = () => {
   const confirmBulkDelete = async () => {
     if (selectedRows.length === 0) return;
     
-    console.log('Bulk deleting participants with IDs:', selectedRows);
     let deleteCount = 0;
     let errorCount = 0;
 
     for (const id of selectedRows) {
       try {
         await new Promise((resolve, reject) => {
-          deleteParticipant({
-            resource: 'participants',
+          deleteLead({
+            resource: 'leads',
             id,
           }, {
             onSuccess: () => {
@@ -157,14 +149,13 @@ export const ParticipantsList = () => {
               resolve(void 0);
             },
             onError: (error) => {
-              console.error(`Delete error for ID ${id}:`, error);
               errorCount++;
               reject(error);
             }
           });
         });
       } catch (error) {
-        // Error already logged above
+        // Error already logged
       }
     }
 
@@ -180,17 +171,51 @@ export const ParticipantsList = () => {
   };
   
   const handleAddNew = () => {
-    console.log('Opening create modal');
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
+  };
+
+  const handleSave = (leadData: LeadCreate) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createLead({
+        resource: 'leads',
+        values: leadData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.lead_created'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'leads', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.create') + ' ' + t('lead'));
+        }
+      });
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateLead({
+        resource: 'leads',
+        id: modalInitialData.id,
+        values: leadData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.lead_updated'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'leads', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.edit') + ' ' + t('lead'));
+        }
+      });
+    }
   };
 
   // Pull-to-refresh handler
   const handleRefresh = async () => {
     try {
       await invalidate({
-        resource: 'participants',
+        resource: 'leads',
         invalidates: ['list']
       });
       showSuccess(t('messages.data_refreshed', 'Data refreshed'));
@@ -200,49 +225,17 @@ export const ParticipantsList = () => {
     }
   };
 
-  const handleSave = (participant: ParticipantCreate) => {
-    if (modalMode === 'create' || modalMode === 'duplicate') {
-      createParticipant({
-        resource: 'participants',
-        values: participant,
-      }, {
-        onSuccess: () => {
-          showSuccess(t('messages.participant_created'));
-          setIsModalOpen(false);
-          setModalInitialData(null);
-          // Let auto-refresh handle it
-        },
-        onError: (error) => {
-          console.error('Create error:', error);
-          handleError(error, t('actions.create') + ' ' + t('participant'));
-        }
-      });
-    } else if (modalMode === 'edit' && modalInitialData) {
-      updateParticipant({
-        resource: 'participants',
-        id: modalInitialData.id,
-        values: participant,
-      }, {
-        onSuccess: () => {
-          showSuccess(t('messages.participant_updated'));
-          setIsModalOpen(false);
-          setModalInitialData(null);
-          // Let auto-refresh handle it
-        },
-        onError: (error) => {
-          console.error('Update error:', error);
-          handleError(error, t('actions.edit') + ' ' + t('participant'));
-        }
-      });
-    }
-  };
-
+  // DataGrid columns for desktop (matching original exactly)
   const columns: GridColDef[] = [
     {
-      field: 'name',
-      headerName: t('common.name'),
+      field: 'first_name',
+      headerName: t('common.first_name'),
       flex: 1,
-      renderCell: (params) => `${params.row.first_name || ''} ${params.row.last_name || ''}`.trim(),
+    },
+    {
+      field: 'last_name',
+      headerName: t('common.last_name'),
+      flex: 1,
     },
     {
       field: 'email',
@@ -255,10 +248,16 @@ export const ParticipantsList = () => {
       flex: 1,
     },
     {
-      field: 'is_active',
+      field: 'source',
+      headerName: t('forms.source'),
+      flex: 1,
+      renderCell: (params) => params.row.source.charAt(0).toUpperCase() + params.row.source.slice(1)
+    },
+    {
+      field: 'status',
       headerName: t('course_fields.status'),
       flex: 1,
-      renderCell: (params) => <StatusChip isActive={params.row.is_active} />,
+      renderCell: (params) => <StatusChip status={params.row.status} />,
     },
     { 
       field: 'created_at', 
@@ -266,32 +265,31 @@ export const ParticipantsList = () => {
       flex: 1,
       renderCell: (params) => new Date(params.row.created_at).toLocaleDateString()
     },
-    { 
-      field: 'enrollments_count', 
-      headerName: t('enrollments'), 
-      flex: 1,
-    },
     {
       field: 'action',
       headerName: t('common.actions'),
       width: 120,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton 
-            onClick={() => handleEdit(params.row.id)}
-            color="primary"
-            size="small"
-          >
+          <IconButton onClick={() => handleEdit(params.row.id)} color="primary" title={t('actions.edit')}>
             <EditIcon />
           </IconButton>
           <ActionMenu
-            onEdit={() => handleEdit(params.row.id)}
             onDuplicate={() => handleDuplicate(params.row.id)}
             onDelete={() => handleDeleteRequest(params.row.id)}
           />
         </Box>
       ),
     },
+  ];
+
+  // Filter options for SharedDataGrid
+  const statusFilterOptions = [
+    { value: LeadStatus.NEW, label: t('lead_status.new') },
+    { value: LeadStatus.CONTACTED, label: t('lead_status.contacted') },
+    { value: LeadStatus.QUALIFIED, label: t('lead_status.qualified') },
+    { value: LeadStatus.CONVERTED, label: t('lead_status.converted') },
+    { value: LeadStatus.LOST, label: t('lead_status.lost') },
   ];
 
   const renderContent = () => (
@@ -305,20 +303,42 @@ export const ParticipantsList = () => {
       '&::-webkit-scrollbar': isMobile ? { display: 'none' } : {}, // Hide webkit scrollbars on mobile
       scrollbarWidth: isMobile ? 'none' : 'auto', // Hide Firefox scrollbars on mobile
     }}>
+      {/* Statistics Cards */}
       <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('students')} value={allParticipants.length.toString()} icon={<PeopleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="primary" />
+          <StatCard 
+            title={t('leads')} 
+            value={leads.length.toString()} 
+            icon={<PersonAddIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="primary" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('common.active')} value={allParticipants.filter(p => p.status === 'active').length.toString()} icon={<VerifiedUserIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="success" />
+          <StatCard 
+            title={t('lead_status.new')} 
+            value={leads.filter(l => l.status === LeadStatus.NEW).length.toString()} 
+            icon={<LanguageIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="info" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('status_options.inactive')} value={allParticipants.filter(p => p.status === 'inactive').length.toString()} icon={<EmailIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="error" />
+          <StatCard 
+            title={t('lead_status.qualified')} 
+            value={leads.filter(l => l.status === LeadStatus.QUALIFIED).length.toString()} 
+            icon={<EmailIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="warning" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('enrollments')} value={allParticipants.reduce((sum, p) => sum + (p.enrollments_count || 0), 0).toString()} icon={<PhoneIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="info" />
+          <StatCard 
+            title={t('lead_status.converted')} 
+            value={leads.filter(l => l.status === LeadStatus.CONVERTED).length.toString()} 
+            icon={<PhoneIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="success" 
+          />
         </Grid>
       </Grid>
+
       <Box sx={{ 
         p: isMobile ? 0 : 2, 
         backgroundColor: isMobile ? 'transparent' : 'background.paper', 
@@ -327,65 +347,6 @@ export const ParticipantsList = () => {
         border: isMobile ? 'none' : '1px solid', 
         borderColor: isMobile ? 'transparent' : 'divider' 
       }}>
-        {/* Desktop Layout */}
-        {!isMobile && (
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleAddNew}
-                sx={{ 
-                  whiteSpace: 'nowrap',
-                  minWidth: 140,
-                  fontWeight: 600,
-                  textTransform: 'none'
-                }}
-              >
-                + {t('actions.create')} {t('student')}
-              </Button>
-              {selectedRows.length > 0 && (
-                <Button 
-                  variant="outlined" 
-                  color="error" 
-                  onClick={handleBulkDelete}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('actions.delete')} ({selectedRows.length})
-                </Button>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 1, minWidth: 0 }}>
-              <TextField
-                placeholder={t('search.placeholder_students')}
-                variant="outlined"
-                size="small"
-                sx={{ 
-                  minWidth: 200,
-                  maxWidth: 300,
-                  flexShrink: 1
-                }}
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-              />
-              <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
-                <InputLabel>{t('course_fields.status')}</InputLabel>
-                <Select
-                  label={t('course_fields.status')}
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                  }}
-                >
-                  <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value="active">{t('common.active')}</MenuItem>
-                  <MenuItem value="inactive">{t('status_options.inactive')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
 
         {/* Mobile Layout - Search and Filter */}
         {isMobile && (
@@ -415,7 +376,7 @@ export const ParticipantsList = () => {
           
             {/* Search Field */}
             <TextField
-              placeholder={t('search.placeholder_students')}
+              placeholder={t('search.placeholder_leads')}
               variant="outlined"
               size="small"
               fullWidth
@@ -450,8 +411,11 @@ export const ParticipantsList = () => {
                 }}
               >
                 <MenuItem value="">{t('common.all')}</MenuItem>
-                <MenuItem value="active">{t('common.active')}</MenuItem>
-                <MenuItem value="inactive">{t('status_options.inactive')}</MenuItem>
+                <MenuItem value={LeadStatus.NEW}>{t('lead_status.new')}</MenuItem>
+                <MenuItem value={LeadStatus.CONTACTED}>{t('lead_status.contacted')}</MenuItem>
+                <MenuItem value={LeadStatus.QUALIFIED}>{t('lead_status.qualified')}</MenuItem>
+                <MenuItem value={LeadStatus.CONVERTED}>{t('lead_status.converted')}</MenuItem>
+                <MenuItem value={LeadStatus.LOST}>{t('lead_status.lost')}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -463,73 +427,104 @@ export const ParticipantsList = () => {
         }}>
           {/* Desktop Data Grid */}
           {!isMobile && (
-            <Box sx={{ height: DATA_GRID_HEIGHT, width: '100%' }}>
-              <DataGrid
-                {...filteredDataGridProps}
-                columns={columns}
-                checkboxSelection
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25, 50]}
-                sx={{ border: 'none' }}
-                onRowSelectionModelChange={(newSelectionModel) => {
-                  setSelectedRows(newSelectionModel as string[]);
-                }}
-                rowSelectionModel={selectedRows}
-              />
-            </Box>
+            <SharedDataGrid
+              rows={leads}
+              columns={columns}
+              searchValue={searchText}
+              onSearchChange={setSearchText}
+              searchPlaceholder={t('search.placeholder_leads')}
+              filterValue={statusFilter}
+              onFilterChange={setStatusFilter}
+              filterOptions={statusFilterOptions}
+              filterLabel={t('course_fields.status')}
+              enableSelection={true}
+              selectedRows={selectedRows}
+              onSelectionChange={(selection) => setSelectedRows(selection as string[])}
+              onCreateNew={handleAddNew}
+              createButtonText={`+ ${t('actions.create')} ${t('lead')}`}
+              onBulkDelete={handleBulkDelete}
+              bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
+              height={DATA_GRID_HEIGHT}
+              pageSizeOptions={[5, 10, 25, 50]}
+              disableRowSelectionOnClick={true}
+            />
           )}
 
-          {/* Mobile Card List */}
+          {/* Mobile Layout - Cards */}
           {isMobile && (
             <Box sx={{ 
               px: 1,
               pb: 10 // Extra padding for bottom navigation
             }}>
-              {participants.map((participant) => (
-                <CompactParticipantCard
-                  key={participant.id}
-                  participant={participant}
+              {leads.map((lead) => (
+                <CompactCardShell
+                  key={lead.id}
+                  entityId={lead.id}
                   onEdit={handleEdit}
                   onDuplicate={handleDuplicate}
                   onDelete={handleDeleteRequest}
-                />
+                  enableSwipeGestures={true}
+                >
+                  <CompactLeadContent lead={lead} />
+                </CompactCardShell>
               ))}
             </Box>
           )}
         </ErrorBoundary>
       </Box>
+      
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title={t('actions.delete') + ' ' + t('student')}
+        title={`${t('actions.delete')} ${t('lead')}`}
         description={t('messages.confirm_delete')}
       />
       <ConfirmationDialog
         open={bulkDeleteDialogOpen}
         onClose={() => setBulkDeleteDialogOpen(false)}
         onConfirm={confirmBulkDelete}
-        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('students')}`}
+        title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('leads')}`}
         description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
       <ErrorBoundary onError={(error, errorInfo) => {
-        console.error('Participant modal error:', error, errorInfo);
-        handleError(error, 'Participant Modal');
+        console.error('Lead modal error:', error, errorInfo);
+        handleError(error, 'Lead Modal');
         setIsModalOpen(false); // Close modal on error
       }}>
-        <ParticipantModal 
+        <LeadModal 
           open={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setModalInitialData(null);
           }}
+          forceMobile={isMobile} // Use responsive detection
+          onSave={handleSave}
           initialData={modalInitialData}
           mode={modalMode}
-          onSave={handleSave}
         />
       </ErrorBoundary>
       
-      {/* Floating Action Button for Create Participant - Mobile Only */}
+    </Box>
+  );
+
+  // Wrap with pull-to-refresh on mobile, or return content directly on desktop
+  const content = isMobile ? (
+    <PullToRefresh 
+      onRefresh={handleRefresh}
+      enabled={true}
+      threshold={PULL_TO_REFRESH_THRESHOLD}
+    >
+      {renderContent()}
+    </PullToRefresh>
+  ) : (
+    renderContent()
+  );
+
+  return (
+    <>
+      {content}
+      {/* Floating Action Button for Create Lead - Mobile Only */}
       {isMobile && (
         <Fab
           color="primary"
@@ -545,20 +540,6 @@ export const ParticipantsList = () => {
           <AddIcon />
         </Fab>
       )}
-      
-    </Box>
+    </>
   );
-
-  // Wrap with pull-to-refresh on mobile, or return content directly on desktop
-  return isMobile ? (
-    <PullToRefresh 
-      onRefresh={handleRefresh}
-      enabled={true}
-      threshold={PULL_TO_REFRESH_THRESHOLD}
-    >
-      {renderContent()}
-    </PullToRefresh>
-  ) : (
-    renderContent()
-  );
-}; 
+};

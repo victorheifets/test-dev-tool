@@ -6,6 +6,8 @@
 // Enum matching backend exactly
 export enum EnrollmentStatus {
   PENDING = 'pending',
+  ENROLLED = 'enrolled',
+  ACTIVE = 'active',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
@@ -78,6 +80,8 @@ export const EnrollmentValidation = {
 // Status display helpers
 export const EnrollmentStatusLabels = {
   [EnrollmentStatus.PENDING]: 'Pending',
+  [EnrollmentStatus.ENROLLED]: 'Enrolled',
+  [EnrollmentStatus.ACTIVE]: 'Active',
   [EnrollmentStatus.CONFIRMED]: 'Confirmed',
   [EnrollmentStatus.CANCELLED]: 'Cancelled',
   [EnrollmentStatus.COMPLETED]: 'Completed',
@@ -88,6 +92,8 @@ export const EnrollmentStatusLabels = {
 // Status color mapping for UI
 export const EnrollmentStatusColors = {
   [EnrollmentStatus.PENDING]: 'warning',
+  [EnrollmentStatus.ENROLLED]: 'success',
+  [EnrollmentStatus.ACTIVE]: 'primary',
   [EnrollmentStatus.CONFIRMED]: 'success',
   [EnrollmentStatus.CANCELLED]: 'error',
   [EnrollmentStatus.COMPLETED]: 'info',

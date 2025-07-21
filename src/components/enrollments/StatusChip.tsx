@@ -12,6 +12,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
   const getStatusDisplay = (status: EnrollmentStatus) => {
     const statusMap = {
       pending: { label: t('status_options.pending'), color: 'warning' as const },
+      enrolled: { label: t('enrollment_status.enrolled'), color: 'success' as const },
+      active: { label: t('enrollment_status.active'), color: 'primary' as const },
       confirmed: { label: t('status_options.confirmed'), color: 'info' as const },
       completed: { label: t('status_options.completed'), color: 'success' as const },
       cancelled: { label: t('status_options.cancelled'), color: 'error' as const },

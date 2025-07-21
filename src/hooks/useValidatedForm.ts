@@ -23,7 +23,7 @@ export const useValidatedForm = <T extends FieldValues>({
 }: UseValidatedFormProps<T>): UseValidatedFormReturn<T> => {
   const form = useForm<T>({
     ...formProps,
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema as any),
     defaultValues,
   });
 

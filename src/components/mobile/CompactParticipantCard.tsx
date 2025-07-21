@@ -172,6 +172,8 @@ export const CompactParticipantCard: React.FC<CompactParticipantCardProps> = ({
                 color="text.secondary"
                 sx={{
                   fontSize: '0.875rem',
+                  letterSpacing: '0.1em',
+                  fontWeight: 400,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -188,7 +190,11 @@ export const CompactParticipantCard: React.FC<CompactParticipantCardProps> = ({
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ fontSize: '0.875rem' }}
+                sx={{ 
+                  fontSize: '0.875rem',
+                  letterSpacing: '0.1em',
+                  fontWeight: 400
+                }}
               >
                 {participant.phone}
               </Typography>

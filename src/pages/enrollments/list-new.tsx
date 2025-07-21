@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Button, TextField, MenuItem, Select, Typography, Grid, FormControl, InputLabel, Fab, InputAdornment } from '@mui/material';
+import { Box, Button, TextField, MenuItem, Select, Typography, Grid, FormControl, InputLabel, Fab, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import { GridColDef } from '@mui/x-data-grid';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -15,14 +16,16 @@ import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { EnrollmentModal } from '../../components/enrollments/EnrollmentModal';
 import { StatCard } from '../../components/StatCard';
+import { SharedDataGrid } from '../../components/common/SharedDataGrid';
+import { CompactCardShell } from '../../components/mobile/CompactCardShell';
+import { CompactEnrollmentContent } from '../../components/mobile/content/CompactEnrollmentContent';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
-import { CompactEnrollmentCard } from '../../components/mobile/CompactEnrollmentCard';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import EventIcon from '@mui/icons-material/Event';
 import PaymentIcon from '@mui/icons-material/Payment';
 
-// UI Constants
+// UI Constants (matching original)
 const MOBILE_BOTTOM_PADDING = 10;
 const MOBILE_SIDE_PADDING = 1;
 const MOBILE_ICON_SIZE = 24;
@@ -35,9 +38,9 @@ const FAB_Z_INDEX = 1000;
 const DATA_GRID_HEIGHT = 500;
 const PULL_TO_REFRESH_THRESHOLD = 80;
 
-export const EnrollmentsList = () => {
+export const EnrollmentsListNew = () => {
   const { t } = useTranslation();
-  const { isMobile } = useBreakpoint(); // Use responsive detection
+  const { isMobile } = useBreakpoint();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,13 +65,14 @@ export const EnrollmentsList = () => {
   // Get enrollments from dataGridProps and apply client-side filtering
   const allEnrollments = dataGridProps.rows || [];
   
-  // Apply client-side filtering with memoization
+  // Apply client-side filtering with useMemo for performance
   const enrollments = useMemo(() => {
     return allEnrollments.filter(enrollment => {
       // Text search filter
       const matchesSearch = !searchText || 
         enrollment.participant_id?.toLowerCase().includes(searchText.toLowerCase()) ||
-        enrollment.activity_id?.toLowerCase().includes(searchText.toLowerCase());
+        enrollment.activity_id?.toLowerCase().includes(searchText.toLowerCase()) ||
+        enrollment.payment_info?.payment_status?.toLowerCase().includes(searchText.toLowerCase());
       
       // Status filter
       const matchesStatus = !statusFilter || enrollment.status === statusFilter;
@@ -76,13 +80,8 @@ export const EnrollmentsList = () => {
       return matchesSearch && matchesStatus;
     });
   }, [allEnrollments, searchText, statusFilter]);
-  
-  // Update dataGridProps with filtered data
-  const filteredDataGridProps = {
-    ...dataGridProps,
-    rows: enrollments,
-  };
 
+  // Event handlers
   const handleEdit = (id: string) => {
     const enrollmentToEdit = enrollments.find(e => e.id === id);
     if (enrollmentToEdit) {
@@ -108,7 +107,6 @@ export const EnrollmentsList = () => {
 
   const confirmDelete = () => {
     if (selectedEnrollmentId) {
-      console.log('Deleting enrollment with ID:', selectedEnrollmentId);
       deleteEnrollment({
         resource: 'enrollments',
         id: selectedEnrollmentId,
@@ -117,7 +115,6 @@ export const EnrollmentsList = () => {
           showSuccess(t('messages.enrollment_deleted'));
         },
         onError: (error) => {
-          console.error('Delete error:', error);
           handleError(error, t('actions.delete') + ' ' + t('enrollment'));
         }
       });
@@ -135,7 +132,6 @@ export const EnrollmentsList = () => {
   const confirmBulkDelete = async () => {
     if (selectedRows.length === 0) return;
     
-    console.log('Bulk deleting enrollments with IDs:', selectedRows);
     let deleteCount = 0;
     let errorCount = 0;
 
@@ -151,14 +147,13 @@ export const EnrollmentsList = () => {
               resolve(void 0);
             },
             onError: (error) => {
-              console.error(`Delete error for ID ${id}:`, error);
               errorCount++;
               reject(error);
             }
           });
         });
       } catch (error) {
-        // Error already logged above
+        // Error already logged
       }
     }
 
@@ -174,10 +169,44 @@ export const EnrollmentsList = () => {
   };
   
   const handleAddNew = () => {
-    console.log('Opening create modal');
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
+  };
+
+  const handleSave = (enrollmentData: EnrollmentCreate) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createEnrollment({
+        resource: 'enrollments',
+        values: enrollmentData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.enrollment_created'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'enrollments', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.create') + ' ' + t('enrollment'));
+        }
+      });
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateEnrollment({
+        resource: 'enrollments',
+        id: modalInitialData.id,
+        values: enrollmentData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.enrollment_updated'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'enrollments', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.edit') + ' ' + t('enrollment'));
+        }
+      });
+    }
   };
 
   // Pull-to-refresh handler
@@ -194,7 +223,7 @@ export const EnrollmentsList = () => {
     }
   };
 
-
+  // DataGrid columns for desktop (matching original exactly)
   const columns: GridColDef[] = [
     {
       field: 'participant_id',
@@ -235,13 +264,25 @@ export const EnrollmentsList = () => {
       headerName: t('common.actions'),
       flex: 1,
       renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEdit(params.row.id)}
-          onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDeleteRequest(params.row.id)}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={() => handleEdit(params.row.id)} color="primary" title={t('actions.edit')}>
+            <EditIcon />
+          </IconButton>
+          <ActionMenu
+            onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDeleteRequest(params.row.id)}
+          />
+        </Box>
       ),
     },
+  ];
+
+  // Filter options for SharedDataGrid
+  const statusFilterOptions = [
+    { value: EnrollmentStatus.ENROLLED, label: t('enrollment_status.enrolled') },
+    { value: EnrollmentStatus.ACTIVE, label: t('enrollment_status.active') },
+    { value: EnrollmentStatus.COMPLETED, label: t('enrollment_status.completed') },
+    { value: EnrollmentStatus.CANCELLED, label: t('enrollment_status.cancelled') },
   ];
 
   const renderContent = () => (
@@ -255,20 +296,42 @@ export const EnrollmentsList = () => {
       '&::-webkit-scrollbar': isMobile ? { display: 'none' } : {}, // Hide webkit scrollbars on mobile
       scrollbarWidth: isMobile ? 'none' : 'auto', // Hide Firefox scrollbars on mobile
     }}>
+      {/* Statistics Cards */}
       <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('enrollments')} value={allEnrollments.length.toString()} icon={<SchoolIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="primary" />
+          <StatCard 
+            title={t('enrollments')} 
+            value={enrollments.length.toString()} 
+            icon={<SchoolIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="primary" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('enrollment_status.confirmed')} value={allEnrollments.filter(e => e.status === 'confirmed').length.toString()} icon={<PeopleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="success" />
+          <StatCard 
+            title={t('enrollment_status.active')} 
+            value={enrollments.filter(e => e.status === EnrollmentStatus.ACTIVE).length.toString()} 
+            icon={<PeopleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="success" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('enrollment_status.completed')} value={allEnrollments.filter(e => e.status === 'completed').length.toString()} icon={<EventIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="info" />
+          <StatCard 
+            title={t('enrollment_status.completed')} 
+            value={enrollments.filter(e => e.status === EnrollmentStatus.COMPLETED).length.toString()} 
+            icon={<EventIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="info" 
+          />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
-          <StatCard title={t('enrollment_status.pending')} value={allEnrollments.filter(e => e.status === 'pending').length.toString()} icon={<PaymentIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} color="warning" />
+          <StatCard 
+            title={t('forms.payment_status')} 
+            value={enrollments.filter(e => e.payment_info?.payment_status === 'paid').length.toString()} 
+            icon={<PaymentIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="warning" 
+          />
         </Grid>
       </Grid>
+
       <Box sx={{ 
         p: isMobile ? 0 : 2, 
         backgroundColor: isMobile ? 'transparent' : 'background.paper', 
@@ -277,68 +340,6 @@ export const EnrollmentsList = () => {
         border: isMobile ? 'none' : '1px solid', 
         borderColor: isMobile ? 'transparent' : 'divider' 
       }}>
-        {/* Desktop Layout */}
-        {!isMobile && (
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleAddNew}
-                sx={{ 
-                  whiteSpace: 'nowrap',
-                  minWidth: 140,
-                  fontWeight: 600,
-                  textTransform: 'none'
-                }}
-              >
-                + {t('actions.create')} {t('enrollment')}
-              </Button>
-              {selectedRows.length > 0 && (
-                <Button 
-                  variant="outlined" 
-                  color="error" 
-                  onClick={handleBulkDelete}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('actions.delete')} ({selectedRows.length})
-                </Button>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 1, minWidth: 0 }}>
-              <TextField
-                placeholder={t('search.placeholder_enrollments')}
-                variant="outlined"
-                size="small"
-                sx={{ 
-                  minWidth: 200,
-                  maxWidth: 300,
-                  flexShrink: 1
-                }}
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-              />
-              <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
-                <InputLabel>{t('course_fields.status')}</InputLabel>
-                <Select
-                  label={t('course_fields.status')}
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                  }}
-                >
-                  <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value={EnrollmentStatus.PENDING}>{t('enrollment_status.pending')}</MenuItem>
-                  <MenuItem value={EnrollmentStatus.CONFIRMED}>{t('enrollment_status.confirmed')}</MenuItem>
-                  <MenuItem value={EnrollmentStatus.COMPLETED}>{t('enrollment_status.completed')}</MenuItem>
-                  <MenuItem value={EnrollmentStatus.CANCELLED}>{t('enrollment_status.cancelled')}</MenuItem>
-                  <MenuItem value={EnrollmentStatus.WAITLISTED}>{t('enrollment_status.waitlisted')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
 
         {/* Mobile Layout - Search and Filter */}
         {isMobile && (
@@ -403,11 +404,10 @@ export const EnrollmentsList = () => {
                 }}
               >
                 <MenuItem value="">{t('common.all')}</MenuItem>
-                <MenuItem value={EnrollmentStatus.PENDING}>{t('enrollment_status.pending')}</MenuItem>
-                <MenuItem value={EnrollmentStatus.CONFIRMED}>{t('enrollment_status.confirmed')}</MenuItem>
+                <MenuItem value={EnrollmentStatus.ENROLLED}>{t('enrollment_status.enrolled')}</MenuItem>
+                <MenuItem value={EnrollmentStatus.ACTIVE}>{t('enrollment_status.active')}</MenuItem>
                 <MenuItem value={EnrollmentStatus.COMPLETED}>{t('enrollment_status.completed')}</MenuItem>
                 <MenuItem value={EnrollmentStatus.CANCELLED}>{t('enrollment_status.cancelled')}</MenuItem>
-                <MenuItem value={EnrollmentStatus.WAITLISTED}>{t('enrollment_status.waitlisted')}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -419,41 +419,52 @@ export const EnrollmentsList = () => {
         }}>
           {/* Desktop Data Grid */}
           {!isMobile && (
-            <Box sx={{ height: DATA_GRID_HEIGHT, width: '100%' }}>
-              <DataGrid
-                {...filteredDataGridProps}
-                columns={columns}
-                checkboxSelection
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25, 50]}
-                sx={{ border: 'none' }}
-                onRowSelectionModelChange={(newSelectionModel) => {
-                  setSelectedRows(newSelectionModel as string[]);
-                }}
-                rowSelectionModel={selectedRows}
-              />
-            </Box>
+            <SharedDataGrid
+              rows={enrollments}
+              columns={columns}
+              searchValue={searchText}
+              onSearchChange={setSearchText}
+              searchPlaceholder={t('search.placeholder_enrollments')}
+              filterValue={statusFilter}
+              onFilterChange={setStatusFilter}
+              filterOptions={statusFilterOptions}
+              filterLabel={t('course_fields.status')}
+              enableSelection={true}
+              selectedRows={selectedRows}
+              onSelectionChange={(selection) => setSelectedRows(selection as string[])}
+              onCreateNew={handleAddNew}
+              createButtonText={`+ ${t('actions.create')} ${t('enrollment')}`}
+              onBulkDelete={handleBulkDelete}
+              bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
+              height={DATA_GRID_HEIGHT}
+              pageSizeOptions={[5, 10, 25, 50]}
+              disableRowSelectionOnClick={true}
+            />
           )}
 
-          {/* Mobile Card List */}
+          {/* Mobile Layout - Cards */}
           {isMobile && (
             <Box sx={{ 
               px: 1,
               pb: 10 // Extra padding for bottom navigation
             }}>
               {enrollments.map((enrollment) => (
-                <CompactEnrollmentCard
+                <CompactCardShell
                   key={enrollment.id}
-                  enrollment={enrollment}
+                  entityId={enrollment.id}
                   onEdit={handleEdit}
                   onDuplicate={handleDuplicate}
                   onDelete={handleDeleteRequest}
-                />
+                  enableSwipeGestures={true}
+                >
+                  <CompactEnrollmentContent enrollment={enrollment} />
+                </CompactCardShell>
               ))}
             </Box>
           )}
         </ErrorBoundary>
       </Box>
+      
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -480,47 +491,31 @@ export const EnrollmentsList = () => {
             setModalInitialData(null);
           }}
           forceMobile={isMobile} // Use responsive detection
-          onSave={async (enrollmentData) => {
-            console.log('Saving enrollment:', enrollmentData);
-            
-            if (modalMode === 'create' || modalMode === 'duplicate') {
-              createEnrollment({
-                resource: 'enrollments',
-                values: enrollmentData,
-              }, {
-                onSuccess: () => {
-                  setIsModalOpen(false);
-                  setModalInitialData(null);
-                  // Just close modal - let auto-refresh handle it
-                },
-                onError: (error) => {
-                  console.error('Create error:', error);
-                  handleError(error, t('actions.create') + ' ' + t('enrollment'));
-                }
-              });
-            } else if (modalMode === 'edit' && modalInitialData?.id) {
-              updateEnrollment({
-                resource: 'enrollments',
-                id: modalInitialData.id,
-                values: enrollmentData,
-              }, {
-                onSuccess: () => {
-                  setIsModalOpen(false);
-                  setModalInitialData(null);
-                  // Just close modal - let auto-refresh handle it
-                },
-                onError: (error) => {
-                  console.error('Update error:', error);
-                  handleError(error, t('actions.edit') + ' ' + t('enrollment'));
-                }
-              });
-            }
-          }}
+          onSave={handleSave}
           initialData={modalInitialData}
           mode={modalMode}
         />
       </ErrorBoundary>
       
+    </Box>
+  );
+
+  // Wrap with pull-to-refresh on mobile, or return content directly on desktop
+  const content = isMobile ? (
+    <PullToRefresh 
+      onRefresh={handleRefresh}
+      enabled={true}
+      threshold={PULL_TO_REFRESH_THRESHOLD}
+    >
+      {renderContent()}
+    </PullToRefresh>
+  ) : (
+    renderContent()
+  );
+
+  return (
+    <>
+      {content}
       {/* Floating Action Button for Create Enrollment - Mobile Only */}
       {isMobile && (
         <Fab
@@ -537,20 +532,6 @@ export const EnrollmentsList = () => {
           <AddIcon />
         </Fab>
       )}
-      
-    </Box>
+    </>
   );
-
-  // Wrap with pull-to-refresh on mobile, or return content directly on desktop
-  return isMobile ? (
-    <PullToRefresh 
-      onRefresh={handleRefresh}
-      enabled={true}
-      threshold={PULL_TO_REFRESH_THRESHOLD}
-    >
-      {renderContent()}
-    </PullToRefresh>
-  ) : (
-    renderContent()
-  );
-}; 
+};
