@@ -51,31 +51,20 @@ export const CourseForm: React.FC<CourseFormProps> = ({
   return (
     <Grid 
       container 
-      spacing={isMobile ? 3 : 2.5} 
-      sx={(theme) => ({
-        mt: isMobile ? 0.5 : 0.5,
-        direction: theme.direction,
-        '& .MuiTextField-root': {
-          '& .MuiInputLabel-root': {
-            transformOrigin: theme.direction === 'rtl' ? 'top right' : 'top left',
-          },
-          '& .MuiInputBase-input': {
-            fontSize: isMobile ? '16px' : '14px',
-            py: isMobile ? 1.5 : 1.2,
-          },
+      spacing={isMobile ? 2 : 2} 
+      sx={{
+        mt: 0,
+        '& .MuiTextField-root, & .MuiFormControl-root': {
           '& .MuiOutlinedInput-root': {
             borderRadius: isMobile ? 2 : 1.5,
           },
-        },
-        '& .MuiFormControl-root': {
-          '& .MuiInputBase-root': {
+          '& .MuiInputBase-input': {
             fontSize: isMobile ? '16px' : '14px',
-            borderRadius: isMobile ? 2 : 1.5,
           },
         },
-      })}
+      }}
     >
-      <Grid item xs={12} sm={8}>
+      <Grid item xs={12} sm={6}>
         <ValidatedTextField
           {...validatedFormHook.createField('name')}
           label={t('course_fields.name')}
@@ -83,7 +72,7 @@ export const CourseForm: React.FC<CourseFormProps> = ({
         />
       </Grid>
       
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={6}>
         <ValidatedSelect
           {...validatedFormHook.createField('type')}
           label={t('forms.type')}
@@ -113,14 +102,6 @@ export const CourseForm: React.FC<CourseFormProps> = ({
         <ValidatedTextField
           {...validatedFormHook.createField('location')}
           label={t('course_fields.location')}
-        />
-      </Grid>
-      
-      <Grid item xs={12} sm={6}>
-        <ValidatedTextField
-          {...validatedFormHook.createField('capacity')}
-          label={t('course_fields.capacity')}
-          type="number"
         />
       </Grid>
       
@@ -165,12 +146,17 @@ export const CourseForm: React.FC<CourseFormProps> = ({
       
       <Grid item xs={12} sm={6}>
         <ValidatedTextField
+          {...validatedFormHook.createField('capacity')}
+          label={t('course_fields.capacity')}
+          type="number"
+        />
+      </Grid>
+      
+      <Grid item xs={12} sm={6}>
+        <ValidatedTextField
           {...validatedFormHook.createField('price')}
           label={t('course_fields.price')}
           type="number"
-          InputProps={{
-            startAdornment: formData.currency || 'USD'
-          }}
         />
       </Grid>
       

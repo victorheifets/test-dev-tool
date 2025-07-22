@@ -30,7 +30,9 @@
     "refresh": "Refresh",
     "duplicate": "Duplicate",
     "close": "Close",
-    "resend": "Resend"
+    "resend": "Resend",
+    "reset": "Reset",
+    "submit": "Submit"
   },
   
   "messages": {
@@ -118,7 +120,8 @@
     "pull_to_refresh": "Pull to refresh",
     "release_to_refresh": "Release to refresh",
     "not_set": "Not set",
-    "invalid_date": "Invalid date"
+    "invalid_date": "Invalid date",
+    "none": "None"
   },
   
   "search": {
@@ -331,6 +334,31 @@
     "publishedUrl": "Published URL",
     "publishConfirmation": "Are you sure you want to publish this form? Once published, it will be available online.",
     "publishing": "Publishing...",
+    "formTitle": "Registration Form",
+    "formSettings": "Form Settings",
+    "published": "Published",
+    "submitSuccess": "Form submitted successfully!",
+    "submitError": "Failed to submit form. Please try again.",
+    "publishSuccess": "Form published successfully!",
+    "publishError": "Failed to publish form. Please try again.",
+    "submitting": "Submitting...",
+    "activityOfInterest": "Activity of Interest",
+    "additionalNotes": "Additional Notes",
+    "sources": {
+      "website": "Website",
+      "social": "Social Media",
+      "referral": "Referral",
+      "other": "Other"
+    },
+    "activities": {
+      "course1": "Beginner Course",
+      "course2": "Advanced Course",
+      "workshop": "Workshop"
+    },
+    "tabs": {
+      "form": "Form",
+      "settings": "Settings"
+    },
     "fields": {
       "fullName": "Full Name",
       "fullNamePlaceholder": "Enter your full name",
@@ -529,8 +557,9 @@
         "content": "How are you finding the course so far? We'd love your feedback!"
       }
     },
-    "labels": {
-      "messages": "messages"
+    "no_messages": "No messages yet. Click the button below to send your first SMS!",
+    "columns": {
+      "cost": "Cost"
     }
   }
 } 

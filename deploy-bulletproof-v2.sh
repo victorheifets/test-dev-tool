@@ -100,19 +100,19 @@ deploy_to_s3() {
         exit 1
     fi
     
-    # Sync files with proper cache headers
+    # First: Upload HTML and JSON files with shorter cache (these must go first to avoid cache issues)
+    aws s3 sync dist/ "s3://$BUCKET_NAME/" \
+        --cache-control "public,max-age=300,no-cache" \
+        --exclude "*" \
+        --include "*.html" \
+        --include "*.json" \
+        --region "$REGION"
+    
+    # Second: Upload all other files with long cache headers and clean up old files
     aws s3 sync dist/ "s3://$BUCKET_NAME/" --delete \
         --cache-control "public,max-age=31536000,immutable" \
         --exclude "*.html" \
         --exclude "*.json" \
-        --region "$REGION"
-    
-    # HTML and JSON files with shorter cache
-    aws s3 sync dist/ "s3://$BUCKET_NAME/" \
-        --cache-control "public,max-age=300" \
-        --include "*.html" \
-        --include "*.json" \
-        --exclude "*" \
         --region "$REGION"
     
     log_success "Files deployed to S3"

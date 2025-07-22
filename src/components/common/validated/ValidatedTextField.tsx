@@ -42,7 +42,7 @@ export const ValidatedTextField = <T extends FieldValues>({
           required={required}
           fullWidth
           // Ensure controlled component behavior
-          value={field.value || ''}
+          value={field.value ?? ''}
           onChange={(e) => {
             const value = type === 'number' ? (e.target.value === '' ? undefined : Number(e.target.value)) : e.target.value;
             field.onChange(value);

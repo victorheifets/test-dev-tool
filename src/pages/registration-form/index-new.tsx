@@ -55,17 +55,24 @@ interface FormSettings {
 // Extract preview content into separate component
 const PreviewContent: React.FC = () => {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   
   const FormPreview = () => (
-    <Paper sx={{ p: 3, backgroundColor: 'background.paper' }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+    <Box sx={{ 
+      p: isMobile ? 2 : 3, 
+      backgroundColor: isMobile ? 'grey.50' : 'background.paper',
+      borderRadius: 2,
+      border: isMobile ? 'none' : '1px solid',
+      borderColor: 'divider'
+    }}>
+      <Typography variant={isMobile ? "h6" : "h5"} gutterBottom sx={{ fontWeight: 600 }}>
         {t('registrationForm.defaultTitle')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         {t('registrationForm.defaultDescription')}
       </Typography>
       
-      <Grid container spacing={2}>
+      <Grid container spacing={isMobile ? 2 : 3}>
         <Grid item xs={12} sm={6}>
           <TextField
             label={t('forms.first_name')}
@@ -73,6 +80,7 @@ const PreviewContent: React.FC = () => {
             fullWidth
             disabled
             value="John"
+            size={isMobile ? "small" : "medium"}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -82,6 +90,7 @@ const PreviewContent: React.FC = () => {
             fullWidth
             disabled
             value="Doe"
+            size={isMobile ? "small" : "medium"}
           />
         </Grid>
         <Grid item xs={12}>
@@ -91,6 +100,7 @@ const PreviewContent: React.FC = () => {
             fullWidth
             disabled
             value="john.doe@example.com"
+            size={isMobile ? "small" : "medium"}
           />
         </Grid>
         <Grid item xs={12}>
@@ -100,10 +110,11 @@ const PreviewContent: React.FC = () => {
             fullWidth
             disabled
             value="+1234567890"
+            size={isMobile ? "small" : "medium"}
           />
         </Grid>
         <Grid item xs={12}>
-          <FormControl fullWidth disabled>
+          <FormControl fullWidth disabled size={isMobile ? "small" : "medium"}>
             <FormLabel>{t('forms.source')}</FormLabel>
             <Select value="website">
               <MenuItem value="website">Website</MenuItem>
@@ -111,7 +122,7 @@ const PreviewContent: React.FC = () => {
           </FormControl>
         </Grid>
       </Grid>
-    </Paper>
+    </Box>
   );
 
   return <FormPreview />;
@@ -240,7 +251,7 @@ const RegistrationFormNew: React.FC = () => {
   // Main form content
   const FormContent = () => (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
+      <Grid container spacing={isMobile ? 2 : 3}>
         <Grid item xs={12} sm={6}>
           <Controller
             name="first_name"
@@ -251,6 +262,7 @@ const RegistrationFormNew: React.FC = () => {
                 label={t('forms.first_name')}
                 variant="outlined"
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 error={!!errors.first_name}
                 helperText={errors.first_name?.message}
                 required
@@ -269,6 +281,7 @@ const RegistrationFormNew: React.FC = () => {
                 label={t('forms.last_name')}
                 variant="outlined"
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 error={!!errors.last_name}
                 helperText={errors.last_name?.message}
                 required
@@ -288,6 +301,7 @@ const RegistrationFormNew: React.FC = () => {
                 type="email"
                 variant="outlined"
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 error={!!errors.email}
                 helperText={errors.email?.message}
                 required
@@ -307,6 +321,7 @@ const RegistrationFormNew: React.FC = () => {
                 type="tel"
                 variant="outlined"
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 error={!!errors.phone}
                 helperText={errors.phone?.message}
               />
@@ -319,7 +334,7 @@ const RegistrationFormNew: React.FC = () => {
             name="source"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth error={!!errors.source}>
+              <FormControl fullWidth error={!!errors.source} size={isMobile ? "small" : "medium"}>
                 <FormLabel required>{t('forms.source')}</FormLabel>
                 <Select {...field} variant="outlined">
                   <MenuItem value="website">{t('registrationForm.sources.website')}</MenuItem>
@@ -342,7 +357,7 @@ const RegistrationFormNew: React.FC = () => {
             name="activity_of_interest"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth>
+              <FormControl fullWidth size={isMobile ? "small" : "medium"}>
                 <FormLabel>{t('registrationForm.activityOfInterest')}</FormLabel>
                 <Select {...field} variant="outlined">
                   <MenuItem value="">{t('common.none')}</MenuItem>
@@ -365,8 +380,9 @@ const RegistrationFormNew: React.FC = () => {
                 label={t('registrationForm.additionalNotes')}
                 variant="outlined"
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 multiline
-                rows={4}
+                rows={isMobile ? 3 : 4}
                 error={!!errors.notes}
                 helperText={errors.notes?.message}
               />
@@ -375,12 +391,20 @@ const RegistrationFormNew: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'flex-end', 
+            gap: 2, 
+            mt: 2 
+          }}>
             <Button
               type="button"
               variant="outlined"
               onClick={() => reset()}
               disabled={isSubmitting}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
             >
               {t('actions.reset')}
             </Button>
@@ -388,6 +412,8 @@ const RegistrationFormNew: React.FC = () => {
               type="submit"
               variant="contained"
               disabled={isSubmitting}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
               startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
             >
               {isSubmitting ? t('registrationForm.submitting') : t('actions.submit')}
@@ -401,16 +427,17 @@ const RegistrationFormNew: React.FC = () => {
   // Settings content
   const SettingsContent = () => (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant={isMobile ? "h6" : "h6"} gutterBottom>
         {t('registrationForm.formSettings')}
       </Typography>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={isMobile ? 2 : 3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {editingTitle ? (
               <TextField
                 fullWidth
+                size={isMobile ? "small" : "medium"}
                 value={formSettings.title}
                 onChange={(e) => setFormSettings(prev => ({ ...prev, title: e.target.value }))}
                 onBlur={() => setEditingTitle(false)}
@@ -419,10 +446,13 @@ const RegistrationFormNew: React.FC = () => {
               />
             ) : (
               <>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                <Typography variant={isMobile ? "body1" : "h6"} sx={{ flexGrow: 1 }}>
                   {formSettings.title}
                 </Typography>
-                <IconButton onClick={() => setEditingTitle(true)}>
+                <IconButton 
+                  onClick={() => setEditingTitle(true)}
+                  size={isMobile ? "small" : "medium"}
+                >
                   <EditIcon />
                 </IconButton>
               </>
@@ -431,11 +461,13 @@ const RegistrationFormNew: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
             {editingDescription ? (
               <TextField
                 fullWidth
                 multiline
+                rows={isMobile ? 2 : 3}
+                size={isMobile ? "small" : "medium"}
                 value={formSettings.description}
                 onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
                 onBlur={() => setEditingDescription(false)}
@@ -443,10 +475,14 @@ const RegistrationFormNew: React.FC = () => {
               />
             ) : (
               <>
-                <Typography sx={{ flexGrow: 1 }}>
+                <Typography variant="body2" sx={{ flexGrow: 1 }}>
                   {formSettings.description}
                 </Typography>
-                <IconButton onClick={() => setEditingDescription(true)}>
+                <IconButton 
+                  onClick={() => setEditingDescription(true)}
+                  size={isMobile ? "small" : "medium"}
+                  sx={{ mt: -0.5 }}
+                >
                   <EditIcon />
                 </IconButton>
               </>
@@ -460,23 +496,30 @@ const RegistrationFormNew: React.FC = () => {
               <Switch
                 checked={formSettings.published}
                 onChange={(e) => setFormSettings(prev => ({ ...prev, published: e.target.checked }))}
+                size={isMobile ? "small" : "medium"}
               />
             }
             label={t('registrationForm.published')}
           />
           {formSettings.publishedUrl && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
               {t('registrationForm.publishedUrl')}: {formSettings.publishedUrl}
             </Typography>
           )}
         </Grid>
 
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: 2 
+          }}>
             <Button
               variant="outlined"
               startIcon={<PreviewIcon />}
               onClick={() => setPreviewOpen(true)}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
             >
               {t('registrationForm.buttons.preview')}
             </Button>
@@ -485,6 +528,8 @@ const RegistrationFormNew: React.FC = () => {
               startIcon={<PublishIcon />}
               onClick={() => setPublishDialogOpen(true)}
               disabled={formSettings.published}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
             >
               {t('registrationForm.buttons.publish')}
             </Button>
@@ -502,12 +547,6 @@ const RegistrationFormNew: React.FC = () => {
       pt: isMobile ? 1 : 3,  // Add top padding
       minHeight: isMobile ? 'auto' : '100vh',
     }}>
-      {/* Page Title - Desktop Only */}
-      {!isMobile && (
-        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-          {t('registrationForm.title')}
-        </Typography>
-      )}
 
       {/* Mobile Tab Navigation */}
         {isMobile && (
@@ -528,17 +567,29 @@ const RegistrationFormNew: React.FC = () => {
         {!isMobile && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 3 }}>
+              <Box sx={{ 
+                p: 3, 
+                backgroundColor: 'background.paper',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}>
                 <Typography variant="h5" gutterBottom>
                   {t('registrationForm.formTitle')}
                 </Typography>
                 <FormContent />
-              </Paper>
+              </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 3 }}>
+              <Box sx={{ 
+                p: 3, 
+                backgroundColor: 'background.paper',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}>
                 <SettingsContent />
-              </Paper>
+              </Box>
             </Grid>
           </Grid>
         )}
@@ -547,14 +598,24 @@ const RegistrationFormNew: React.FC = () => {
         {isMobile && (
           <>
             <TabPanel value={mobileTab} index={0}>
-              <Paper sx={{ p: 2 }}>
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'grey.50',
+                borderRadius: 2,
+                minHeight: '60vh'
+              }}>
                 <FormContent />
-              </Paper>
+              </Box>
             </TabPanel>
             <TabPanel value={mobileTab} index={1}>
-              <Paper sx={{ p: 2 }}>
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'grey.50',
+                borderRadius: 2,
+                minHeight: '60vh'
+              }}>
                 <SettingsContent />
-              </Paper>
+              </Box>
             </TabPanel>
           </>
         )}
@@ -587,7 +648,9 @@ const RegistrationFormNew: React.FC = () => {
           cancelButtonText={t('actions.close')}
           onSave={undefined} // No save action for preview
         >
-          <PreviewContent />
+          <Box sx={{ mt: isMobile ? 1 : 2 }}>
+            <PreviewContent />
+          </Box>
         </CommonModalShell>
 
         {/* Publish Modal using CommonModalShell */}
@@ -604,7 +667,13 @@ const RegistrationFormNew: React.FC = () => {
           saveButtonText={t('registrationForm.buttons.publish')}
           saveButtonDisabled={isPublishing}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            mt: isMobile ? 1 : 2,
+            p: isMobile ? 1 : 2
+          }}>
             {isPublishing && <CircularProgress size={20} />}
             <PublishContent />
           </Box>

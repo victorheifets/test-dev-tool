@@ -30,7 +30,9 @@
     "refresh": "רענן",
     "duplicate": "שכפל",
     "close": "סגור",
-    "resend": "שלח שוב"
+    "resend": "שלח שוב",
+    "reset": "איפוס",
+    "submit": "שלח"
   },
   
   "messages": {
@@ -51,7 +53,8 @@
     "participant_updated": "משתתף עודכן בהצלחה!",
     "lead_deleted": "ליד נמחק בהצלחה!",
     "lead_created": "ליד נוצר בהצלחה!",
-    "lead_updated": "ליד עודכן בהצלחה!"
+    "lead_updated": "ליד עודכן בהצלחה!",
+    "data_refreshed": "הנתונים רועננו בהצלחה"
   },
   
   "course_status": {
@@ -115,7 +118,14 @@
     "last_name": "שם משפחה",
     "created_at": "נוצר ב",
     "cancel": "בטל",
-    "confirm": "אשר"
+    "confirm": "אשר",
+    "refresh": "רענן",
+    "refreshing": "מרענן...",
+    "pull_to_refresh": "משוך לרענון",
+    "release_to_refresh": "שחרר לרענון",
+    "not_set": "לא הוגדר",
+    "invalid_date": "תאריך לא תקין",
+    "none": "ללא"
   },
   
   "search": {
@@ -328,6 +338,31 @@
     "publishedUrl": "כתובת URL מפורסמת",
     "publishConfirmation": "האם אתה בטוח שברצונך לפרסם טופס זה? לאחר הפרסום, הוא יהיה זמין באינטרנט.",
     "publishing": "מפרסם...",
+    "formTitle": "טופס הרשמה",
+    "formSettings": "הגדרות טופס",
+    "published": "מפורסם",
+    "submitSuccess": "הטופס נשלח בהצלחה!",
+    "submitError": "שליחת הטופס נכשלה. אנא נסה שוב.",
+    "publishSuccess": "הטופס פורסם בהצלחה!",
+    "publishError": "פרסום הטופס נכשל. אנא נסה שוב.",
+    "submitting": "שולח...",
+    "activityOfInterest": "פעילות מעניינת",
+    "additionalNotes": "הערות נוספות",
+    "sources": {
+      "website": "אתר אינטרנט",
+      "social": "רשתות חברתיות",
+      "referral": "הפניה",
+      "other": "אחר"
+    },
+    "activities": {
+      "course1": "קורס מתחילים",
+      "course2": "קורס מתקדמים",
+      "workshop": "סדנה"
+    },
+    "tabs": {
+      "form": "טופס",
+      "settings": "הגדרות"
+    },
     "fields": {
       "fullName": "שם מלא",
       "fullNamePlaceholder": "הזינו את השם המלא שלכם",
@@ -511,8 +546,9 @@
         "content": "איך אתם מוצאים את הקורס עד כה? נשמח לשמוע את המשוב שלכם!"
       }
     },
-    "labels": {
-      "messages": "הודעות"
+    "no_messages": "אין הודעות עדיין. לחץ על הכפתור למטה כדי לשלוח את ה-SMS הראשון שלך!",
+    "columns": {
+      "cost": "עלות"
     }
   }
 }
