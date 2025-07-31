@@ -31,7 +31,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'courses',
-      list: '/test-courses',
+      list: '/courses',
       meta: {
         label: t('navigation.courses'),
         icon: <SchoolIcon />,
@@ -39,7 +39,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'participants',
-      list: '/test-participants',
+      list: '/participants',
       meta: {
         label: t('navigation.participants'),
         icon: <PeopleIcon />,
@@ -47,7 +47,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'enrollments',
-      list: '/test-enrollments',
+      list: '/enrollments',
       meta: {
         label: t('navigation.enrollments'),
         icon: <LibraryBooksIcon />,
@@ -55,7 +55,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'leads',
-      list: '/test-leads',
+      list: '/leads',
       meta: {
         label: t('navigation.leads'),
         icon: <PersonAddIcon />,
@@ -69,7 +69,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'simple-sms',
-      list: '/test-sms',
+      list: '/sms',
       meta: {
         label: t('navigation.sms_messaging'),
         icon: <MessageIcon />,
@@ -77,7 +77,7 @@ export const useResources = (): RefineProps['resources'] => {
     },
     {
       name: 'registration-form',
-      list: '/test-registration',
+      list: '/registration',
       meta: {
         label: t('navigation.registration_form'),
         icon: <AppRegistrationIcon />,

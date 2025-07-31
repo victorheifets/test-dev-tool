@@ -129,7 +129,9 @@
     "placeholder_participants": "Search participants...",
     "placeholder_enrollments": "Search enrollments...",
     "placeholder_leads": "Search leads...",
-    "placeholder_students": "Search students..."
+    "placeholder_students": "Search students...",
+    "select_participant": "Select participant...",
+    "select_lead": "Select lead..."
   },
   
   "forms": {
@@ -147,7 +149,14 @@
     "payment_status": "Payment Status",
     "activity_id": "Activity ID",
     "enrollment_date": "Enrollment Date",
-    "progress": "Progress"
+    "progress": "Progress",
+    "enrollment_mode": "Enrollment Mode",
+    "existing_participant": "Existing Participant",
+    "new_participant": "New Participant",
+    "from_lead": "From Lead",
+    "new_participant_details": "New Participant Details",
+    "email": "Email",
+    "phone": "Phone"
   },
   
   "status_options": {
@@ -347,6 +356,8 @@
     "sources": {
       "website": "Website",
       "social": "Social Media",
+      "email": "Email",
+      "advertisement": "Advertisement",
       "referral": "Referral",
       "other": "Other"
     },
@@ -399,7 +410,11 @@
     "email_invalid": "Invalid email format",
     "phone_min_length": "Phone number must be at least 10 digits",
     "source_required": "Source is required",
-    "notes_max_length": "Notes cannot exceed 2000 characters"
+    "notes_max_length": "Notes cannot exceed 2000 characters",
+    "required_field": "This field is required",
+    "invalid_email": "Invalid email format",
+    "start_date_required": "Start date is required",
+    "end_date_required": "End date is required"
   },
 
   "auth": {
@@ -484,7 +499,8 @@
       "message": "Message",
       "recipients": "Recipients",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "cost": "Cost"
     },
     "search": {
       "placeholder": "Search messages...",
@@ -557,9 +573,6 @@
         "content": "How are you finding the course so far? We'd love your feedback!"
       }
     },
-    "no_messages": "No messages yet. Click the button below to send your first SMS!",
-    "columns": {
-      "cost": "Cost"
-    }
+    "no_messages": "No messages yet. Click the button below to send your first SMS!"
   }
 } 

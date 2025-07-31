@@ -3052,6 +3052,73 @@
         }
       }
     },
+    "/api/enrollments/enroll-flexible": {
+      "post": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "Flexible Enrollment",
+        "description": "Flexible enrollment endpoint supporting multiple workflows:\n- existing: Enroll existing participant\n- new: Create participant + enroll\n- from_lead: Convert lead to participant + enroll",
+        "operationId": "flexible_enrollment_api_enrollments_enroll_flexible_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlexibleEnrollmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Flexible Enrollment Api Enrollments Enroll Flexible Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/marketing/leads": {
       "post": {
         "tags": [
@@ -3631,14 +3698,81 @@
         }
       }
     },
-    "/api/marketing/leads/{lead_id}/convert": {
+    "/api/marketing/leads/{lead_id}/convert-to-participant": {
       "post": {
         "tags": [
           "marketing"
         ],
         "summary": "Convert Lead To Participant",
+        "description": "Convert a lead to a participant with authenticated tenant isolation.\nReturns both the new participant and updated lead.",
+        "operationId": "convert_lead_to_participant_api_marketing_leads__lead_id__convert_to_participant_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lead_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lead Id"
+            }
+          },
+          {
+            "name": "x-provider-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Convert Lead To Participant Api Marketing Leads  Lead Id  Convert To Participant Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/marketing/leads/{lead_id}/convert-and-enroll": {
+      "post": {
+        "tags": [
+          "marketing"
+        ],
+        "summary": "Convert Lead And Enroll",
         "description": "Convert a lead to a participant and enroll them in an activity with authenticated tenant isolation.",
-        "operationId": "convert_lead_to_participant_api_marketing_leads__lead_id__convert_post",
+        "operationId": "convert_lead_and_enroll_api_marketing_leads__lead_id__convert_and_enroll_post",
         "security": [
           {
             "HTTPBearer": []
@@ -5733,28 +5867,14 @@
             "maximum": 1000
           },
           "start_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date",
             "title": "Start Date",
             "description": "Activity start date"
           },
           "end_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date",
             "title": "End Date",
             "description": "Activity end date"
           },
@@ -5844,7 +5964,9 @@
         "additionalProperties": true,
         "type": "object",
         "required": [
-          "name"
+          "name",
+          "start_date",
+          "end_date"
         ],
         "title": "Activity",
         "description": "Complete activity schema with all fields"
@@ -5857,6 +5979,18 @@
             "minLength": 1,
             "title": "Name",
             "description": "Activity name"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date",
+            "description": "Activity start date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date",
+            "description": "Activity end date"
           },
           "description": {
             "anyOf": [
@@ -5887,32 +6021,6 @@
             "description": "Maximum participants",
             "minimum": 1,
             "maximum": 1000
-          },
-          "start_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Date",
-            "description": "Activity start date"
-          },
-          "end_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Date",
-            "description": "Activity end date"
           },
           "status": {
             "$ref": "#/components/schemas/ActivityStatus",
@@ -5985,7 +6093,9 @@
         },
         "type": "object",
         "required": [
-          "name"
+          "name",
+          "start_date",
+          "end_date"
         ],
         "title": "ActivityCreate",
         "description": "Schema for creating a new activity",
@@ -6567,6 +6677,92 @@
         "type": "object",
         "title": "EnrollmentUpdate",
         "description": "Schema for updating enrollment information"
+      },
+      "FlexibleEnrollmentRequest": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "participant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Id"
+          },
+          "lead_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Id"
+          },
+          "participant_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Data"
+          },
+          "activity_id": {
+            "type": "string",
+            "title": "Activity Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "default": "pending"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "special_requirements": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Special Requirements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "activity_id"
+        ],
+        "title": "FlexibleEnrollmentRequest"
       },
       "GoogleLoginRequest": {
         "properties": {

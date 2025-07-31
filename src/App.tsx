@@ -38,20 +38,17 @@ import { Header } from "./components/header";
 import { ThemeContextProvider } from "./contexts/color-mode";
 import { useResources } from "./config/navigation";
 import { useTranslation } from "react-i18next";
+import { GlobalStyleOverrides } from "./styles/globalOverrides";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Dashboard } from "./pages/dashboard";
 import { CourseList } from './pages/courses/list';
-import { CourseListNew } from './pages/courses/list-new';
 import { ParticipantsList } from './pages/participants/list';
-import { ParticipantsListNew } from './pages/participants/list-new';
 import { EnrollmentsList } from './pages/enrollments/list';
-import { EnrollmentsListNew } from './pages/enrollments/list-new';
 import { LeadsList } from './pages/leads/list';
-import { LeadsListNew } from './pages/leads/list-new';
 import SimpleSMS from './pages/messaging/SimpleSMS';
-import SimpleSMSNew from './pages/messaging/SimpleSMS-new';
 import { LandingPagesExamples } from './pages/landing-pages-examples';
 import RegistrationForm from './pages/registration-form';
-import RegistrationFormNew from './pages/registration-form/index-new';
+import PublicRegistrationForm from './pages/registration-form/public';
 import CustomLoginPage from './pages/login';
 import { MobileBottomNavigation } from './components/mobile/BottomNavigation';
 
@@ -138,18 +135,12 @@ const AppContent = () => {
                     />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/courses" element={<CourseList />} />
-                    <Route path="/test-courses" element={<CourseListNew />} />
                     <Route path="/participants" element={<ParticipantsList />} />
-                    <Route path="/test-participants" element={<ParticipantsListNew />} />
                     <Route path="/enrollments" element={<EnrollmentsList />} />
-                    <Route path="/test-enrollments" element={<EnrollmentsListNew />} />
                     <Route path="/leads" element={<LeadsList />} />
-                    <Route path="/test-leads" element={<LeadsListNew />} />
-                    <Route path="/simple-sms" element={<SimpleSMS />} />
-                    <Route path="/test-sms" element={<SimpleSMSNew />} />
+                    <Route path="/sms" element={<SimpleSMS />} />
                     <Route path="/landing-pages-examples" element={<LandingPagesExamples />} />
-                    <Route path="/registration-form" element={<RegistrationForm />} />
-                    <Route path="/test-registration" element={<RegistrationFormNew />} />
+                    <Route path="/registration" element={<RegistrationForm />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                   <Route
@@ -161,6 +152,7 @@ const AppContent = () => {
                   >
                     <Route path="/login" element={<CustomLoginPage />} />
                   </Route>
+                  <Route path="/public/registration/:formId" element={<PublicRegistrationForm />} />
                 </Routes>
 
                 <RefineKbar />
@@ -178,8 +170,11 @@ function App() {
         <ThemeContextProvider>
           <CssBaseline />
           <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
+          <GlobalStyleOverrides />
           <RefineSnackbarProvider>
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
           </RefineSnackbarProvider>
         </ThemeContextProvider>
       </RefineKbarProvider>

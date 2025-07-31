@@ -3,26 +3,29 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, TextField, MenuItem, Select, Typography, Grid, FormControl, InputLabel, Fab, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import { GridColDef } from '@mui/x-data-grid';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { Activity, ActivityStatus } from '../../types/activity';
+import { ActivityCreate } from '../../types/generated';
 import { StatusChip } from '../../components/courses/StatusChip';
 import { ActionMenu } from '../../components/courses/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { CourseModal } from '../../components/courses/CourseModal';
 import { StatCard } from '../../components/StatCard';
-import { ResponsiveDataView } from '../../components/mobile/ResponsiveDataView';
-import { PullToRefresh } from '../../components/mobile/PullToRefresh';
+import { SharedDataGrid } from '../../components/common/SharedDataGrid';
+import { CompactCardShell } from '../../components/mobile/CompactCardShell';
+import { CompactCourseContent } from '../../components/mobile/content/CompactCourseContent';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 
-// UI Constants
+// UI Constants (matching original)
 const MOBILE_BOTTOM_PADDING = 10;
 const MOBILE_SIDE_PADDING = 1;
 const MOBILE_ICON_SIZE = 24;
@@ -33,11 +36,10 @@ const FAB_BOTTOM_OFFSET = 90;
 const FAB_RIGHT_OFFSET = 16;
 const FAB_Z_INDEX = 1000;
 const DATA_GRID_HEIGHT = 500;
-const PULL_TO_REFRESH_THRESHOLD = 80;
 
 export const CourseList = () => {
   const { t } = useTranslation();
-  const { isMobile } = useBreakpoint(); // Use responsive detection
+  const { isMobile } = useBreakpoint();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,22 +58,21 @@ export const CourseList = () => {
 
   // Use real API data via useDataGrid hook
   const { dataGridProps } = useDataGrid<Activity>({
-    resource: 'courses', // This maps to 'activities' in our data provider
+    resource: 'courses',
   });
   
   // Get activities from dataGridProps and apply client-side filtering
   const allActivities = dataGridProps.rows || [];
   
-  
-  // Apply client-side filtering with memoization
+  // Apply client-side filtering with useMemo for performance
   const activities = useMemo(() => {
     return allActivities.filter(activity => {
       // Text search filter
       const matchesSearch = !searchText || 
         activity.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-        activity.category?.toLowerCase().includes(searchText.toLowerCase()) ||
-        activity.trainer?.toLowerCase().includes(searchText.toLowerCase()) ||
-        activity.location?.toLowerCase().includes(searchText.toLowerCase());
+        activity.activity_type?.toLowerCase().includes(searchText.toLowerCase()) ||
+        activity.location?.toLowerCase().includes(searchText.toLowerCase()) ||
+        activity.trainer_id?.toLowerCase().includes(searchText.toLowerCase());
       
       // Status filter
       const matchesStatus = !statusFilter || activity.status === statusFilter;
@@ -79,13 +80,8 @@ export const CourseList = () => {
       return matchesSearch && matchesStatus;
     });
   }, [allActivities, searchText, statusFilter]);
-  
-  // Update dataGridProps with filtered data
-  const filteredDataGridProps = {
-    ...dataGridProps,
-    rows: activities,
-  };
 
+  // Event handlers
   const handleEdit = (id: string) => {
     const activityToEdit = activities.find(a => a.id === id);
     if (activityToEdit) {
@@ -111,17 +107,14 @@ export const CourseList = () => {
 
   const confirmDelete = () => {
     if (selectedActivityId) {
-      console.log('Deleting course with ID:', selectedActivityId);
       deleteActivity({
         resource: 'courses',
         id: selectedActivityId,
       }, {
         onSuccess: () => {
-          showSuccess(t('messages.success'));
-          // Just close dialog - let auto-refresh handle it
+          showSuccess(t('messages.course_deleted'));
         },
         onError: (error) => {
-          console.error('Delete error:', error);
           handleError(error, t('actions.delete') + ' ' + t('course'));
         }
       });
@@ -139,7 +132,6 @@ export const CourseList = () => {
   const confirmBulkDelete = async () => {
     if (selectedRows.length === 0) return;
     
-    console.log('Bulk deleting courses with IDs:', selectedRows);
     let deleteCount = 0;
     let errorCount = 0;
 
@@ -155,14 +147,13 @@ export const CourseList = () => {
               resolve(void 0);
             },
             onError: (error) => {
-              console.error(`Delete error for ID ${id}:`, error);
               errorCount++;
               reject(error);
             }
           });
         });
       } catch (error) {
-        // Error already logged above
+        // Error already logged
       }
     }
 
@@ -178,26 +169,48 @@ export const CourseList = () => {
   };
   
   const handleAddNew = () => {
-    console.log('Opening create modal');
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
   };
 
-  // Pull-to-refresh handler
-  const handleRefresh = async () => {
-    try {
-      await invalidate({
+  const handleSave = (activityData: ActivityCreate) => {
+    if (modalMode === 'create' || modalMode === 'duplicate') {
+      createActivity({
         resource: 'courses',
-        invalidates: ['list']
+        values: activityData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.course_created'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'courses', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.create') + ' ' + t('course'));
+        }
       });
-      showSuccess(t('messages.data_refreshed', 'Data refreshed'));
-    } catch (error) {
-      console.error('Refresh error:', error);
-      handleError(error, t('common.refresh'));
+    } else if (modalMode === 'edit' && modalInitialData) {
+      updateActivity({
+        resource: 'courses',
+        id: modalInitialData.id,
+        values: activityData,
+      }, {
+        onSuccess: () => {
+          showSuccess(t('messages.course_updated'));
+          setIsModalOpen(false);
+          setModalInitialData(null);
+          invalidate({ resource: 'courses', invalidates: ['list'] });
+        },
+        onError: (error) => {
+          handleError(error, t('actions.edit') + ' ' + t('course'));
+        }
+      });
     }
   };
 
+
+  // DataGrid columns for desktop (matching original exactly)
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -255,8 +268,8 @@ export const CourseList = () => {
       headerName: t('course_fields.price'), 
       flex: 1,
       renderCell: (params) => {
-        const price = params.row.pricing?.amount || params.row.price || 0;
-        const currency = params.row.pricing?.currency || 'USD';
+        const price = params.row.price || 0;
+        const currency = params.row.currency || 'USD';
         return `${price} ${currency}`;
       }
     },
@@ -265,26 +278,38 @@ export const CourseList = () => {
       headerName: t('common.actions'),
       flex: 1,
       renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEdit(params.row.id)}
-          onDuplicate={() => handleDuplicate(params.row.id)}
-          onDelete={() => handleDeleteRequest(params.row.id)}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={() => handleEdit(params.row.id)} color="primary" title={t('actions.edit')}>
+            <EditIcon />
+          </IconButton>
+          <ActionMenu
+            onDuplicate={() => handleDuplicate(params.row.id)}
+            onDelete={() => handleDeleteRequest(params.row.id)}
+          />
+        </Box>
       ),
     },
   ];
 
-  const renderContent = () => (
+  // Filter options for SharedDataGrid
+  const statusFilterOptions = [
+    { value: ActivityStatus.DRAFT, label: t('course_status.draft') },
+    { value: ActivityStatus.PUBLISHED, label: t('course_status.published') },
+    { value: ActivityStatus.ONGOING, label: t('course_status.ongoing') },
+    { value: ActivityStatus.COMPLETED, label: t('course_status.completed') },
+    { value: ActivityStatus.CANCELLED, label: t('course_status.cancelled') },
+  ];
+
+  return (
     <Box sx={{ 
       width: '100%',
       pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
       px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
       minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
       backgroundColor: isMobile ? '#f8f9fa' : 'background.default',
-      overflow: isMobile ? 'hidden' : 'visible', // Force hide scrollbar on mobile
-      '&::-webkit-scrollbar': isMobile ? { display: 'none' } : {}, // Hide webkit scrollbars on mobile
-      scrollbarWidth: isMobile ? 'none' : 'auto', // Hide Firefox scrollbars on mobile
+      overflow: 'visible', // Use natural document scrolling
     }}>
+      {/* Statistics Cards */}
       <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
@@ -297,28 +322,29 @@ export const CourseList = () => {
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('course_status.published')} 
-            value={allActivities.filter(a => a.status === 'published').length.toString()} 
-            icon={<BusinessIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            value={allActivities.filter(a => a.status === ActivityStatus.PUBLISHED).length.toString()} 
+            icon={<PeopleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="success" 
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('course_status.ongoing')} 
-            value={allActivities.filter(a => a.status === 'ongoing').length.toString()} 
-            icon={<MonetizationOnIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            value={allActivities.filter(a => a.status === ActivityStatus.ONGOING).length.toString()} 
+            icon={<BusinessIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="warning" 
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
-            title={t('course_status.draft')} 
-            value={allActivities.filter(a => a.status === 'draft').length.toString()} 
-            icon={<PeopleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            title={t('revenue')} 
+            value={allActivities.reduce((sum, a) => sum + ((a.price || 0) * (a.enrollments_count || 0)), 0).toString()} 
+            icon={<MonetizationOnIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="info" 
           />
         </Grid>
       </Grid>
+
       <Box sx={{ 
         p: isMobile ? 0 : 2, 
         backgroundColor: isMobile ? 'transparent' : 'background.paper', 
@@ -327,68 +353,6 @@ export const CourseList = () => {
         border: isMobile ? 'none' : '1px solid', 
         borderColor: isMobile ? 'transparent' : 'divider' 
       }}>
-        {/* Desktop Layout - Match Old Page */}
-        {!isMobile && (
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleAddNew}
-                sx={{ 
-                  whiteSpace: 'nowrap',
-                  minWidth: 140,
-                  fontWeight: 600,
-                  textTransform: 'none'
-                }}
-              >
-                + {t('actions.create')} {t('course')}
-              </Button>
-              {selectedRows.length > 0 && (
-                <Button 
-                  variant="outlined" 
-                  color="error" 
-                  onClick={handleBulkDelete}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('actions.delete')} ({selectedRows.length})
-                </Button>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 1, minWidth: 0 }}>
-              <TextField
-                placeholder={t('search.placeholder_courses')}
-                variant="outlined"
-                size="small"
-                sx={{ 
-                  minWidth: 200,
-                  maxWidth: 300,
-                  flexShrink: 1
-                }}
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-              />
-              <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
-                <InputLabel>{t('course_fields.status')}</InputLabel>
-                <Select
-                  label={t('course_fields.status')}
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                  }}
-                >
-                  <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value={ActivityStatus.DRAFT}>{t('course_status.draft')}</MenuItem>
-                  <MenuItem value={ActivityStatus.PUBLISHED}>{t('course_status.published')}</MenuItem>
-                  <MenuItem value={ActivityStatus.ONGOING}>{t('course_status.ongoing')}</MenuItem>
-                  <MenuItem value={ActivityStatus.COMPLETED}>{t('course_status.completed')}</MenuItem>
-                  <MenuItem value={ActivityStatus.CANCELLED}>{t('course_status.cancelled')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
 
         {/* Mobile Layout - Search and Filter */}
         {isMobile && (
@@ -416,72 +380,122 @@ export const CourseList = () => {
               </Button>
             )}
           
-          {/* Search Field */}
-          <TextField
-            placeholder={t('search.placeholder_courses')}
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
-              }
-            }}
-          />
-          
-          {/* Status Filter */}
-          <FormControl 
-            size="small" 
-            sx={{ minWidth: isMobile ? '100%' : 140 }}
-          >
-            <InputLabel>{t('course_fields.status')}</InputLabel>
-            <Select
-              label={t('course_fields.status')}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{
-                borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+            {/* Search Field */}
+            <TextField
+              placeholder={t('search.placeholder_courses')}
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                  </InputAdornment>
+                ),
               }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                }
+              }}
+            />
+            
+            {/* Status Filter */}
+            <FormControl 
+              size="small" 
+              sx={{ minWidth: isMobile ? '100%' : 140 }}
             >
-              <MenuItem value="">{t('common.all')}</MenuItem>
-              <MenuItem value={ActivityStatus.DRAFT}>{t('course_status.draft')}</MenuItem>
-              <MenuItem value={ActivityStatus.PUBLISHED}>{t('course_status.published')}</MenuItem>
-              <MenuItem value={ActivityStatus.ONGOING}>{t('course_status.ongoing')}</MenuItem>
-              <MenuItem value={ActivityStatus.COMPLETED}>{t('course_status.completed')}</MenuItem>
-              <MenuItem value={ActivityStatus.CANCELLED}>{t('course_status.cancelled')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+              <InputLabel>{t('course_fields.status')}</InputLabel>
+              <Select
+                label={t('course_fields.status')}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                sx={{
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                }}
+              >
+                <MenuItem value="">{t('common.all')}</MenuItem>
+                <MenuItem value={ActivityStatus.DRAFT}>{t('course_status.draft')}</MenuItem>
+                <MenuItem value={ActivityStatus.PUBLISHED}>{t('course_status.published')}</MenuItem>
+                <MenuItem value={ActivityStatus.ONGOING}>{t('course_status.ongoing')}</MenuItem>
+                <MenuItem value={ActivityStatus.COMPLETED}>{t('course_status.completed')}</MenuItem>
+                <MenuItem value={ActivityStatus.CANCELLED}>{t('course_status.cancelled')}</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         )}
         
         <ErrorBoundary onError={(error, errorInfo) => {
           console.error('Data view error:', error, errorInfo);
           handleError(error, 'Data View');
         }}>
-          <ResponsiveDataView
-            data={activities}
-            columns={columns}
-            dataGridProps={filteredDataGridProps}
-            onEdit={handleEdit}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDeleteRequest}
-            selectedRows={selectedRows}
-            onRowSelectionChange={(newSelectionModel) => {
-              setSelectedRows(newSelectionModel as string[]);
-            }}
-            height={DATA_GRID_HEIGHT}
-          />
+          {/* Desktop Data Grid */}
+          {!isMobile && (
+            <SharedDataGrid
+              rows={activities}
+              columns={columns}
+              searchValue={searchText}
+              onSearchChange={setSearchText}
+              searchPlaceholder={t('search.placeholder_courses')}
+              filterValue={statusFilter}
+              onFilterChange={setStatusFilter}
+              filterOptions={statusFilterOptions}
+              filterLabel={t('course_fields.status')}
+              enableSelection={true}
+              selectedRows={selectedRows}
+              onSelectionChange={(selection) => setSelectedRows(selection as string[])}
+              onCreateNew={handleAddNew}
+              createButtonText={`+ ${t('actions.create')} ${t('course')}`}
+              onBulkDelete={handleBulkDelete}
+              bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
+              height={DATA_GRID_HEIGHT}
+              pageSizeOptions={[5, 10, 25, 50]}
+              disableRowSelectionOnClick={true}
+            />
+          )}
+
+          {/* Mobile Layout - Cards */}
+          {isMobile && (
+            <Box sx={{ 
+              px: 1,
+              pb: 10 // Extra padding for bottom navigation
+            }}>
+              {activities.map((activity) => (
+                <CompactCardShell
+                  key={activity.id}
+                  entityId={activity.id}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDeleteRequest}
+                  enableSwipeGestures={true}
+                >
+                  <CompactCourseContent activity={activity} />
+                </CompactCardShell>
+              ))}
+            </Box>
+          )}
         </ErrorBoundary>
       </Box>
+      
+      {/* Floating Action Button for Create Course - Mobile Only */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          onClick={handleAddNew}
+          sx={{
+            position: 'fixed',
+            bottom: FAB_BOTTOM_OFFSET, // Above bottom navigation
+            right: FAB_RIGHT_OFFSET,
+            zIndex: FAB_Z_INDEX,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+          }}
+        >
+          <AddIcon />
+        </Fab>
+      )}
+      
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -508,77 +522,11 @@ export const CourseList = () => {
             setModalInitialData(null);
           }}
           forceMobile={isMobile} // Use responsive detection
-          onSave={async (activityData) => {
-            console.log('Saving activity:', activityData);
-            
-            if (modalMode === 'create' || modalMode === 'duplicate') {
-              createActivity({
-                resource: 'courses',
-                values: activityData,
-              }, {
-                onSuccess: () => {
-                  setIsModalOpen(false);
-                  setModalInitialData(null);
-                  // Just close modal - let auto-refresh handle it
-                },
-                onError: (error) => {
-                  console.error('Create error:', error);
-                  handleError(error, t('actions.create') + ' ' + t('course'));
-                }
-              });
-            } else if (modalMode === 'edit' && modalInitialData?.id) {
-              updateActivity({
-                resource: 'courses',
-                id: modalInitialData.id,
-                values: activityData,
-              }, {
-                onSuccess: () => {
-                  setIsModalOpen(false);
-                  setModalInitialData(null);
-                  // Just close modal - let auto-refresh handle it
-                },
-                onError: (error) => {
-                  console.error('Update error:', error);
-                  handleError(error, t('actions.edit') + ' ' + t('course'));
-                }
-              });
-            }
-          }}
+          onSave={handleSave}
           initialData={modalInitialData}
           mode={modalMode}
         />
       </ErrorBoundary>
-      
-      {/* Floating Action Button for Create Course - Mobile Only */}
-      {isMobile && (
-        <Fab
-          color="primary"
-          onClick={handleAddNew}
-          sx={{
-            position: 'fixed',
-            bottom: FAB_BOTTOM_OFFSET, // Above bottom navigation
-            right: FAB_RIGHT_OFFSET,
-            zIndex: FAB_Z_INDEX,
-            boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
-          }}
-        >
-          <AddIcon />
-        </Fab>
-      )}
-      
     </Box>
   );
-
-  // Wrap with pull-to-refresh on mobile, or return content directly on desktop
-  return isMobile ? (
-    <PullToRefresh 
-      onRefresh={handleRefresh}
-      enabled={true}
-      threshold={PULL_TO_REFRESH_THRESHOLD}
-    >
-      {renderContent()}
-    </PullToRefresh>
-  ) : (
-    renderContent()
-  );
-}; 
+};

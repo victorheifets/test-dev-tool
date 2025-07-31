@@ -51,8 +51,8 @@ export const ActivitySchema = z.object({
   name: createRequiredString(1, 255),
   description: createRequiredString(1, 2000).optional(),
   capacity: createNumberRange(1.0, 1000.0).optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
+  start_date: z.string(),
+  end_date: z.string(),
   status: z.string().optional(),
   location: createRequiredString(1, 500).optional(),
   type: z.string().optional(),
@@ -69,10 +69,10 @@ export type Activity = z.infer<typeof ActivitySchema>;
 
 export const ActivityCreateSchema = z.object({
   name: createRequiredString(1, 255),
+  start_date: z.string(),
+  end_date: z.string(),
   description: createRequiredString(1, 2000).optional(),
   capacity: createNumberRange(1.0, 1000.0).optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
   status: z.string().optional(),
   location: createRequiredString(1, 500).optional(),
   type: z.string().optional(),

@@ -84,7 +84,7 @@ export const Dashboard = () => {
       <Grid container spacing={isMobile ? 2 : 3} sx={{ px: isMobile ? 1 : 0 }}>
         {/* Recent Activity */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
+          <Card className="dashboard-component" sx={{ height: '100%', backgroundColor: 'background.paper' }}>
             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600 }}>
@@ -140,7 +140,7 @@ export const Dashboard = () => {
 
         {/* Top Courses */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
+          <Card className="dashboard-component" sx={{ height: '100%', backgroundColor: 'background.paper' }}>
             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600, mb: 2 }}>
                 {t('dashboard.top_courses')}
@@ -178,7 +178,7 @@ export const Dashboard = () => {
 
         {/* Upcoming Events */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
+          <Card className="dashboard-component" sx={{ height: '100%', backgroundColor: 'background.paper' }}>
             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600 }}>
@@ -202,7 +202,7 @@ export const Dashboard = () => {
 
         {/* Quick Actions */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
+          <Card className="dashboard-component" sx={{ height: '100%', backgroundColor: 'background.paper' }}>
             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
               <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 600, mb: 2 }}>
                 {t('dashboard.quick_actions')}
@@ -214,6 +214,7 @@ export const Dashboard = () => {
                       p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
+                      backgroundColor: 'background.paper',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
@@ -230,6 +231,7 @@ export const Dashboard = () => {
                       p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
+                      backgroundColor: 'background.paper',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
@@ -246,6 +248,7 @@ export const Dashboard = () => {
                       p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
+                      backgroundColor: 'background.paper',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}
@@ -262,6 +265,7 @@ export const Dashboard = () => {
                       p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
                       cursor: 'pointer',
+                      backgroundColor: 'background.paper',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'all 0.2s'
                     }}

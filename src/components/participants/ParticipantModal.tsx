@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { SelectChangeEvent } from '@mui/material';
+import React, { useEffect } from 'react';
 import { Participant, ParticipantCreate } from '../../types/participant';
 import { useTranslation } from 'react-i18next';
 import { CommonModalShell } from '../common/CommonModalShell';
 import { ParticipantForm } from '../forms/ParticipantForm';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ParticipantCreateSchema } from '../../types/generated/validation-schemas';
 
 interface ParticipantModalProps {
   open: boolean;
@@ -19,38 +21,42 @@ const emptyParticipant: ParticipantCreate = {
   last_name: '',
   email: '',
   phone: '',
+  date_of_birth: '',
+  address: '',
 };
 
 export const ParticipantModal: React.FC<ParticipantModalProps> = ({ open, onClose, onSave, initialData, mode, forceMobile }) => {
   const { t } = useTranslation();
-  const [participant, setParticipant] = useState<ParticipantCreate>(emptyParticipant);
+  
+  const form = useForm<ParticipantCreate>({
+    resolver: zodResolver(ParticipantCreateSchema),
+    defaultValues: emptyParticipant,
+    mode: 'onChange', // Real-time validation
+  });
+
+  const { handleSubmit, reset, formState: { errors } } = form;
 
   useEffect(() => {
     if (initialData) {
       const { id, provider_id, created_at, updated_at, is_active, enrollments_count, ...data } = initialData;
       // Map Participant to ParticipantCreate format
       const participantCreate: ParticipantCreate = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone: data.phone,
-        date_of_birth: data.date_of_birth,
-        address: data.address,
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        date_of_birth: data.date_of_birth || '',
+        address: data.address || '',
       };
-      setParticipant(participantCreate);
+      reset(participantCreate);
     } else {
-      setParticipant(emptyParticipant);
+      reset(emptyParticipant);
     }
-  }, [initialData, open]);
+  }, [initialData, open, reset]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
-    setParticipant(prev => ({ ...prev, [name as string]: value }));
-  };
-
-  const handleSave = () => {
-    onSave(participant);
-  };
+  const handleSave = handleSubmit((data: ParticipantCreate) => {
+    onSave(data);
+  });
 
   const getTitle = () => {
     if (mode === 'edit') return t('actions.edit') + ' ' + t('student');
@@ -69,7 +75,7 @@ export const ParticipantModal: React.FC<ParticipantModalProps> = ({ open, onClos
       saveButtonText={t('actions.save')}
       cancelButtonText={t('actions.cancel')}
     >
-      <ParticipantForm data={participant} onChange={handleChange} />
+      <ParticipantForm form={form} errors={errors} />
     </CommonModalShell>
   );
 };

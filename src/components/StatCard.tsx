@@ -18,6 +18,7 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
 
   return (
     <Card 
+      className="stat-card"
       sx={{ 
         borderBottom: `3px solid ${mainColor}`,
         borderRadius: 2, 
@@ -25,6 +26,8 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color })
           ? '0 2px 8px 0 rgba(0,0,0,0.15)' 
           : '0 2px 4px 0 rgba(0,0,0,0.1)',
         height: '100%',
+        backgroundColor: theme.palette.background.paper,
+        backgroundImage: 'none',
       }}
     >
       <CardContent sx={{ 

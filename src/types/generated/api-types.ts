@@ -530,6 +530,29 @@ export interface paths {
         patch: operations["patch_enrollment_api_enrollments__item_id__patch"];
         trace?: never;
     };
+    "/api/enrollments/enroll-flexible": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Flexible Enrollment
+         * @description Flexible enrollment endpoint supporting multiple workflows:
+         *     - existing: Enroll existing participant
+         *     - new: Create participant + enroll
+         *     - from_lead: Convert lead to participant + enroll
+         */
+        post: operations["flexible_enrollment_api_enrollments_enroll_flexible_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/marketing/leads": {
         parameters: {
             query?: never;
@@ -626,7 +649,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/marketing/leads/{lead_id}/convert": {
+    "/api/marketing/leads/{lead_id}/convert-to-participant": {
         parameters: {
             query?: never;
             header?: never;
@@ -637,9 +660,30 @@ export interface paths {
         put?: never;
         /**
          * Convert Lead To Participant
+         * @description Convert a lead to a participant with authenticated tenant isolation.
+         *     Returns both the new participant and updated lead.
+         */
+        post: operations["convert_lead_to_participant_api_marketing_leads__lead_id__convert_to_participant_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/marketing/leads/{lead_id}/convert-and-enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Convert Lead And Enroll
          * @description Convert a lead to a participant and enroll them in an activity with authenticated tenant isolation.
          */
-        post: operations["convert_lead_to_participant_api_marketing_leads__lead_id__convert_post"];
+        post: operations["convert_lead_and_enroll_api_marketing_leads__lead_id__convert_and_enroll_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1517,14 +1561,16 @@ export interface components {
             capacity?: number | null;
             /**
              * Start Date
+             * Format: date
              * @description Activity start date
              */
-            start_date?: string | null;
+            start_date: string;
             /**
              * End Date
+             * Format: date
              * @description Activity end date
              */
-            end_date?: string | null;
+            end_date: string;
             /**
              * @description Activity status
              * @default draft
@@ -1604,6 +1650,18 @@ export interface components {
              */
             name: string;
             /**
+             * Start Date
+             * Format: date
+             * @description Activity start date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             * @description Activity end date
+             */
+            end_date: string;
+            /**
              * Description
              * @description Activity description
              */
@@ -1613,16 +1671,6 @@ export interface components {
              * @description Maximum participants
              */
             capacity?: number | null;
-            /**
-             * Start Date
-             * @description Activity start date
-             */
-            start_date?: string | null;
-            /**
-             * End Date
-             * @description Activity end date
-             */
-            end_date?: string | null;
             /**
              * @description Activity status
              * @default draft
@@ -1888,6 +1936,30 @@ export interface components {
             special_requirements?: string | null;
             /** Is Active */
             is_active?: boolean | null;
+        };
+        /** FlexibleEnrollmentRequest */
+        FlexibleEnrollmentRequest: {
+            /** Mode */
+            mode: string;
+            /** Participant Id */
+            participant_id?: string | null;
+            /** Lead Id */
+            lead_id?: string | null;
+            /** Participant Data */
+            participant_data?: {
+                [key: string]: unknown;
+            } | null;
+            /** Activity Id */
+            activity_id: string;
+            /**
+             * Status
+             * @default pending
+             */
+            status: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Special Requirements */
+            special_requirements?: string | null;
         };
         /** GoogleLoginRequest */
         GoogleLoginRequest: {
@@ -4061,6 +4133,43 @@ export interface operations {
             };
         };
     };
+    flexible_enrollment_api_enrollments_enroll_flexible_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FlexibleEnrollmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_leads_api_marketing_leads_get: {
         parameters: {
             query?: {
@@ -4338,7 +4447,42 @@ export interface operations {
             };
         };
     };
-    convert_lead_to_participant_api_marketing_leads__lead_id__convert_post: {
+    convert_lead_to_participant_api_marketing_leads__lead_id__convert_to_participant_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-provider-id"?: string | null;
+            };
+            path: {
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    convert_lead_and_enroll_api_marketing_leads__lead_id__convert_and_enroll_post: {
         parameters: {
             query: {
                 activity_id: string;

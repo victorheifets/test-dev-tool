@@ -1,417 +1,238 @@
-# Task Master AI - Claude Code Integration Guide
+# CLAUDE.md
 
-## Essential Commands
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-### Core Workflow Commands
+## Development Commands
 
+### Core Development Workflow
 ```bash
-# Project Setup
-task-master init                                    # Initialize Task Master in current project
-task-master parse-prd .taskmaster/docs/prd.txt      # Generate tasks from PRD document
-task-master models --setup                        # Configure AI models interactively
-
-# Daily Development Workflow
-task-master list                                   # Show all tasks with status
-task-master next                                   # Get next available task to work on
-task-master show <id>                             # View detailed task information (e.g., task-master show 1.2)
-task-master set-status --id=<id> --status=done    # Mark task complete
-
-# Task Management
-task-master add-task --prompt="description" --research        # Add new task with AI assistance
-task-master expand --id=<id> --research --force              # Break task into subtasks
-task-master update-task --id=<id> --prompt="changes"         # Update specific task
-task-master update --from=<id> --prompt="changes"            # Update multiple tasks from ID onwards
-task-master update-subtask --id=<id> --prompt="notes"        # Add implementation notes to subtask
-
-# Analysis & Planning
-task-master analyze-complexity --research          # Analyze task complexity
-task-master complexity-report                      # View complexity analysis
-task-master expand --all --research               # Expand all eligible tasks
-
-# Dependencies & Organization
-task-master add-dependency --id=<id> --depends-on=<id>       # Add task dependency
-task-master move --from=<id> --to=<id>                       # Reorganize task hierarchy
-task-master validate-dependencies                            # Check for dependency issues
-task-master generate                                         # Update task markdown files (usually auto-called)
+npm run dev           # Start development server with Vite + React
+npm run build         # Production build (TypeScript compile + Vite build)
+npm run build:prod    # Production build with prod config
+npm run start         # Start production server
+npm run api           # Start mock API server (json-server)
 ```
 
-## Key Files & Project Structure
-
-### Core Files
-
-- `.taskmaster/tasks/tasks.json` - Main task data file (auto-managed)
-- `.taskmaster/config.json` - AI model configuration (use `task-master models` to modify)
-- `.taskmaster/docs/prd.txt` - Product Requirements Document for parsing
-- `.taskmaster/tasks/*.txt` - Individual task files (auto-generated from tasks.json)
-- `.env` - API keys for CLI usage
-
-### Claude Code Integration Files
-
-- `CLAUDE.md` - Auto-loaded context for Claude Code (this file)
-- `.claude/settings.json` - Claude Code tool allowlist and preferences
-- `.claude/commands/` - Custom slash commands for repeated workflows
-- `.mcp.json` - MCP server configuration (project-specific)
-
-### Directory Structure
-
-```
-project/
-├── .taskmaster/
-│   ├── tasks/              # Task files directory
-│   │   ├── tasks.json      # Main task database
-│   │   ├── task-1.md      # Individual task files
-│   │   └── task-2.md
-│   ├── docs/              # Documentation directory
-│   │   ├── prd.txt        # Product requirements
-│   ├── reports/           # Analysis reports directory
-│   │   └── task-complexity-report.json
-│   ├── templates/         # Template files
-│   │   └── example_prd.txt  # Example PRD template
-│   └── config.json        # AI models & settings
-├── .claude/
-│   ├── settings.json      # Claude Code configuration
-│   └── commands/         # Custom slash commands
-├── .env                  # API keys
-├── .mcp.json            # MCP configuration
-└── CLAUDE.md            # This file - auto-loaded by Claude Code
-```
-
-## MCP Integration
-
-Task Master provides an MCP server that Claude Code can connect to. Configure in `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "task-master-ai": {
-      "command": "npx",
-      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
-      "env": {
-        "ANTHROPIC_API_KEY": "your_key_here",
-        "PERPLEXITY_API_KEY": "your_key_here",
-        "OPENAI_API_KEY": "OPENAI_API_KEY_HERE",
-        "GOOGLE_API_KEY": "GOOGLE_API_KEY_HERE",
-        "XAI_API_KEY": "XAI_API_KEY_HERE",
-        "OPENROUTER_API_KEY": "OPENROUTER_API_KEY_HERE",
-        "MISTRAL_API_KEY": "MISTRAL_API_KEY_HERE",
-        "AZURE_OPENAI_API_KEY": "AZURE_OPENAI_API_KEY_HERE",
-        "OLLAMA_API_KEY": "OLLAMA_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
-
-### Essential MCP Tools
-
-```javascript
-help; // = shows available taskmaster commands
-// Project setup
-initialize_project; // = task-master init
-parse_prd; // = task-master parse-prd
-
-// Daily workflow
-get_tasks; // = task-master list
-next_task; // = task-master next
-get_task; // = task-master show <id>
-set_task_status; // = task-master set-status
-
-// Task management
-add_task; // = task-master add-task
-expand_task; // = task-master expand
-update_task; // = task-master update-task
-update_subtask; // = task-master update-subtask
-update; // = task-master update
-
-// Analysis
-analyze_project_complexity; // = task-master analyze-complexity
-complexity_report; // = task-master complexity-report
-```
-
-## Claude Code Workflow Integration
-
-### Standard Development Workflow
-
-#### 1. Project Initialization
-
+### Type Generation & Validation
 ```bash
-# Initialize Task Master
-task-master init
-
-# Create or obtain PRD, then parse it
-task-master parse-prd .taskmaster/docs/prd.txt
-
-# Analyze complexity and expand tasks
-task-master analyze-complexity --research
-task-master expand --all --research
+npm run generate-types              # Generate TypeScript types from backend API
+npm run generate-types:force        # Force regenerate types (ignore cache)
+npm run types:validate              # Validate generated types compile correctly
+npm run test:schema-drift           # Check for API schema changes
 ```
 
-If tasks already exist, another PRD can be parsed (with new information only!) using parse-prd with --append flag. This will add the generated tasks to the existing list of tasks..
-
-#### 2. Daily Development Loop
-
+### Testing Commands
 ```bash
-# Start each session
-task-master next                           # Find next available task
-task-master show <id>                     # Review task details
-
-# During implementation, check in code context into the tasks and subtasks
-task-master update-subtask --id=<id> --prompt="implementation notes..."
-
-# Complete tasks
-task-master set-status --id=<id> --status=done
+npm run test                # Run all tests (types + unit tests)
+npm run test:types         # Run type validation tests only
+npm run test:quick         # Quick smoke tests (type validation)
+npm run health-check       # Check if backend API is responding
 ```
 
-#### 3. Multi-Claude Workflows
+## Project Architecture
 
-For complex projects, use multiple Claude Code sessions:
+### Core Framework Stack
+- **Frontend Framework**: React 18 with TypeScript
+- **Admin Framework**: [Refine](https://refine.dev) - React framework for internal tools/admin panels
+- **UI Library**: Material-UI (MUI) v6 with custom theming
+- **Build Tool**: Vite with React plugin
+- **Router**: React Router v7 with Refine router bindings
+- **Forms**: React Hook Form with Yup validation
+- **Data Grid**: MUI X Data Grid for table components
+- **Internationalization**: i18next with React integration
 
-```bash
-# Terminal 1: Main implementation
-cd project && claude
+### Backend Integration
+- **API Base**: `http://localhost:8082` (proxied through Vite dev server)
+- **Data Provider**: Custom Refine data provider in `src/providers/dataProvider.ts`
+- **Authentication**: Google OAuth via `@react-oauth/google`
+- **API Client**: Custom HTTP client with comprehensive error handling
 
-# Terminal 2: Testing and validation
-cd project-test-worktree && claude
+### Key Architectural Patterns
 
-# Terminal 3: Documentation updates
-cd project-docs-worktree && claude
+#### Resource-Based Navigation
+The app follows Refine's resource-based pattern where each business entity (courses, participants, enrollments, leads) maps to:
+- A navigation item in `src/config/navigation.tsx`  
+- A list page in `src/pages/{resource}/list.tsx`
+- Form components in `src/components/{resource}/`
+- Data transformations in the data provider
+
+#### Mobile-First Responsive Design
+- **Breakpoint System**: Uses MUI breakpoints (`useMediaQuery(theme.breakpoints.down('md'))`)
+- **Desktop**: Full sidebar navigation with ThemedLayoutV2
+- **Mobile**: Bottom navigation bar (`src/components/mobile/BottomNavigation.tsx`) + compact cards
+- **Responsive Components**: Separate mobile/desktop component variants in `src/components/mobile/`
+
+#### Error Handling Strategy
+- **Centralized**: `src/utils/errorHandler.ts` with `AppError` class
+- **Pydantic Integration**: Parses FastAPI/Pydantic validation errors into user-friendly messages
+- **Error Boundaries**: React error boundaries in `src/components/ErrorBoundary.tsx`
+- **API Errors**: Comprehensive HTTP error parsing in data provider
+
+#### Form Validation Architecture
+- **Validated Components**: Wrapper components in `src/components/common/validated/`
+- **Schema Validation**: Yup schemas integrated with React Hook Form
+- **Custom Hook**: `src/hooks/useValidatedForm.ts` for form state management
+- **API Integration**: Form errors automatically mapped from backend validation
+
+## Data Layer Architecture
+
+### Resource Mapping
+The frontend uses business-friendly names that map to backend endpoints:
+```typescript
+// src/providers/dataProvider.ts - resourceMap
+'courses' → 'activities'     // Course management maps to activity API
+'participants' → 'participants'
+'enrollments' → 'enrollments'  
+'leads' → 'marketing'        // Lead management uses marketing API
+'sms' → 'sms'               // SMS messaging
 ```
 
-### Custom Slash Commands
+### Data Transformations
+- **Course ↔ Activity**: Complex pricing objects simplified for UI, restored for API
+- **Date Handling**: Consistent date formatting between frontend/backend
+- **Validation**: Pydantic errors parsed into user-friendly messages
+- **Provider Context**: JWT tokens automatically added to API requests
 
-Create `.claude/commands/taskmaster-next.md`:
+### API Integration Patterns
+```typescript
+// Standard CRUD operations through Refine
+const { data, isLoading } = useList({ resource: 'courses' });
+const { mutate } = useCreate({ resource: 'participants' });
 
-```markdown
-Find the next available Task Master task and show its details.
-
-Steps:
-
-1. Run `task-master next` to get the next task
-2. If a task is available, run `task-master show <id>` for full details
-3. Provide a summary of what needs to be implemented
-4. Suggest the first implementation step
+// Custom API calls through data provider
+const { data } = useCustom({
+  url: '/api/enrollments/enroll-flexible',
+  method: 'post',
+  config: { payload: flexibleEnrollmentData }
+});
 ```
 
-Create `.claude/commands/taskmaster-complete.md`:
+## Component Architecture
 
-```markdown
-Complete a Task Master task: $ARGUMENTS
+### Refine Integration Components
+- **List Pages**: Use `useList()`, `<List>`, and MUI DataGrid
+- **Forms**: Integrate `useForm()` with React Hook Form and MUI components  
+- **Actions**: Standard edit/delete actions through `useUpdate()`, `useDelete()`
+- **Modals**: Modal shells with form integration in `src/components/{resource}/`
 
-Steps:
-
-1. Review the current task with `task-master show $ARGUMENTS`
-2. Verify all implementation is complete
-3. Run any tests related to this task
-4. Mark as complete: `task-master set-status --id=$ARGUMENTS --status=done`
-5. Show the next available task with `task-master next`
+### Shared Component Library
+```
+src/components/common/
+├── validated/           # Form input wrappers with validation
+├── SharedDataGrid.tsx   # Standardized data grid configuration
+├── ConfirmationDialog.tsx  # Reusable confirmation dialogs
+└── CommonModalShell.tsx    # Modal wrapper with consistent styling
 ```
 
-## Tool Allowlist Recommendations
-
-Add to `.claude/settings.json`:
-
-```json
-{
-  "allowedTools": [
-    "Edit",
-    "Bash(task-master *)",
-    "Bash(git commit:*)",
-    "Bash(git add:*)",
-    "Bash(npm run *)",
-    "mcp__task_master_ai__*"
-  ]
-}
+### Mobile-Specific Components
+```
+src/components/mobile/
+├── CompactCardShell.tsx     # Mobile card container
+├── Compact{Resource}Card.tsx # Resource-specific mobile cards
+├── ResponsiveDataView.tsx    # Responsive list/grid switcher
+└── PullToRefresh.tsx        # Mobile pull-to-refresh functionality  
 ```
 
-## Configuration & Setup
+## Styling and Theming
 
-### API Keys Required
+### MUI Theme Customization
+- **Primary Color**: Purple gradient (`#7367F0` to `#9C88FF`)
+- **Theme Provider**: `src/contexts/color-mode/` with dark/light mode support
+- **Global Overrides**: `src/styles/globalOverrides.tsx` for consistent styling
+- **Form Styles**: Centralized form styling in `src/styles/formStyles.ts`
 
-At least **one** of these API keys must be configured:
+### Responsive Patterns
+```typescript
+// Standard responsive pattern used throughout
+const theme = useTheme();
+const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-- `ANTHROPIC_API_KEY` (Claude models) - **Recommended**
-- `PERPLEXITY_API_KEY` (Research features) - **Highly recommended**
-- `OPENAI_API_KEY` (GPT models)
-- `GOOGLE_API_KEY` (Gemini models)
-- `MISTRAL_API_KEY` (Mistral models)
-- `OPENROUTER_API_KEY` (Multiple models)
-- `XAI_API_KEY` (Grok models)
-
-An API key is required for any provider used across any of the 3 roles defined in the `models` command.
-
-### Model Configuration
-
-```bash
-# Interactive setup (recommended)
-task-master models --setup
-
-# Set specific models
-task-master models --set-main claude-3-5-sonnet-20241022
-task-master models --set-research perplexity-llama-3.1-sonar-large-128k-online
-task-master models --set-fallback gpt-4o-mini
+return isMobile ? <MobileComponent /> : <DesktopComponent />;
 ```
 
-## Task Structure & IDs
+## Development Patterns
 
-### Task ID Format
+### Type Safety
+- **Generated Types**: API types auto-generated in `src/types/generated/`
+- **Custom Types**: Business logic types in `src/types/{domain}.ts`
+- **Validation Schemas**: Zod schemas for runtime validation
+- **Type Validation**: `npm run types:validate` ensures type safety
 
-- Main tasks: `1`, `2`, `3`, etc.
-- Subtasks: `1.1`, `1.2`, `2.1`, etc.
-- Sub-subtasks: `1.1.1`, `1.1.2`, etc.
+### Error Handling Best Practices
+- **User-Friendly Messages**: Always parse technical errors into readable text
+- **Logging**: Use `logError()` for debugging while showing clean errors to users  
+- **Graceful Degradation**: Handle API failures without breaking the UI
+- **Error Recovery**: Provide actionable error messages with retry options
 
-### Task Status Values
+### Testing Strategy
+- **Type Tests**: Ensure generated types compile (`test:types`)
+- **Schema Drift**: Detect API changes (`test:schema-drift`) 
+- **Health Checks**: Verify backend connectivity (`health-check`)
+- **Unit Tests**: Framework ready for Jest/Vitest implementation
 
-- `pending` - Ready to work on
-- `in-progress` - Currently being worked on
-- `done` - Completed and verified
-- `deferred` - Postponed
-- `cancelled` - No longer needed
-- `blocked` - Waiting on external factors
+## Development Workflow
 
-### Task Fields
+### Backend Integration
+1. **API First**: Backend API expected at `localhost:8082`
+2. **Type Generation**: Run `npm run generate-types` after API changes
+3. **Schema Validation**: `npm run test:schema-drift` detects breaking changes
+4. **Error Testing**: Test error scenarios to ensure proper user messaging
 
-```json
-{
-  "id": "1.2",
-  "title": "Implement user authentication",
-  "description": "Set up JWT-based auth system",
-  "status": "pending",
-  "priority": "high",
-  "dependencies": ["1.1"],
-  "details": "Use bcrypt for hashing, JWT for tokens...",
-  "testStrategy": "Unit tests for auth functions, integration tests for login flow",
-  "subtasks": []
-}
-```
+### Form Development
+1. Use validated components from `src/components/common/validated/`
+2. Integrate with `useValidatedForm()` hook for consistent error handling
+3. Test both client-side validation and server-side error responses
+4. Ensure mobile responsiveness with form layouts
 
-## Claude Code Best Practices with Task Master
+### Mobile Development  
+1. **Mobile-First**: Design mobile layouts first, then enhance for desktop
+2. **Breakpoint Testing**: Test responsive behavior at various screen sizes
+3. **Touch Interactions**: Ensure proper touch targets and mobile UX patterns
+4. **Performance**: Optimize for mobile devices with code splitting
 
-### Context Management
+### API Integration
+1. **Resource Mapping**: Understand frontend→backend resource name mapping
+2. **Data Transformations**: Handle data shape differences in data provider
+3. **Error Handling**: Test error scenarios and ensure good user experience  
+4. **Authentication**: JWT tokens handled automatically via auth provider
 
-- Use `/clear` between different tasks to maintain focus
-- This CLAUDE.md file is automatically loaded for context
-- Use `task-master show <id>` to pull specific task context when needed
+## Key Files Reference
 
-### Iterative Implementation
+### Core Configuration
+- `src/App.tsx` - Main app component with routing and providers
+- `src/config/navigation.tsx` - Resource definitions and navigation structure
+- `src/providers/dataProvider.ts` - Backend API integration layer
+- `src/providers/authProvider.ts` - Authentication logic
+- `vite.config.ts` - Development server configuration with API proxy
 
-1. `task-master show <subtask-id>` - Understand requirements
-2. Explore codebase and plan implementation
-3. `task-master update-subtask --id=<id> --prompt="detailed plan"` - Log plan
-4. `task-master set-status --id=<id> --status=in-progress` - Start work
-5. Implement code following logged plan
-6. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-7. `task-master set-status --id=<id> --status=done` - Complete task
+### Type System
+- `src/types/generated/` - Auto-generated API types (do not edit manually)
+- `src/types/{domain}.ts` - Business domain type definitions
+- `tsconfig.json` - TypeScript configuration
 
-### Complex Workflows with Checklists
+### Styling
+- `src/contexts/color-mode/` - Theme and dark mode logic  
+- `src/styles/globalOverrides.tsx` - Global MUI theme overrides
+- `public/locales/{lang}/common.json` - Internationalization strings
 
-For large migrations or multi-step processes:
+## Important Constraints
 
-1. Create a markdown PRD file describing the new changes: `touch task-migration-checklist.md` (prds can be .txt or .md)
-2. Use Taskmaster to parse the new prd with `task-master parse-prd --append` (also available in MCP)
-3. Use Taskmaster to expand the newly generated tasks into subtasks. Consdier using `analyze-complexity` with the correct --to and --from IDs (the new ids) to identify the ideal subtask amounts for each task. Then expand them.
-4. Work through items systematically, checking them off as completed
-5. Use `task-master update-subtask` to log progress on each task/subtask and/or updating/researching them before/during implementation if getting stuck
+### Type Generation Dependencies
+- Types are generated from backend API at `../course-management-api`
+- Always run `npm run generate-types` after backend schema changes  
+- Do not manually edit files in `src/types/generated/`
 
-### Git Integration
+### Mobile Responsiveness Requirements
+- All new components must work on both mobile and desktop
+- Use established breakpoint patterns (`useMediaQuery(theme.breakpoints.down('md'))`)
+- Mobile components should be touch-friendly with adequate tap targets
 
-Task Master works well with `gh` CLI:
+### Error Handling Standards  
+- Parse all API errors through `parsePydanticValidationError()` in data provider
+- Always provide user-friendly error messages, never expose technical details
+- Use consistent error UI patterns from existing components
 
-```bash
-# Create PR for completed task
-gh pr create --title "Complete task 1.2: User authentication" --body "Implements JWT auth system as specified in task 1.2"
-
-# Reference task in commits
-git commit -m "feat: implement JWT auth (task 1.2)"
-```
-
-### Parallel Development with Git Worktrees
-
-```bash
-# Create worktrees for parallel task development
-git worktree add ../project-auth feature/auth-system
-git worktree add ../project-api feature/api-refactor
-
-# Run Claude Code in each worktree
-cd ../project-auth && claude    # Terminal 1: Auth work
-cd ../project-api && claude     # Terminal 2: API work
-```
-
-## Troubleshooting
-
-### AI Commands Failing
-
-```bash
-# Check API keys are configured
-cat .env                           # For CLI usage
-
-# Verify model configuration
-task-master models
-
-# Test with different model
-task-master models --set-fallback gpt-4o-mini
-```
-
-### MCP Connection Issues
-
-- Check `.mcp.json` configuration
-- Verify Node.js installation
-- Use `--mcp-debug` flag when starting Claude Code
-- Use CLI as fallback if MCP unavailable
-
-### Task File Sync Issues
-
-```bash
-# Regenerate task files from tasks.json
-task-master generate
-
-# Fix dependency issues
-task-master fix-dependencies
-```
-
-DO NOT RE-INITIALIZE. That will not do anything beyond re-adding the same Taskmaster core files.
-
-## Important Notes
-
-### AI-Powered Operations
-
-These commands make AI calls and may take up to a minute:
-
-- `parse_prd` / `task-master parse-prd`
-- `analyze_project_complexity` / `task-master analyze-complexity`
-- `expand_task` / `task-master expand`
-- `expand_all` / `task-master expand --all`
-- `add_task` / `task-master add-task`
-- `update` / `task-master update`
-- `update_task` / `task-master update-task`
-- `update_subtask` / `task-master update-subtask`
-
-### File Management
-
-- Never manually edit `tasks.json` - use commands instead
-- Never manually edit `.taskmaster/config.json` - use `task-master models`
-- Task markdown files in `tasks/` are auto-generated
-- Run `task-master generate` after manual changes to tasks.json
-
-### Claude Code Session Management
-
-- Use `/clear` frequently to maintain focused context
-- Create custom slash commands for repeated Task Master workflows
-- Configure tool allowlist to streamline permissions
-- Use headless mode for automation: `claude -p "task-master next"`
-
-### Multi-Task Updates
-
-- Use `update --from=<id>` to update multiple future tasks
-- Use `update-task --id=<id>` for single task updates
-- Use `update-subtask --id=<id>` for implementation logging
-
-### Research Mode
-
-- Add `--research` flag for research-based AI enhancement
-- Requires a research model API key like Perplexity (`PERPLEXITY_API_KEY`) in environment
-- Provides more informed task creation and updates
-- Recommended for complex technical tasks
-
----
-
-_This guide ensures Claude Code has immediate access to Task Master's essential functionality for agentic development workflows._
+### Backend API Expectations
+- API must be running on `localhost:8082` for development
+- API follows FastAPI + Pydantic patterns for error responses
+- Authentication via JWT tokens in Authorization header

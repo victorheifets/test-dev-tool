@@ -9,8 +9,9 @@ const designTokens = {
     none: 0,
   },
   shadows: {
-    card: '0px 2px 10px 0px rgba(58, 53, 65, 0.1)',
+    card: '0px 4px 20px 0px rgba(58, 53, 65, 0.15)',
     header: '0px 2px 10px 0px rgba(58, 53, 65, 0.1)',
+    elevated: '0px 8px 30px 0px rgba(58, 53, 65, 0.2)',
   },
   spacing: {
     sidebarWidth: 260,
@@ -33,7 +34,7 @@ const palette = {
     main: '#7367F0', // Updated to Materialize blue
   },
   background: {
-    default: '#F8F7FA', // Light grey page background from Materialize
+    default: '#F4F5F7', // Slightly darker background for better contrast
     paper: '#FFFFFF',    // White for cards, tables, etc.
   },
   text: {
@@ -100,6 +101,8 @@ const baseThemeOptions: ThemeOptions = {
         root: {
           boxShadow: designTokens.shadows.card,
           borderRadius: designTokens.borderRadius.default,
+          backgroundColor: palette.background.paper,
+          backgroundImage: 'none',
         },
       },
     },
@@ -107,9 +110,17 @@ const baseThemeOptions: ThemeOptions = {
         styleOverrides: {
           root: {
             borderRadius: designTokens.borderRadius.default,
+            backgroundColor: palette.background.paper,
+            backgroundImage: 'none',
+          },
+          elevation0: {
+            backgroundColor: palette.background.paper,
+            backgroundImage: 'none',
           },
           elevation1: {
             boxShadow: designTokens.shadows.card,
+            backgroundColor: palette.background.paper,
+            backgroundImage: 'none',
           }
         },
       },
@@ -215,6 +226,34 @@ export const darkTheme = createTheme({
                 color: '#D0D2D6', // Brighter icon color for dark theme
               },
             },
+          },
+        },
+        MuiCard: {
+          styleOverrides: {
+            root: {
+              boxShadow: designTokens.shadows.card,
+              borderRadius: designTokens.borderRadius.default,
+              backgroundColor: '#283046',
+              backgroundImage: 'none',
+            },
+          },
+        },
+        MuiPaper: {
+          styleOverrides: {
+            root: {
+              borderRadius: designTokens.borderRadius.default,
+              backgroundColor: '#283046',
+              backgroundImage: 'none',
+            },
+            elevation0: {
+              backgroundColor: '#283046',
+              backgroundImage: 'none',
+            },
+            elevation1: {
+              boxShadow: designTokens.shadows.card,
+              backgroundColor: '#283046',
+              backgroundImage: 'none',
+            }
           },
         },
         MuiDrawer: {

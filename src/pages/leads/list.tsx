@@ -1,32 +1,40 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, useMediaQuery, useTheme, Fab } from '@mui/material';
+import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, Fab, InputAdornment } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { Lead, LeadStatus } from '../../types/lead';
+import { Lead, LeadStatus, LeadCreate } from '../../types/lead';
 import { StatusChip } from '../../components/leads/StatusChip';
 import { ActionMenu } from '../../components/leads/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
+import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { LeadModal } from '../../components/leads/LeadModal';
 import { StatCard } from '../../components/StatCard';
-import { CompactLeadCard } from '../../components/mobile/CompactLeadCard';
+import { SharedDataGrid } from '../../components/common/SharedDataGrid';
+import { CompactCardShell } from '../../components/mobile/CompactCardShell';
+import { CompactLeadContent } from '../../components/mobile/content/CompactLeadContent';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LanguageIcon from '@mui/icons-material/Language';
 
-// UI Constants
+// UI Constants (matching original)
+const MOBILE_BOTTOM_PADDING = 10;
+const MOBILE_SIDE_PADDING = 1;
 const MOBILE_ICON_SIZE = 24;
 const DESKTOP_ICON_SIZE = 40;
-
-// FAB positioning constants
-const FAB_BOTTOM_OFFSET = 90; // Above bottom navigation
+const MOBILE_SEARCH_BORDER_RADIUS = 3;
+const DESKTOP_BORDER_RADIUS = 1.5;
+const FAB_BOTTOM_OFFSET = 90;
+const FAB_RIGHT_OFFSET = 16;
 const FAB_Z_INDEX = 1000;
+const DATA_GRID_HEIGHT = 500;
 
 export const LeadsList = () => {
   const { t } = useTranslation();
@@ -72,13 +80,8 @@ export const LeadsList = () => {
       return matchesSearch && matchesStatus;
     });
   }, [allLeads, searchText, statusFilter]);
-  
-  // Update dataGridProps with filtered data
-  const filteredDataGridProps = {
-    ...dataGridProps,
-    rows: leads,
-  };
 
+  // Event handlers
   const handleEdit = (id: string) => {
     const leadToEdit = leads.find(l => l.id === id);
     if (leadToEdit) {
@@ -104,7 +107,6 @@ export const LeadsList = () => {
 
   const confirmDelete = () => {
     if (selectedLeadId) {
-      console.log('Deleting lead with ID:', selectedLeadId);
       deleteLead({
         resource: 'leads',
         id: selectedLeadId,
@@ -113,7 +115,6 @@ export const LeadsList = () => {
           showSuccess(t('messages.lead_deleted'));
         },
         onError: (error) => {
-          console.error('Delete error:', error);
           handleError(error, t('actions.delete') + ' ' + t('lead'));
         }
       });
@@ -131,7 +132,6 @@ export const LeadsList = () => {
   const confirmBulkDelete = async () => {
     if (selectedRows.length === 0) return;
     
-    console.log('Bulk deleting leads with IDs:', selectedRows);
     let deleteCount = 0;
     let errorCount = 0;
 
@@ -147,14 +147,13 @@ export const LeadsList = () => {
               resolve(void 0);
             },
             onError: (error) => {
-              console.error(`Delete error for ID ${id}:`, error);
               errorCount++;
               reject(error);
             }
           });
         });
       } catch (error) {
-        // Error already logged above
+        // Error already logged
       }
     }
 
@@ -170,17 +169,16 @@ export const LeadsList = () => {
   };
   
   const handleAddNew = () => {
-    console.log('Opening create modal');
     setModalMode('create');
     setModalInitialData(null);
     setIsModalOpen(true);
   };
 
-  const handleSave = (lead: Omit<Lead, 'id'>) => {
+  const handleSave = (leadData: LeadCreate) => {
     if (modalMode === 'create' || modalMode === 'duplicate') {
       createLead({
         resource: 'leads',
-        values: lead,
+        values: leadData,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.lead_created'));
@@ -189,7 +187,6 @@ export const LeadsList = () => {
           invalidate({ resource: 'leads', invalidates: ['list'] });
         },
         onError: (error) => {
-          console.error('Create error:', error);
           handleError(error, t('actions.create') + ' ' + t('lead'));
         }
       });
@@ -197,7 +194,7 @@ export const LeadsList = () => {
       updateLead({
         resource: 'leads',
         id: modalInitialData.id,
-        values: lead,
+        values: leadData,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.lead_updated'));
@@ -206,13 +203,14 @@ export const LeadsList = () => {
           invalidate({ resource: 'leads', invalidates: ['list'] });
         },
         onError: (error) => {
-          console.error('Update error:', error);
           handleError(error, t('actions.edit') + ' ' + t('lead'));
         }
       });
     }
   };
 
+
+  // DataGrid columns for desktop (matching original exactly)
   const columns: GridColDef[] = [
     {
       field: 'first_name',
@@ -258,8 +256,10 @@ export const LeadsList = () => {
       width: 120,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={() => handleEdit(params.row.id)} color="primary" title={t('actions.edit')}>
+            <EditIcon />
+          </IconButton>
           <ActionMenu
-            onEdit={() => handleEdit(params.row.id)}
             onDuplicate={() => handleDuplicate(params.row.id)}
             onDelete={() => handleDeleteRequest(params.row.id)}
           />
@@ -268,9 +268,26 @@ export const LeadsList = () => {
     },
   ];
 
+  // Filter options for SharedDataGrid
+  const statusFilterOptions = [
+    { value: LeadStatus.NEW, label: t('lead_status.new') },
+    { value: LeadStatus.CONTACTED, label: t('lead_status.contacted') },
+    { value: LeadStatus.QUALIFIED, label: t('lead_status.qualified') },
+    { value: LeadStatus.CONVERTED, label: t('lead_status.converted') },
+    { value: LeadStatus.LOST, label: t('lead_status.lost') },
+  ];
+
   return (
-    <Box sx={{ width: '100%' }}>
-      <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: 3 }}>
+    <Box sx={{ 
+      width: '100%',
+      pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
+      px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
+      minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
+      backgroundColor: isMobile ? '#f8f9fa' : 'background.default',
+      overflow: 'visible', // Use natural document scrolling
+    }}>
+      {/* Statistics Cards */}
+      <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('leads')} 
@@ -281,157 +298,186 @@ export const LeadsList = () => {
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
-            title={t('status_options.new')} 
-            value={leads.filter(l => l.status === 'new').length.toString()} 
-            icon={<EmailIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            title={t('lead_status.new')} 
+            value={leads.filter(l => l.status === LeadStatus.NEW).length.toString()} 
+            icon={<LanguageIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="info" 
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
-            title={t('status_options.qualified')} 
-            value={leads.filter(l => l.status === 'qualified').length.toString()} 
-            icon={<PhoneIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
-            color="success" 
+            title={t('lead_status.qualified')} 
+            value={leads.filter(l => l.status === LeadStatus.QUALIFIED).length.toString()} 
+            icon={<EmailIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="warning" 
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
-            title={t('status_options.converted')} 
-            value={leads.filter(l => l.status === 'converted').length.toString()} 
-            icon={<LanguageIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
-            color="secondary" 
+            title={t('lead_status.converted')} 
+            value={leads.filter(l => l.status === LeadStatus.CONVERTED).length.toString()} 
+            icon={<PhoneIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
+            color="success" 
           />
         </Grid>
       </Grid>
-      <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 3, border: '1px solid', borderColor: 'divider' }}>
-        {/* Desktop Controls */}
-        {!isMobile && (
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" onClick={handleAddNew}>+ {t('actions.create')} {t('lead')}</Button>
-              {selectedRows.length > 0 && (
-                <Button 
-                  variant="outlined" 
-                  color="error" 
-                  onClick={handleBulkDelete}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('actions.delete')} ({selectedRows.length})
-                </Button>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <TextField
-                placeholder={t('search.placeholder_leads')}
-                variant="outlined"
-                size="small"
-                sx={{ minWidth: 250 }}
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-              />
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>{t('course_fields.status')}</InputLabel>
-                <Select
-                  label={t('course_fields.status')}
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                  }}
-                >
-                  <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value={LeadStatus.NEW}>{t('status_options.new')}</MenuItem>
-                  <MenuItem value={LeadStatus.CONTACTED}>{t('status_options.contacted')}</MenuItem>
-                  <MenuItem value={LeadStatus.QUALIFIED}>{t('status_options.qualified')}</MenuItem>
-                  <MenuItem value={LeadStatus.CONVERTED}>{t('status_options.converted')}</MenuItem>
-                  <MenuItem value={LeadStatus.LOST}>{t('status_options.lost')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
 
-        {/* Mobile Controls */}
+      <Box sx={{ 
+        p: isMobile ? 0 : 2, 
+        backgroundColor: isMobile ? 'transparent' : 'background.paper', 
+        borderRadius: isMobile ? 0 : DESKTOP_BORDER_RADIUS, 
+        boxShadow: isMobile ? 'none' : 3, 
+        border: isMobile ? 'none' : '1px solid', 
+        borderColor: isMobile ? 'transparent' : 'divider' 
+      }}>
+
+        {/* Mobile Layout - Search and Filter */}
         {isMobile && (
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-              <TextField
-                placeholder={t('search.placeholder_leads')}
-                variant="outlined"
+          <Box sx={{ 
+            mb: 1.5, 
+            px: 1,
+            display: 'flex', 
+            gap: 1,
+            flexDirection: 'column',
+            alignItems: 'stretch'
+          }}>
+            {/* Bulk Delete Button (when items selected) */}
+            {selectedRows.length > 0 && (
+              <Button 
+                variant="outlined" 
+                color="error" 
+                onClick={handleBulkDelete}
                 size="small"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                fullWidth
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontSize: '16px', // Prevent zoom on iOS
-                  }
+                sx={{ 
+                  textTransform: 'none',
+                  mb: 1
                 }}
-              />
-              <FormControl size="small" fullWidth>
-                <InputLabel>{t('course_fields.status')}</InputLabel>
-                <Select
-                  label={t('course_fields.status')}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      fontSize: '16px',
-                    }
-                  }}
-                >
-                  <MenuItem value="">{t('common.all')}</MenuItem>
-                  <MenuItem value={LeadStatus.NEW}>{t('status_options.new')}</MenuItem>
-                  <MenuItem value={LeadStatus.CONTACTED}>{t('status_options.contacted')}</MenuItem>
-                  <MenuItem value={LeadStatus.QUALIFIED}>{t('status_options.qualified')}</MenuItem>
-                  <MenuItem value={LeadStatus.CONVERTED}>{t('status_options.converted')}</MenuItem>
-                  <MenuItem value={LeadStatus.LOST}>{t('status_options.lost')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
-
-        {/* Desktop Table */}
-        {!isMobile && (
-          <Box sx={{ height: 500, width: '100%' }}>
-            <DataGrid
-              {...filteredDataGridProps}
-              columns={columns}
-              checkboxSelection
-              disableRowSelectionOnClick
-              pageSizeOptions={[5, 10, 25, 50]}
-              sx={{ border: 'none' }}
-              onRowSelectionModelChange={(newSelectionModel) => {
-                setSelectedRows(newSelectionModel as string[]);
+              >
+                {t('actions.delete')} ({selectedRows.length})
+              </Button>
+            )}
+          
+            {/* Search Field */}
+            <TextField
+              placeholder={t('search.placeholder_leads')}
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                  </InputAdornment>
+                ),
               }}
-              rowSelectionModel={selectedRows}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                }
+              }}
             />
+            
+            {/* Status Filter */}
+            <FormControl 
+              size="small" 
+              sx={{ minWidth: isMobile ? '100%' : 140 }}
+            >
+              <InputLabel>{t('course_fields.status')}</InputLabel>
+              <Select
+                label={t('course_fields.status')}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                sx={{
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                }}
+              >
+                <MenuItem value="">{t('common.all')}</MenuItem>
+                <MenuItem value={LeadStatus.NEW}>{t('lead_status.new')}</MenuItem>
+                <MenuItem value={LeadStatus.CONTACTED}>{t('lead_status.contacted')}</MenuItem>
+                <MenuItem value={LeadStatus.QUALIFIED}>{t('lead_status.qualified')}</MenuItem>
+                <MenuItem value={LeadStatus.CONVERTED}>{t('lead_status.converted')}</MenuItem>
+                <MenuItem value={LeadStatus.LOST}>{t('lead_status.lost')}</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         )}
+        
+        <ErrorBoundary onError={(error, errorInfo) => {
+          console.error('Data view error:', error, errorInfo);
+          handleError(error, 'Data View');
+        }}>
+          {/* Desktop Data Grid */}
+          {!isMobile && (
+            <SharedDataGrid
+              rows={leads}
+              columns={columns}
+              searchValue={searchText}
+              onSearchChange={setSearchText}
+              searchPlaceholder={t('search.placeholder_leads')}
+              filterValue={statusFilter}
+              onFilterChange={setStatusFilter}
+              filterOptions={statusFilterOptions}
+              filterLabel={t('course_fields.status')}
+              enableSelection={true}
+              selectedRows={selectedRows}
+              onSelectionChange={(selection) => setSelectedRows(selection as string[])}
+              onCreateNew={handleAddNew}
+              createButtonText={`+ ${t('actions.create')} ${t('lead')}`}
+              onBulkDelete={handleBulkDelete}
+              bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
+              height={DATA_GRID_HEIGHT}
+              pageSizeOptions={[5, 10, 25, 50]}
+              disableRowSelectionOnClick={true}
+            />
+          )}
 
-        {/* Mobile Cards */}
-        {isMobile && (
-          <Box>
-            {leads.map((lead) => (
-              <CompactLeadCard
-                key={lead.id}
-                lead={lead}
-                onEdit={handleEdit}
-                onDuplicate={handleDuplicate}
-                onDelete={handleDeleteRequest}
-              />
-            ))}
-          </Box>
-        )}
+          {/* Mobile Layout - Cards */}
+          {isMobile && (
+            <Box sx={{ 
+              px: 1,
+              pb: 10 // Extra padding for bottom navigation
+            }}>
+              {leads.map((lead) => (
+                <CompactCardShell
+                  key={lead.id}
+                  entityId={lead.id}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDeleteRequest}
+                  enableSwipeGestures={true}
+                >
+                  <CompactLeadContent lead={lead} />
+                </CompactCardShell>
+              ))}
+            </Box>
+          )}
+        </ErrorBoundary>
       </Box>
+      
+      {/* Floating Action Button for Create Lead - Mobile Only */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          onClick={handleAddNew}
+          sx={{
+            position: 'fixed',
+            bottom: FAB_BOTTOM_OFFSET, // Above bottom navigation
+            right: FAB_RIGHT_OFFSET,
+            zIndex: FAB_Z_INDEX,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+          }}
+        >
+          <AddIcon />
+        </Fab>
+      )}
+      
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title={t('actions.delete') + ' ' + t('lead')}
+        title={`${t('actions.delete')} ${t('lead')}`}
         description={t('messages.confirm_delete')}
       />
       <ConfirmationDialog
@@ -441,34 +487,23 @@ export const LeadsList = () => {
         title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('leads')}`}
         description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
-      <LeadModal 
-        open={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setModalInitialData(null);
-        }}
-        initialData={modalInitialData}
-        mode={modalMode}
-        onSave={handleSave}
-        forceMobile={isMobile}
-      />
-      
-      {/* Mobile FAB */}
-      {isMobile && (
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={handleAddNew}
-          sx={{
-            position: 'fixed',
-            bottom: FAB_BOTTOM_OFFSET,
-            right: 16,
-            zIndex: FAB_Z_INDEX,
+      <ErrorBoundary onError={(error, errorInfo) => {
+        console.error('Lead modal error:', error, errorInfo);
+        handleError(error, 'Lead Modal');
+        setIsModalOpen(false); // Close modal on error
+      }}>
+        <LeadModal 
+          open={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setModalInitialData(null);
           }}
-        >
-          <AddIcon />
-        </Fab>
-      )}
+          forceMobile={isMobile} // Use responsive detection
+          onSave={handleSave}
+          initialData={modalInitialData}
+          mode={modalMode}
+        />
+      </ErrorBoundary>
     </Box>
   );
-} 
+};

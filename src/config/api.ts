@@ -18,8 +18,7 @@ export const API_CONFIG = {
   // API timeout in milliseconds
   timeout: 10000,
   
-  // Provider ID for development (will be replaced with JWT token data)
-  defaultProviderId: 'af333f3e-1007-424c-93d5-4dfde7407674',
+  // Provider ID will be extracted from JWT token or user session
   
   // API endpoints
   endpoints: {
@@ -60,17 +59,37 @@ export const buildApiUrl = (endpoint: keyof typeof API_CONFIG.endpoints, id?: st
   return id ? `${baseUrl}/${id}` : baseUrl;
 };
 
+// Helper function to extract provider ID from JWT token
+export const getProviderIdFromToken = (): string | null => {
+  const token = localStorage.getItem('auth-token');
+  if (!token) return null;
+  
+  try {
+    // Decode JWT token (basic decode, not verification)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.provider_id || null;
+  } catch (error) {
+    console.warn('Failed to decode JWT token:', error);
+    return null;
+  }
+};
+
 // Helper function to get auth headers with JWT token
 export const getAuthHeaders = (): Record<string, string> => {
   const headers: Record<string, string> = {
-    ...API_CONFIG.headers,
-    'X-Provider-ID': API_CONFIG.defaultProviderId // For multi-tenant support
+    ...API_CONFIG.headers
   };
 
   // Add JWT token if available
   const token = localStorage.getItem('auth-token');
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    
+    // Add provider ID from token if available
+    const providerId = getProviderIdFromToken();
+    if (providerId) {
+      headers['X-Provider-ID'] = providerId;
+    }
   }
 
   return headers;

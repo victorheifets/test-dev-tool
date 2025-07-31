@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Create } from '@refinedev/mui';
+import { API_CONFIG, getAuthHeaders } from '../../config/api';
+
+// Helper function for text direction - simple approach
+const getTextDirection = (currentLanguage: string) => {
+  return currentLanguage === 'he' ? 'rtl' : 'ltr';
+};
 import { 
   Box, 
   Button, 
@@ -18,37 +23,24 @@ import {
   Divider,
   Switch,
   FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   Fab,
   useMediaQuery,
   useTheme,
   Tab,
   Tabs,
-  Slide
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Edit as EditIcon, Preview as PreviewIcon, Publish as PublishIcon, Save as SaveIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { CommonModalShell } from '../../components/common/CommonModalShell';
+import { useCreate, useList } from '@refinedev/core';
 
 // FAB positioning constants
 const FAB_BOTTOM_OFFSET = 90; // Above bottom navigation
 const FAB_Z_INDEX = 1000;
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface FormData {
   first_name: string;
@@ -67,15 +59,112 @@ interface FormSettings {
   publishedUrl?: string;
 }
 
-const RegistrationForm: React.FC = () => {
+// Extract preview content into separate component
+const PreviewContent: React.FC = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
+  
+  const FormPreview = () => (
+    <Box sx={{ 
+      p: isMobile ? 2 : 3, 
+      backgroundColor: isMobile ? 'grey.50' : 'background.paper',
+      borderRadius: 2,
+      border: isMobile ? 'none' : '1px solid',
+      borderColor: 'divider'
+    }}>
+      <Typography variant={isMobile ? "h6" : "h5"} gutterBottom sx={{ fontWeight: 600 }}>
+        {t('registrationForm.defaultTitle')}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        {t('registrationForm.defaultDescription')}
+      </Typography>
+      
+      <Grid container spacing={isMobile ? 2 : 3}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label={t('forms.first_name')}
+            variant="outlined"
+            fullWidth
+            disabled
+            value="John"
+            size={isMobile ? "small" : "medium"}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label={t('forms.last_name')}
+            variant="outlined"
+            fullWidth
+            disabled
+            value="Doe"
+            size={isMobile ? "small" : "medium"}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label={t('common.email')}
+            variant="outlined"
+            fullWidth
+            disabled
+            value="john.doe@example.com"
+            size={isMobile ? "small" : "medium"}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label={t('common.phone')}
+            variant="outlined"
+            fullWidth
+            disabled
+            value="+1234567890"
+            size={isMobile ? "small" : "medium"}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth disabled size={isMobile ? "small" : "medium"}>
+            <FormLabel>{t('forms.source')}</FormLabel>
+            <Select value="website">
+              <MenuItem value="website">Website</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  return <FormPreview />;
+};
+
+// Extract publish content into separate component
+const PublishContent: React.FC = () => {
+  const { t } = useTranslation();
+  
+  return (
+    <Typography>
+      {t('registrationForm.publishConfirmation')}
+    </Typography>
+  );
+};
+
+const RegistrationFormNew: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const { isMobile } = useBreakpoint();
+  const currentLanguage = i18n.language;
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const theme = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
+
+  // Function to handle text direction
+  const handleTextDirection = (text: string = '') => {
+    // Check if the text contains RTL characters
+    const rtlChars = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    return rtlChars.test(text) ? 'rtl' : 'ltr';
+  };
+  
   const [isPublishing, setIsPublishing] = useState(false);
   const [mobileTab, setMobileTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{
@@ -94,6 +183,13 @@ const RegistrationForm: React.FC = () => {
     published: false,
     publishedUrl: undefined
   });
+  
+  // Update text direction in real-time as user types
+  useEffect(() => {
+    if (descriptionRef.current && editingDescription) {
+      descriptionRef.current.dir = handleTextDirection(formSettings.description);
+    }
+  }, [formSettings.description, editingDescription]);
 
   // Create validation schema with translated messages
   const validationSchemaWithTranslation: yup.ObjectSchema<FormData> = yup.object().shape({
@@ -103,48 +199,78 @@ const RegistrationForm: React.FC = () => {
     phone: yup.string().optional().min(10, t('validation.phone_min_length')),
     source: yup.string().required(t('validation.source_required')),
     activity_of_interest: yup.string().optional(),
-    notes: yup.string().optional().max(2000, t('validation.notes_max_length'))
+    notes: yup.string().optional()
   });
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm<FormData>({
+  const { control, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     resolver: yupResolver(validationSchemaWithTranslation),
     defaultValues: {
       first_name: '',
       last_name: '',
       email: '',
       phone: '',
-      source: 'website',
+      source: '',
       activity_of_interest: '',
       notes: ''
     }
   });
 
+  // Use the useCreate hook for better error handling and integration
+  const { mutate: createLead } = useCreate();
+  
+  // Fetch activities for the activity dropdown
+  const { data: activitiesData } = useList({
+    resource: 'activities',
+  });
+  
+  const activities = activitiesData?.data || [];
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    
     try {
-      // For now, simulate successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Connect to proper API endpoint when backend is ready
-      console.log('Form submitted:', data);
+      // Create lead data with "qualified" status to indicate registration form submission
+      const leadData = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone: data.phone || '',
+        source: data.source,
+        status: 'qualified', // Use "qualified" status to differentiate registration forms from regular leads
+        activity_of_interest: data.activity_of_interest || '',
+        notes: data.notes ? `[Registration Form] ${data.notes}` : '[Registration Form] Submitted via registration form',
+      };
 
-      setSnackbar({
-        open: true,
-        message: t('registrationForm.messages.saved'),
-        severity: 'success'
-      });
-
-      reset();
+      // Submit to leads API using Refine's useCreate hook
+      createLead(
+        {
+          resource: 'leads',
+          values: leadData,
+        },
+        {
+          onSuccess: (result) => {
+            console.log('Registration form submitted as lead:', result);
+            setSnackbar({
+              open: true,
+              message: t('registrationForm.submitSuccess'),
+              severity: 'success'
+            });
+            reset();
+          },
+          onError: (error) => {
+            console.error('Registration form submission error:', error);
+            setSnackbar({
+              open: true,
+              message: t('registrationForm.submitError'),
+              severity: 'error'
+            });
+          },
+        }
+      );
     } catch (error) {
+      console.error('Registration form submission error:', error);
       setSnackbar({
         open: true,
-        message: t('messages.error'),
+        message: t('registrationForm.submitError'),
         severity: 'error'
       });
     } finally {
@@ -155,163 +281,44 @@ const RegistrationForm: React.FC = () => {
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
-      // Create the form data to publish
-      const formData = {
-        title: formSettings.title,
-        description: formSettings.description,
-        fields: [
-          { name: 'first_name', type: 'text', label: t('registrationForm.fields.fullName'), required: true },
-          { name: 'last_name', type: 'text', label: t('common.last_name'), required: true },
-          { name: 'email', type: 'email', label: t('registrationForm.fields.email'), required: true },
-          { name: 'phone', type: 'tel', label: t('registrationForm.fields.phone'), required: false },
-          { name: 'source', type: 'select', label: t('forms.source'), required: true, options: [
-            { value: 'website', label: t('sources.website') },
-            { value: 'referral', label: t('sources.referral') },
-            { value: 'social_media', label: t('sources.social_media') },
-            { value: 'email', label: t('sources.email') },
-            { value: 'advertisement', label: t('sources.advertisement') },
-            { value: 'other', label: t('sources.other') }
-          ]},
-          { name: 'activity_of_interest', type: 'text', label: t('forms.activity_of_interest'), required: false },
-          { name: 'notes', type: 'textarea', label: t('forms.notes'), required: false }
-        ],
-        createdAt: new Date().toISOString(),
-        language: 'en' // You can make this dynamic based on current language
-      };
-
-      // Create the HTML content for the published form
-      const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${formSettings.title}</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .form-container { background: #f9f9f9; padding: 30px; border-radius: 8px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #1976d2; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #1565c0; }
-        .required { color: red; }
-    </style>
-</head>
-<body>
-    <div class="form-container">
-        <h1>${formSettings.title}</h1>
-        <p>${formSettings.description}</p>
-        <form id="registrationForm" method="POST" action="/api/registration-submit">
-            <div class="form-group">
-                <label for="first_name">${t('registrationForm.fields.fullName')} <span class="required">*</span></label>
-                <input type="text" id="first_name" name="first_name" required>
-            </div>
-            <div class="form-group">
-                <label for="last_name">${t('common.last_name')} <span class="required">*</span></label>
-                <input type="text" id="last_name" name="last_name" required>
-            </div>
-            <div class="form-group">
-                <label for="email">${t('registrationForm.fields.email')} <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">${t('registrationForm.fields.phone')}</label>
-                <input type="tel" id="phone" name="phone">
-            </div>
-            <div class="form-group">
-                <label for="source">${t('forms.source')} <span class="required">*</span></label>
-                <select id="source" name="source" required>
-                    <option value="website">${t('sources.website')}</option>
-                    <option value="referral">${t('sources.referral')}</option>
-                    <option value="social_media">${t('sources.social_media')}</option>
-                    <option value="email">${t('sources.email')}</option>
-                    <option value="advertisement">${t('sources.advertisement')}</option>
-                    <option value="other">${t('sources.other')}</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="activity_of_interest">${t('forms.activity_of_interest')}</label>
-                <input type="text" id="activity_of_interest" name="activity_of_interest">
-            </div>
-            <div class="form-group">
-                <label for="notes">${t('forms.notes')}</label>
-                <textarea id="notes" name="notes" rows="4"></textarea>
-            </div>
-            <button type="submit">${t('landing_pages.forms.submit')}</button>
-        </form>
-    </div>
-    <script>
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('${t('registrationForm.messages.saved')}');
-        });
-    </script>
-</body>
-</html>`;
-
-      // Save the form to the server
-      const response = await fetch('/api/forms/publish', {
+      // Call the backend API to publish the form
+      const response = await fetch(`${API_CONFIG.baseURL}/registration-forms/publish`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          formData,
-          htmlContent,
-          fileName: `${formSettings.title.replace(/[^a-zA-Z0-9]/g, '_')}_form.html`
-        })
+          title: formSettings.title,
+          description: formSettings.description,
+        }),
       });
 
       if (!response.ok) {
-        // If server endpoint doesn't exist, fallback to client-side simulation
-        if (response.status === 404 || response.status === 405) {
-          // Create a blob and download URL for the HTML file (fallback)
-          const blob = new Blob([htmlContent], { type: 'text/html' });
-          const url = URL.createObjectURL(blob);
-          
-          // Create a temporary download link
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${formSettings.title.replace(/[^a-zA-Z0-9]/g, '_')}_form.html`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          // Create a mock published URL for demo
-          const publishedUrl = `https://forms.${window.location.hostname}/registration/${Date.now()}`;
-          
-          setFormSettings(prev => ({
-            ...prev,
-            published: true,
-            publishedUrl
-          }));
-        } else {
-          throw new Error(`Server error: ${response.status}`);
-        }
-      } else {
-        // Server successfully published the form
-        const result = await response.json();
-        
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.data && result.data.form_id) {
+        const publicUrl = `${window.location.origin}/public/registration/${result.data.form_id}`;
         setFormSettings(prev => ({
           ...prev,
           published: true,
-          publishedUrl: result.publishedUrl
+          publishedUrl: publicUrl
         }));
+        
+        setSnackbar({
+          open: true,
+          message: t('registrationForm.publishSuccess'),
+          severity: 'success'
+        });
+        setPublishDialogOpen(false);
+      } else {
+        throw new Error('Failed to publish form - no form ID returned');
       }
-
-      setPublishDialogOpen(false);
-      setSnackbar({
-        open: true,
-        message: t('registrationForm.messages.published'),
-        severity: 'success'
-      });
     } catch (error) {
-      console.error('Publishing failed:', error);
+      console.error('Form publish error:', error);
       setSnackbar({
         open: true,
-        message: t('registrationForm.messages.publishing_failed'),
+        message: t('registrationForm.publishError'),
         severity: 'error'
       });
     } finally {
@@ -319,199 +326,340 @@ const RegistrationForm: React.FC = () => {
     }
   };
 
-  const handleSaveSettings = () => {
-    setSnackbar({
-      open: true,
-      message: t('registrationForm.messages.saved'),
-      severity: 'success'
-    });
-  };
+  const TabPanel = ({ children, value, index }: { children: React.ReactNode, value: number, index: number }) => (
+    <div hidden={value !== index}>
+      {value === index && children}
+    </div>
+  );
 
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
-
-  const FormPreview = () => (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {formSettings.title}
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        {formSettings.description}
-      </Typography>
-
-      <Paper elevation={2} sx={{ p: 4, boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3}>
-            {/* First Name */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="first_name"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('registrationForm.fields.fullName')}
-                    placeholder={t('registrationForm.fields.fullNamePlaceholder')}
-                    error={!!errors.first_name}
-                    helperText={errors.first_name?.message}
-                    required
-                    size="small"
-                  />
-                )}
+  // Main form content
+  const FormContent = () => (
+    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Grid container spacing={isMobile ? 2 : 3}>
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="first_name"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('forms.first_name')}
+                variant="outlined"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                error={!!errors.first_name}
+                helperText={errors.first_name?.message}
+                required
               />
-            </Grid>
-
-            {/* Last Name */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="last_name"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('common.last_name')}
-                    error={!!errors.last_name}
-                    helperText={errors.last_name?.message}
-                    required
-                    size="small"
-                  />
-                )}
+            )}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="last_name"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('forms.last_name')}
+                variant="outlined"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                error={!!errors.last_name}
+                helperText={errors.last_name?.message}
+                required
               />
-            </Grid>
+            )}
+          />
+        </Grid>
 
-            {/* Email */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="email"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="email"
-                    label={t('registrationForm.fields.email')}
-                    placeholder={t('registrationForm.fields.emailPlaceholder')}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                    required
-                    size="small"
-                  />
-                )}
+        <Grid item xs={12}>
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('common.email')}
+                type="email"
+                variant="outlined"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                required
               />
-            </Grid>
+            )}
+          />
+        </Grid>
 
-            {/* Phone */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="phone"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="tel"
-                    label={t('registrationForm.fields.phone')}
-                    placeholder={t('registrationForm.fields.phonePlaceholder')}
-                    error={!!errors.phone}
-                    helperText={errors.phone?.message}
-                    size="small"
-                  />
-                )}
+        <Grid item xs={12}>
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('common.phone')}
+                type="tel"
+                variant="outlined"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
               />
-            </Grid>
+            )}
+          />
+        </Grid>
 
-            {/* Source */}
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <FormLabel>{t('forms.source')}</FormLabel>
-                <Controller
-                  name="source"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      error={!!errors.source}
-                    >
-                      <MenuItem value="website">{t('sources.website')}</MenuItem>
-                      <MenuItem value="referral">{t('sources.referral')}</MenuItem>
-                      <MenuItem value="social_media">{t('sources.social_media')}</MenuItem>
-                      <MenuItem value="email">{t('sources.email')}</MenuItem>
-                      <MenuItem value="advertisement">{t('sources.advertisement')}</MenuItem>
-                      <MenuItem value="other">{t('sources.other')}</MenuItem>
-                    </Select>
-                  )}
-                />
+        <Grid item xs={12}>
+          <Controller
+            name="source"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth error={!!errors.source} size={isMobile ? "small" : "medium"}>
+                <FormLabel required>{t('forms.source')}</FormLabel>
+                <Select {...field} variant="outlined">
+                  <MenuItem value="website">{t('registrationForm.sources.website')}</MenuItem>
+                  <MenuItem value="social_media">{t('registrationForm.sources.social')}</MenuItem>
+                  <MenuItem value="referral">{t('registrationForm.sources.referral')}</MenuItem>
+                  <MenuItem value="email">{t('registrationForm.sources.email')}</MenuItem>
+                  <MenuItem value="advertisement">{t('registrationForm.sources.advertisement')}</MenuItem>
+                  <MenuItem value="other">{t('registrationForm.sources.other')}</MenuItem>
+                </Select>
+                {errors.source && (
+                  <Typography variant="caption" color="error" sx={{ mt: 1 }}>
+                    {errors.source.message}
+                  </Typography>
+                )}
               </FormControl>
-            </Grid>
+            )}
+          />
+        </Grid>
 
-            {/* Activity of Interest */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="activity_of_interest"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('forms.activity_of_interest')}
-                    placeholder={t('forms.placeholder_activity_interest')}
-                    error={!!errors.activity_of_interest}
-                    helperText={errors.activity_of_interest?.message}
-                    size="small"
-                  />
-                )}
+        <Grid item xs={12}>
+          <Controller
+            name="activity_of_interest"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size={isMobile ? "small" : "medium"}>
+                <FormLabel>{t('registrationForm.activityOfInterest')}</FormLabel>
+                <Select {...field} variant="outlined">
+                  <MenuItem value="">{t('common.none')}</MenuItem>
+                  {activities.map((activity) => (
+                    <MenuItem key={activity.id} value={activity.id || ''}>
+                      {activity.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Controller
+            name="notes"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('registrationForm.additionalNotes')}
+                variant="outlined"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                multiline
+                rows={isMobile ? 3 : 4}
+                error={!!errors.notes}
+                helperText={errors.notes?.message}
+                InputProps={{
+                  sx: {
+                    '& textarea': {
+                      direction: 'ltr !important',
+                      textAlign: 'left !important',
+                      unicodeBidi: 'normal !important'
+                    }
+                  }
+                }}
               />
-            </Grid>
+            )}
+          />
+        </Grid>
 
-            {/* Notes */}
-            <Grid item xs={12}>
-              <Controller
-                name="notes"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label={t('forms.notes')}
-                    error={!!errors.notes}
-                    helperText={errors.notes?.message}
-                    size="small"
-                  />
-                )}
-              />
-            </Grid>
-
-          </Grid>
-        </form>
-      </Paper>
+        <Grid item xs={12}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'flex-end', 
+            gap: 2, 
+            mt: 2 
+          }}>
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={() => reset()}
+              disabled={isSubmitting}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
+            >
+              {t('actions.reset')}
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
+              startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
+            >
+              {isSubmitting ? t('registrationForm.submitting') : t('actions.submit')}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 
-  return (
-    <Create 
-      title={t('registrationForm.title')}
-      breadcrumb={null}
-      saveButtonProps={{ style: { display: 'none' } }}
-      headerButtons={
-        !isMobile && (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<SaveIcon />}
-              onClick={handleSaveSettings}
-            >
-              {t('registrationForm.buttons.save')}
-            </Button>
+  // Settings content
+  const SettingsContent = () => (
+    <Box>
+      <Typography variant={isMobile ? "h6" : "h6"} gutterBottom>
+        {t('registrationForm.formSettings')}
+      </Typography>
+      
+      <Grid container spacing={isMobile ? 2 : 3}>
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingTitle ? (
+              <TextField
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+                value={formSettings.title}
+                onChange={(e) => setFormSettings(prev => ({ ...prev, title: e.target.value }))}
+                onBlur={() => setEditingTitle(false)}
+                onKeyPress={(e) => e.key === 'Enter' && setEditingTitle(false)}
+                autoFocus
+              />
+            ) : (
+              <>
+                <Typography variant={isMobile ? "body1" : "h6"} sx={{ flexGrow: 1 }}>
+                  {formSettings.title}
+                </Typography>
+                <IconButton 
+                  onClick={() => setEditingTitle(true)}
+                  size={isMobile ? "small" : "medium"}
+                >
+                  <EditIcon />
+                </IconButton>
+              </>
+            )}
+          </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+            {editingDescription ? (
+              <Box sx={{ width: '100%', position: 'relative' }}>
+                <textarea
+                  ref={descriptionRef}
+                  value={formSettings.description}
+                  onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
+                  onBlur={() => setEditingDescription(false)}
+                  autoFocus
+                  rows={isMobile ? 2 : 3}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc',
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    resize: 'vertical',
+                    backgroundColor: theme.palette.mode === 'dark' ? '#1F2937' : '#fff',
+                    color: theme.palette.mode === 'dark' ? '#F9FAFB' : 'inherit'
+                  }}
+                />
+              </Box>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                  {formSettings.description}
+                </Typography>
+                <IconButton 
+                  onClick={() => setEditingDescription(true)}
+                  size={isMobile ? "small" : "medium"}
+                  sx={{ mt: -0.5 }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </>
+            )}
+          </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formSettings.published}
+                onChange={(e) => setFormSettings(prev => ({ ...prev, published: e.target.checked }))}
+                size={isMobile ? "small" : "medium"}
+              />
+            }
+            label={t('registrationForm.published')}
+          />
+          {formSettings.publishedUrl && (
+            <Box sx={{ mt: 2, p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1F2937' : 'background.paper', border: '1px solid', borderColor: theme.palette.mode === 'dark' ? '#4B5563' : 'divider', borderRadius: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                {t('registrationForm.publishedUrl')}:
+              </Typography>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  backgroundColor: 'background.paper',
+                  p: 1,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}
+              >
+                {formSettings.publishedUrl}
+              </Typography>
+              <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => formSettings.publishedUrl && navigator.clipboard.writeText(formSettings.publishedUrl)}
+                >
+                  Copy URL
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => formSettings.publishedUrl && window.open(formSettings.publishedUrl, '_blank')}
+                >
+                  Open Form
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Grid>
+
+        <Grid item xs={12}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: 2 
+          }}>
             <Button
               variant="outlined"
               startIcon={<PreviewIcon />}
               onClick={() => setPreviewOpen(true)}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
             >
               {t('registrationForm.buttons.preview')}
             </Button>
@@ -519,604 +667,175 @@ const RegistrationForm: React.FC = () => {
               variant="contained"
               startIcon={<PublishIcon />}
               onClick={() => setPublishDialogOpen(true)}
-              disabled={isPublishing}
-              sx={{ 
-                backgroundColor: '#7367F0', 
-                '&:hover': { backgroundColor: '#5a52cc' },
-                '&:disabled': { backgroundColor: '#b8b2ff' }
-              }}
+              disabled={formSettings.published}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
             >
-              {isPublishing ? t('registrationForm.publishing') : t('registrationForm.buttons.publish')}
+              {t('registrationForm.buttons.publish')}
             </Button>
           </Box>
-        )
-      }
-    >
-      <Box sx={{ p: isMobile ? 0 : 2, backgroundColor: 'background.paper', borderRadius: 1.5, boxShadow: 6, border: '1px solid', borderColor: 'divider' }}>
-        {/* Mobile Tabs */}
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ 
+      width: '100%',
+      pb: isMobile ? 10 : 3, // Match participants page mobile padding
+      px: isMobile ? 1 : 3,  // Add desktop padding
+      pt: isMobile ? 1 : 3,  // Add top padding
+      minHeight: isMobile ? 'auto' : '100vh',
+    }}>
+
+      {/* Mobile Tab Navigation */}
         {isMobile && (
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={mobileTab} onChange={(e, newValue) => setMobileTab(newValue)} variant="fullWidth">
-              <Tab label={t('registrationForm.settings')} icon={<SettingsIcon />} iconPosition="start" />
-              <Tab label={t('registrationForm.preview')} icon={<PreviewIcon />} iconPosition="start" />
+          <Paper sx={{ position: 'sticky', top: 0, zIndex: 1, mb: 2 }}>
+            <Tabs
+              value={mobileTab}
+              onChange={(_, newValue) => setMobileTab(newValue)}
+              variant="fullWidth"
+              sx={{ borderBottom: 1, borderColor: 'divider' }}
+            >
+              <Tab label={t('registrationForm.tabs.form')} />
+              <Tab label={t('registrationForm.tabs.settings')} />
             </Tabs>
-          </Box>
+          </Paper>
         )}
-        
+
         {/* Desktop Layout */}
-        {!isMobile ? (
+        {!isMobile && (
           <Grid container spacing={3}>
-            {/* Form Settings */}
-            <Grid item xs={12} md={6}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-              {t('registrationForm.title')}
-            </Typography>
-              <Grid container spacing={2}>
-                {/* Editable Title */}
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    border: '1px solid', 
-                    borderColor: 'divider', 
-                    borderRadius: 1, 
-                    backgroundColor: 'white',
-                    boxShadow: 1,
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1 
-                  }}>
-                    {editingTitle ? (
-                      <TextField
-                        fullWidth
-                        value={formSettings.title}
-                        onChange={(e) => setFormSettings(prev => ({ ...prev, title: e.target.value }))}
-                        onBlur={() => setEditingTitle(false)}
-                        onKeyPress={(e) => e.key === 'Enter' && setEditingTitle(false)}
-                        autoFocus
-                        label={t('registrationForm.fields.title')}
-                        variant="outlined"
-                        size="small"
-                      />
-                    ) : (
-                      <>
-                        <Typography variant="h6" sx={{ flex: 1, fontWeight: 500 }}>
-                          {formSettings.title}
-                        </Typography>
-                        <IconButton onClick={() => setEditingTitle(true)} size="small">
-                          <EditIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </Box>
-                </Grid>
-
-                {/* Editable Description */}
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    border: '1px solid', 
-                    borderColor: 'divider', 
-                    borderRadius: 1, 
-                    backgroundColor: 'white',
-                    boxShadow: 1,
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
-                    gap: 1 
-                  }}>
-                    {editingDescription ? (
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={2}
-                        value={formSettings.description}
-                        onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
-                        onBlur={() => setEditingDescription(false)}
-                        autoFocus
-                        label={t('registrationForm.fields.description')}
-                        variant="outlined"
-                        size="small"
-                      />
-                    ) : (
-                      <>
-                        <Typography variant="body1" color="text.secondary" sx={{ flex: 1, lineHeight: 1.5 }}>
-                          {formSettings.description}
-                        </Typography>
-                        <IconButton onClick={() => setEditingDescription(true)} size="small">
-                          <EditIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-
-                {/* Publishing Status */}
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formSettings.published}
-                        disabled
-                        color="success"
-                      />
-                    }
-                    label={formSettings.published ? t('registrationForm.status.published') : t('registrationForm.status.draft')}
-                  />
-                  {formSettings.published && formSettings.publishedUrl && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {t('registrationForm.publishedUrl')}:
-                      </Typography>
-                      <Typography variant="body2" color="primary" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                        {formSettings.publishedUrl}
-                      </Typography>
-                    </Box>
-                  )}
-                </Grid>
-              </Grid>
-          </Box>
-        </Grid>
-
-        {/* Form Preview */}
-        <Grid item xs={12} md={6}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-              {t('registrationForm.preview')}
-            </Typography>
+            <Grid item xs={12} md={8}>
               <Box sx={{ 
-                border: '1px solid', 
-                borderColor: 'divider', 
-                borderRadius: 1, 
-                p: 2, 
-                boxShadow: 1,
-                backgroundColor: 'white'
-              }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 500 }}>
-                  {formSettings.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph sx={{ lineHeight: 1.5 }}>
-                  {formSettings.description}
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Box>
-                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                      {t('registrationForm.fields.fullName')}
-                    </Typography>
-                    <TextField size="small" disabled variant="outlined" fullWidth />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                      {t('common.last_name')}
-                    </Typography>
-                    <TextField size="small" disabled variant="outlined" fullWidth />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                      {t('registrationForm.fields.email')}
-                    </Typography>
-                    <TextField size="small" disabled variant="outlined" fullWidth />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                      {t('registrationForm.fields.phone')}
-                    </Typography>
-                    <TextField size="small" disabled variant="outlined" fullWidth />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                      {t('forms.source')}
-                    </Typography>
-                    <FormControl size="small" fullWidth variant="outlined">
-                      <Select disabled value="website">
-                        <MenuItem value="website">{t('sources.website')}</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Button variant="contained" disabled sx={{ height: 48, mt: 1 }}>
-                    {t('landing_pages.forms.submit')}
-                  </Button>
-                </Box>
-              </Box>
-          </Box>
-        </Grid>
-          </Grid>
-        ) : (
-          /* Mobile Layout */
-          <Box>
-            {/* Settings Tab */}
-            {mobileTab === 0 && (
-              <Box sx={{ p: 2 }}>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                  {t('registrationForm.title')}
-                </Typography>
-                <Grid container spacing={2}>
-                  {/* Editable Title */}
-                  <Grid item xs={12}>
-                    <Box sx={{ 
-                      p: 2, 
-                      border: '1px solid', 
-                      borderColor: 'divider', 
-                      borderRadius: 1, 
-                      backgroundColor: 'white',
-                      boxShadow: 1,
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1 
-                    }}>
-                      {editingTitle ? (
-                        <TextField
-                          fullWidth
-                          value={formSettings.title}
-                          onChange={(e) => setFormSettings(prev => ({ ...prev, title: e.target.value }))}
-                          onBlur={() => setEditingTitle(false)}
-                          onKeyPress={(e) => e.key === 'Enter' && setEditingTitle(false)}
-                          autoFocus
-                          label={t('registrationForm.fields.title')}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiInputBase-input': {
-                              fontSize: '16px', // Prevent zoom on iOS
-                            }
-                          }}
-                        />
-                      ) : (
-                        <>
-                          <Typography variant="h6" sx={{ flex: 1, fontWeight: 500 }}>
-                            {formSettings.title}
-                          </Typography>
-                          <IconButton onClick={() => setEditingTitle(true)} size="small">
-                            <EditIcon />
-                          </IconButton>
-                        </>
-                      )}
-                    </Box>
-                  </Grid>
-
-                  {/* Editable Description */}
-                  <Grid item xs={12}>
-                    <Box sx={{ 
-                      p: 2, 
-                      border: '1px solid', 
-                      borderColor: 'divider', 
-                      borderRadius: 1, 
-                      backgroundColor: 'white',
-                      boxShadow: 1,
-                      display: 'flex', 
-                      alignItems: 'flex-start', 
-                      gap: 1 
-                    }}>
-                      {editingDescription ? (
-                        <TextField
-                          fullWidth
-                          multiline
-                          rows={2}
-                          value={formSettings.description}
-                          onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
-                          onBlur={() => setEditingDescription(false)}
-                          autoFocus
-                          label={t('registrationForm.fields.description')}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiInputBase-input': {
-                              fontSize: '16px', // Prevent zoom on iOS
-                            }
-                          }}
-                        />
-                      ) : (
-                        <>
-                          <Typography variant="body1" color="text.secondary" sx={{ flex: 1, lineHeight: 1.5 }}>
-                            {formSettings.description}
-                          </Typography>
-                          <IconButton onClick={() => setEditingDescription(true)} size="small">
-                            <EditIcon />
-                          </IconButton>
-                        </>
-                      )}
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Divider />
-                  </Grid>
-
-                  {/* Publishing Status */}
-                  <Grid item xs={12}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={formSettings.published}
-                          disabled
-                          color="success"
-                        />
-                      }
-                      label={formSettings.published ? t('registrationForm.status.published') : t('registrationForm.status.draft')}
-                    />
-                    {formSettings.published && formSettings.publishedUrl && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          {t('registrationForm.publishedUrl')}:
-                        </Typography>
-                        <Typography variant="body2" color="primary" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                          {formSettings.publishedUrl}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
-
-            {/* Preview Tab */}
-            {mobileTab === 1 && (
-              <Box sx={{ p: 2 }}>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                  {t('registrationForm.preview')}
-                </Typography>
-                <Box sx={{ 
-                  border: '1px solid', 
-                  borderColor: 'divider', 
-                  borderRadius: 1, 
-                  p: 2, 
-                  boxShadow: 1,
-                  backgroundColor: 'white'
-                }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 500 }}>
-                    {formSettings.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph sx={{ lineHeight: 1.5 }}>
-                    {formSettings.description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box>
-                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                        {t('registrationForm.fields.fullName')}
-                      </Typography>
-                      <TextField size="small" disabled variant="outlined" fullWidth />
-                    </Box>
-                    <Box>
-                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                        {t('common.last_name')}
-                      </Typography>
-                      <TextField size="small" disabled variant="outlined" fullWidth />
-                    </Box>
-                    <Box>
-                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                        {t('registrationForm.fields.email')}
-                      </Typography>
-                      <TextField size="small" disabled variant="outlined" fullWidth />
-                    </Box>
-                    <Box>
-                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                        {t('registrationForm.fields.phone')}
-                      </Typography>
-                      <TextField size="small" disabled variant="outlined" fullWidth />
-                    </Box>
-                    <Box>
-                      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, fontSize: '0.875rem' }}>
-                        {t('forms.source')}
-                      </Typography>
-                      <FormControl size="small" fullWidth variant="outlined">
-                        <Select disabled value="website">
-                          <MenuItem value="website">{t('sources.website')}</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
-                    <Button variant="contained" disabled sx={{ height: 48, mt: 1 }}>
-                      {t('landing_pages.forms.submit')}
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            )}
-          </Box>
-        )}
-      </Box>
-
-      {/* Mobile Action Buttons */}
-      {isMobile && (
-        <Box sx={{ 
-          position: 'fixed', 
-          bottom: FAB_BOTTOM_OFFSET, 
-          right: 16, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: 1,
-          zIndex: FAB_Z_INDEX 
-        }}>
-          <Fab
-            size="small"
-            color="default"
-            onClick={handleSaveSettings}
-            sx={{ backgroundColor: 'white', boxShadow: 2 }}
-          >
-            <SaveIcon />
-          </Fab>
-          <Fab
-            size="small"
-            color="secondary"
-            onClick={() => setPreviewOpen(true)}
-          >
-            <PreviewIcon />
-          </Fab>
-          <Fab
-            color="primary"
-            onClick={() => setPublishDialogOpen(true)}
-            disabled={isPublishing}
-            sx={{ 
-              backgroundColor: '#7367F0', 
-              '&:hover': { backgroundColor: '#5a52cc' },
-              '&:disabled': { backgroundColor: '#b8b2ff' }
-            }}
-          >
-            {isPublishing ? <CircularProgress size={24} color="inherit" /> : <PublishIcon />}
-          </Fab>
-        </Box>
-      )}
-
-      {/* Preview Dialog */}
-      <Dialog 
-        open={previewOpen} 
-        onClose={() => setPreviewOpen(false)} 
-        maxWidth={isMobile ? false : "md"} 
-        fullWidth={!isMobile}
-        fullScreen={isMobile}
-        TransitionComponent={isMobile ? Transition : undefined}
-        PaperProps={{
-          sx: { 
-            boxShadow: 6, 
-            border: '1px solid', 
-            borderColor: 'divider',
-            borderRadius: isMobile ? 0 : 2,
-            margin: isMobile ? 0 : 2,
-          }
-        }}
-      >
-        <DialogTitle sx={{
-          backgroundColor: isMobile ? 'primary.main' : 'transparent',
-          color: isMobile ? 'white' : 'text.primary',
-          fontWeight: 600,
-          fontSize: isMobile ? '1.25rem' : '1.5rem',
-          py: isMobile ? 2 : 1.5,
-        }}>{t('registrationForm.buttons.preview')}</DialogTitle>
-        <DialogContent sx={{
-          backgroundColor: isMobile ? '#f8f9fa' : 'background.paper',
-          px: isMobile ? 1 : 3,
-          py: isMobile ? 1 : 2,
-        }}>
-          <FormPreview />
-        </DialogContent>
-        <DialogActions sx={{
-          backgroundColor: isMobile ? 'background.paper' : 'transparent',
-          px: isMobile ? 2 : 3,
-          py: isMobile ? 2 : 1,
-          borderTop: isMobile ? '1px solid' : 'none',
-          borderColor: 'divider',
-        }}>
-          <Button 
-            onClick={() => setPreviewOpen(false)}
-            variant={isMobile ? "contained" : "text"}
-            fullWidth={isMobile}
-            sx={isMobile ? {
-              height: 48,
-              minHeight: 48,
-              fontSize: '1rem',
-              fontWeight: 600,
-              borderRadius: 2,
-              textTransform: 'none',
-            } : {}}
-          >
-            {t('actions.close')}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Publish Dialog */}
-      <Dialog 
-        open={publishDialogOpen} 
-        onClose={() => setPublishDialogOpen(false)}
-        maxWidth={isMobile ? false : "sm"}
-        fullWidth={!isMobile}
-        fullScreen={isMobile}
-        TransitionComponent={isMobile ? Transition : undefined}
-        PaperProps={{
-          sx: { 
-            boxShadow: 6, 
-            border: '1px solid', 
-            borderColor: 'divider',
-            borderRadius: isMobile ? 0 : 2,
-            margin: isMobile ? 0 : 2,
-          }
-        }}
-      >
-        <DialogTitle sx={{
-          backgroundColor: isMobile ? 'primary.main' : 'transparent',
-          color: isMobile ? 'white' : 'text.primary',
-          fontWeight: 600,
-          fontSize: isMobile ? '1.25rem' : '1.5rem',
-          py: isMobile ? 2 : 1.5,
-        }}>{t('registrationForm.buttons.publish')}</DialogTitle>
-        <DialogContent sx={{
-          backgroundColor: isMobile ? '#f8f9fa' : 'background.paper',
-          px: isMobile ? 2 : 3,
-          py: isMobile ? 2 : 2,
-        }}>
-          <Typography>
-            {t('registrationForm.publishConfirmation')}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{
-          backgroundColor: isMobile ? 'background.paper' : 'transparent',
-          px: isMobile ? 2 : 3,
-          py: isMobile ? 2 : 1,
-          gap: 1,
-          borderTop: isMobile ? '1px solid' : 'none',
-          borderColor: 'divider',
-          flexDirection: isMobile ? 'column-reverse' : 'row',
-        }}>
-          <Button 
-            onClick={() => setPublishDialogOpen(false)} 
-            disabled={isPublishing}
-            variant="outlined"
-            fullWidth={isMobile}
-            sx={isMobile ? {
-              height: 48,
-              minHeight: 48,
-              fontSize: '1rem',
-              fontWeight: 600,
-              borderRadius: 2,
-              textTransform: 'none',
-            } : {}}
-          >
-            {t('actions.cancel')}
-          </Button>
-          <Button 
-            onClick={handlePublish} 
-            variant="contained" 
-            disabled={isPublishing}
-            startIcon={isPublishing ? <CircularProgress size={20} /> : <PublishIcon />}
-            fullWidth={isMobile}
-            sx={{ 
-              backgroundColor: '#7367F0', 
-              '&:hover': { backgroundColor: '#5a52cc' },
-              '&:disabled': { backgroundColor: '#b8b2ff' },
-              ...(isMobile ? {
-                height: 48,
-                minHeight: 48,
-                fontSize: '1rem',
-                fontWeight: 600,
+                p: 3, 
+                backgroundColor: 'background.paper',
                 borderRadius: 2,
-                textTransform: 'none',
-              } : {})
+                border: '1px solid',
+                borderColor: 'divider'
+              }}>
+                <Typography variant="h5" gutterBottom>
+                  {t('registrationForm.formTitle')}
+                </Typography>
+                <FormContent />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ 
+                p: 3, 
+                backgroundColor: 'background.paper',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}>
+                <SettingsContent />
+              </Box>
+            </Grid>
+          </Grid>
+        )}
+
+        {/* Mobile Layout */}
+        {isMobile && (
+          <>
+            <TabPanel value={mobileTab} index={0}>
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'grey.50',
+                borderRadius: 2,
+                minHeight: '60vh'
+              }}>
+                <FormContent />
+              </Box>
+            </TabPanel>
+            <TabPanel value={mobileTab} index={1}>
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'grey.50',
+                borderRadius: 2,
+                minHeight: '60vh'
+              }}>
+                <SettingsContent />
+              </Box>
+            </TabPanel>
+          </>
+        )}
+
+        {/* FAB for mobile settings */}
+        {isMobile && mobileTab === 0 && (
+          <Fab
+            color="secondary"
+            onClick={() => setMobileTab(1)}
+            sx={{
+              position: 'fixed',
+              bottom: FAB_BOTTOM_OFFSET, // Above bottom navigation
+              right: 16,
+              zIndex: FAB_Z_INDEX,
             }}
           >
-            {isPublishing ? t('registrationForm.publishing') : t('registrationForm.buttons.publish')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <SettingsIcon />
+          </Fab>
+        )}
 
-      {/* Success/Error Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
+        {/* Preview Modal using CommonModalShell */}
+        <CommonModalShell
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          title={t('registrationForm.buttons.preview')}
+          forceMobile={isMobile}
+          maxWidth="md"
+          showActions={true}
+          onCancel={() => setPreviewOpen(false)}
+          cancelButtonText={t('actions.close')}
+          onSave={() => {}} // Empty function instead of undefined
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Create>
+          <Box sx={{ mt: isMobile ? 1 : 2 }}>
+            <PreviewContent />
+          </Box>
+        </CommonModalShell>
+
+        {/* Publish Modal using CommonModalShell */}
+        <CommonModalShell
+          open={publishDialogOpen}
+          onClose={() => setPublishDialogOpen(false)}
+          title={t('registrationForm.buttons.publish')}
+          forceMobile={isMobile}
+          maxWidth="sm"
+          showActions={true}
+          onCancel={() => setPublishDialogOpen(false)}
+          onSave={handlePublish}
+          cancelButtonText={t('actions.cancel')}
+          saveButtonText={t('registrationForm.buttons.publish')}
+          saveButtonDisabled={isPublishing}
+        >
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            mt: isMobile ? 1 : 2,
+            p: isMobile ? 1 : 2
+          }}>
+            {isPublishing && <CircularProgress size={20} />}
+            <PublishContent />
+          </Box>
+        </CommonModalShell>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          <Alert 
+            onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
   );
 };
 
-export default RegistrationForm;
+export default RegistrationFormNew;

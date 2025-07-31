@@ -1,88 +1,87 @@
 import React from 'react';
-import { TextField, Grid, SelectChangeEvent } from '@mui/material';
+import { Grid, TextField } from '@mui/material';
 import { ParticipantCreate } from '../../types/participant';
 import { useTranslation } from 'react-i18next';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { UseFormReturn, FieldErrors } from 'react-hook-form';
+import { getFormFieldStyles } from '../../styles/formStyles';
 
 interface ParticipantFormProps {
-  data: ParticipantCreate;
-  onChange: (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => void;
+  form: UseFormReturn<ParticipantCreate>;
+  errors: FieldErrors<ParticipantCreate>;
 }
 
-export const ParticipantForm: React.FC<ParticipantFormProps> = ({ data, onChange }) => {
+export const ParticipantForm: React.FC<ParticipantFormProps> = ({ form, errors }) => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
+  const { register } = form;
 
   return (
     <Grid 
       container 
-      spacing={isMobile ? 3 : 2} 
-      sx={(theme) => ({
-        mt: isMobile ? 0.5 : 1,
-        direction: theme.direction,
-        '& .MuiTextField-root': {
-          '& .MuiInputLabel-root': {
-            transformOrigin: theme.direction === 'rtl' ? 'top right' : 'top left',
-          },
-          '& .MuiInputBase-input': {
-            fontSize: isMobile ? '16px' : '14px',
-            py: isMobile ? 1.5 : 1.2,
-          },
-          '& .MuiOutlinedInput-root': {
-            borderRadius: isMobile ? 2 : 1.5,
-          },
-        }
-      })}
+      spacing={isMobile ? 2 : 2} 
+      sx={getFormFieldStyles(isMobile)}
     >
       <Grid item xs={6}>
-        <TextField 
-          name="first_name" 
-          label={t('forms.first_name')} 
-          value={data.first_name} 
-          onChange={onChange} 
-          fullWidth 
+        <TextField
+          {...register('first_name')}
+          label={t('forms.first_name')}
+          fullWidth
           required
+          error={!!errors.first_name}
+          helperText={errors.first_name?.message}
         />
       </Grid>
       <Grid item xs={6}>
-        <TextField 
-          name="last_name" 
-          label={t('forms.last_name')} 
-          value={data.last_name} 
-          onChange={onChange} 
-          fullWidth 
+        <TextField
+          {...register('last_name')}
+          label={t('forms.last_name')}
+          fullWidth
           required
+          error={!!errors.last_name}
+          helperText={errors.last_name?.message}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField 
-          name="email" 
-          label={t('common.email')} 
-          value={data.email} 
-          onChange={onChange} 
-          fullWidth 
+        <TextField
+          {...register('email')}
+          label={t('common.email')}
+          fullWidth
           type="email"
           required
+          error={!!errors.email}
+          helperText={errors.email?.message}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField 
-          name="phone" 
-          label={t('common.phone')} 
-          value={data.phone || ''} 
-          onChange={onChange} 
-          fullWidth 
+        <TextField
+          {...register('phone')}
+          label={t('common.phone')}
+          fullWidth
+          error={!!errors.phone}
+          helperText={errors.phone?.message}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField 
-          name="address" 
-          label={t('common.address')} 
-          value={data.address || ''} 
-          onChange={onChange} 
-          fullWidth 
-          multiline 
-          rows={2} 
+        <TextField
+          {...register('date_of_birth')}
+          label={t('forms.date_of_birth')}
+          fullWidth
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          error={!!errors.date_of_birth}
+          helperText={errors.date_of_birth?.message}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          {...register('address')}
+          label={t('common.address')}
+          fullWidth
+          multiline
+          rows={2}
+          error={!!errors.address}
+          helperText={errors.address?.message}
         />
       </Grid>
     </Grid>

@@ -7,6 +7,67 @@ import { AppError, logError, parseError } from "../utils/errorHandler";
  * Implements Refine DataProvider interface to work with backend API
  */
 
+/**
+ * Parse Pydantic validation errors to extract user-friendly messages
+ * Input: "1 validation error for ParticipantCreate\nphone\n  Value error, Phone number must be at least 10 digits [type=value_error, input_value='34434334', input_type=str]"
+ * Output: "Phone number must be at least 10 digits"
+ */
+const parsePydanticValidationError = (message: string): string | null => {
+  try {
+    // Handle single-line format: "1 validation error for ParticipantCreate phone Value error, Phone number must be at least 10 digits [type=value_error...]"
+    if (message.includes('Value error,')) {
+      const match = message.match(/Value error,\s*(.+?)(?:\s*\[|$)/);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    
+    // Handle multiline format - split by lines and find the actual error message
+    const lines = message.split('\n');
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Skip empty lines and technical headers
+      if (!trimmed || trimmed.includes('validation error for')) {
+        continue;
+      }
+      
+      // Look for "Value error," in multiline format
+      if (trimmed.includes('Value error,')) {
+        const match = trimmed.match(/Value error,\s*(.+?)(?:\s*\[|$)/);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
+      }
+      
+      // Look for other common Pydantic error patterns
+      if (trimmed.includes('String should have at least') || 
+          trimmed.includes('Input should be') ||
+          trimmed.includes('Field required') ||
+          trimmed.includes('Invalid email')) {
+        // Clean up technical details
+        return trimmed.replace(/\s*\[.*?\].*$/, '').trim();
+      }
+      
+      // For field-specific messages, extract clean text (multiline format)
+      if (trimmed.length > 10 && 
+          !trimmed.includes('For further information') &&
+          !trimmed.includes('[type=')) {
+        const cleanMessage = trimmed.replace(/\s*\[.*?\].*$/, '').trim();
+        if (cleanMessage && cleanMessage.length > 5) {
+          return cleanMessage;
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('Failed to parse Pydantic error:', error);
+    return null;
+  }
+};
+
 // HTTP Client with error handling
 const httpClient = async (url: string, options: RequestInit = {}): Promise<any> => {
   const config: RequestInit = {
@@ -33,7 +94,17 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
         // Handle new standardized error format
         if (errorJson.error && errorJson.message) {
           errorMessage = errorJson.message;
-          if (errorJson.details && errorJson.details.length > 0) {
+          
+          // Parse Pydantic validation errors for better user experience
+          if (errorJson.error_code === 'VALIDATION_ERROR' && errorMessage.includes('validation error')) {
+            const cleanMessage = parsePydanticValidationError(errorMessage);
+            if (cleanMessage) {
+              errorMessage = cleanMessage;
+            }
+          }
+          
+          // Handle details array if present (for other error types)
+          if (errorJson.details && Array.isArray(errorJson.details) && errorJson.details.length > 0) {
             errorMessage += ': ' + errorJson.details.map((d: any) => d.message).join(', ');
           }
         } else {
@@ -201,10 +272,8 @@ export const dataProvider: DataProvider = {
       payload = transformCourseToActivity(variables);
     }
     
-    // Add provider_id to payload if not present
-    if (!(payload as any).provider_id) {
-      (payload as any).provider_id = API_CONFIG.defaultProviderId;
-    }
+    // Provider ID will be handled via JWT token in headers
+    // No need to manually add provider_id to payload
     
     console.log('Final payload being sent to API:', JSON.stringify(payload, null, 2));
     console.log(`[DataProvider] Sending POST request to: ${url}`);
@@ -221,8 +290,15 @@ export const dataProvider: DataProvider = {
       console.log('=============================================\n');
     }
     
+    // Handle flexible enrollment endpoint for enrollments with participant creation or lead conversion
+    let finalUrl = url;
+    if (resource === 'enrollments' && payload.mode && (payload.participant_data || payload.lead_id)) {
+      finalUrl = url + '/enroll-flexible';
+      console.log('[DataProvider] Using flexible enrollment endpoint:', finalUrl);
+    }
+    
     try {
-      const response = await httpClient(url, {
+      const response = await httpClient(finalUrl, {
         method: 'POST',
         body: JSON.stringify(payload),
       });
@@ -256,10 +332,8 @@ export const dataProvider: DataProvider = {
       payload = transformCourseToActivity(variables);
     }
     
-    // Add provider_id to payload if not present (for updates too)
-    if (!(payload as any).provider_id) {
-      (payload as any).provider_id = API_CONFIG.defaultProviderId;
-    }
+    // Provider ID will be handled via JWT token in headers
+    // No need to manually add provider_id to payload
     
     try {
       const response = await httpClient(url, {

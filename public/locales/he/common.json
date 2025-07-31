@@ -133,7 +133,9 @@
     "placeholder_participants": "חיפוש משתתפים...",
     "placeholder_enrollments": "חיפוש הרשמות...",
     "placeholder_leads": "חיפוש לידים...",
-    "placeholder_students": "חיפוש תלמידים..."
+    "placeholder_students": "חיפוש תלמידים...",
+    "select_participant": "בחר משתתף...",
+    "select_lead": "בחר ליד..."
   },
   
   "forms": {
@@ -151,7 +153,14 @@
     "payment_status": "סטטוס תשלום",
     "activity_id": "מזהה פעילות",
     "enrollment_date": "תאריך הרשמה",
-    "progress": "התקדמות"
+    "progress": "התקדמות",
+    "enrollment_mode": "מצב הרשמה",
+    "existing_participant": "משתתף קיים",
+    "new_participant": "משתתף חדש",
+    "from_lead": "מליד",
+    "new_participant_details": "פרטי משתתף חדש",
+    "email": "אימייל",
+    "phone": "טלפון"
   },
   
   "status_options": {
@@ -351,6 +360,8 @@
     "sources": {
       "website": "אתר אינטרנט",
       "social": "רשתות חברתיות",
+      "email": "אימייל",
+      "advertisement": "פרסומת",
       "referral": "הפניה",
       "other": "אחר"
     },
@@ -403,7 +414,11 @@
     "email_invalid": "פורמט אימייל לא תקין",
     "phone_min_length": "מספר הטלפון חייב להיות לפחות 10 ספרות",
     "source_required": "מקור נדרש",
-    "notes_max_length": "הערות לא יכולות לעבור 2000 תווים"
+    "notes_max_length": "הערות לא יכולות לעבור 2000 תווים",
+    "required_field": "שדה זה נדרש",
+    "invalid_email": "פורמט אימייל לא תקין",
+    "start_date_required": "תאריך התחלה נדרש",
+    "end_date_required": "תאריך סיום נדרש"
   },
 
   "auth": {
@@ -473,7 +488,8 @@
       "message": "הודעה",
       "recipients": "נמענים",
       "status": "סטטוס",
-      "actions": "פעולות"
+      "actions": "פעולות",
+      "cost": "עלות"
     },
     "search": {
       "placeholder": "חפש הודעות...",
@@ -546,9 +562,6 @@
         "content": "איך אתם מוצאים את הקורס עד כה? נשמח לשמוע את המשוב שלכם!"
       }
     },
-    "no_messages": "אין הודעות עדיין. לחץ על הכפתור למטה כדי לשלוח את ה-SMS הראשון שלך!",
-    "columns": {
-      "cost": "עלות"
-    }
+    "no_messages": "אין הודעות עדיין. לחץ על הכפתור למטה כדי לשלוח את ה-SMS הראשון שלך!"
   }
 }
