@@ -2,6 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Recent Updates (2025-08-01)
+### Mobile-Responsive Registration Forms
+- **Registration Form Builder**: Preview modal now displays full-screen on mobile devices
+- **Published Registration Forms**: Public forms display as full-screen mobile modals for optimal UX
+- **Hebrew Localization**: Fixed logout button translation - now properly displays "התנתק" in Hebrew
+- **Form Field Optimization**: Replaced problematic description textarea with working testField1
+- **Mobile Touch UX**: All form elements use appropriate mobile sizing and touch-friendly interactions
+
+### Technical Implementation
+- Modified `src/pages/registration-form/index.tsx` to use `CommonModalShell` with `fullScreen={isMobile}`
+- Updated `src/pages/registration-form/public.tsx` for mobile-first responsive design
+- Fixed `src/components/header/index.tsx` logout translation with direct language check
+- Enhanced form state management to properly reflect edits in preview and publish
+
+### Deployment Status
+- **Frontend**: Deployed to CloudFront (https://d3ld4gkanad66u.cloudfront.net/)
+- **Backend**: Deployed to AWS Lambda (https://lph40ds6v8.execute-api.eu-west-1.amazonaws.com/prod)
+
 ## Development Commands
 
 ### Core Development Workflow
