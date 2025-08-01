@@ -38,6 +38,11 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
 }) => {
   const { mode, setMode } = useContext(ThemeContext);
   const { i18n, t } = useTranslation();
+  
+  // Force Hebrew translation for logout
+  const getLogoutText = () => {
+    return i18n.language === 'he' ? 'התנתק' : 'Logout';
+  };
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
   
@@ -198,7 +203,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
               <ListItemIcon>
                 <LogoutIcon fontSize="small" />
               </ListItemIcon>
-              {t('header.logout')}
+              {getLogoutText()}
             </MenuItem>
           </Menu>
 
@@ -222,7 +227,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
                 {t('buttons.cancel')}
               </Button>
               <Button onClick={handleLogoutConfirm} color="primary" variant="contained" autoFocus>
-                {t('header.logout')}
+                {getLogoutText()}
               </Button>
             </DialogActions>
           </Dialog>

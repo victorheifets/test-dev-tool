@@ -17,6 +17,7 @@ import {
   CircularProgress,
   useTheme,
   Container,
+  useMediaQuery,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -38,6 +39,7 @@ const PublicRegistrationForm: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
   const { t } = useTranslation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formConfig, setFormConfig] = useState<any>(null);
@@ -170,46 +172,90 @@ const PublicRegistrationForm: React.FC = () => {
 
   if (submitted) {
     return (
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" gutterBottom color="success.main">
-            {t('registrationForm.submitSuccess')}
-          </Typography>
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            Thank you for your registration. We will contact you soon!
-          </Typography>
-          <Button 
-            variant="contained" 
-            sx={{ mt: 4 }}
-            onClick={() => {
-              setSubmitted(false);
-              reset();
-            }}
-          >
-            Submit Another Registration
-          </Button>
-        </Paper>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: isMobile ? 'background.default' : (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+        py: isMobile ? 0 : 4,
+        px: isMobile ? 0 : 2,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Container maxWidth={isMobile ? false : "sm"} sx={{ 
+          mt: isMobile ? 0 : 8,
+          height: isMobile ? '100vh' : 'auto',
+          display: isMobile ? 'flex' : 'block',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: isMobile ? 'center' : 'flex-start',
+          alignItems: isMobile ? 'center' : 'stretch'
+        }}>
+          <Paper sx={{ 
+            p: isMobile ? 3 : 4, 
+            textAlign: 'center',
+            width: isMobile ? '100%' : 'auto',
+            height: isMobile ? 'auto' : 'auto',
+            border: isMobile ? 'none' : '1px solid',
+            borderColor: isMobile ? 'transparent' : 'divider',
+            borderRadius: isMobile ? 0 : 2,
+            boxShadow: isMobile ? 'none' : theme.shadows[3]
+          }}>
+            <Typography variant={isMobile ? "h5" : "h4"} gutterBottom color="success.main">
+              {t('registrationForm.submitSuccess')}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Thank you for your registration. We will contact you soon!
+            </Typography>
+            <Button 
+              variant="contained" 
+              sx={{ mt: 4 }}
+              size={isMobile ? "large" : "medium"}
+              fullWidth={isMobile}
+              onClick={() => {
+                setSubmitted(false);
+                reset();
+              }}
+            >
+              Submit Another Registration
+            </Button>
+          </Paper>
+        </Container>
+      </Box>
     );
   }
 
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
-      py: 4
+      backgroundColor: isMobile ? 'background.default' : (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+      py: isMobile ? 0 : 4,
+      px: isMobile ? 0 : 2,
+      display: isMobile ? 'flex' : 'block',
+      flexDirection: isMobile ? 'column' : 'row'
     }}>
-      <Container maxWidth="md">
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+      <Container maxWidth={isMobile ? false : "md"} sx={{ 
+        height: isMobile ? '100vh' : 'auto',
+        display: isMobile ? 'flex' : 'block',
+        flexDirection: isMobile ? 'column' : 'row',
+        p: isMobile ? 0 : 2
+      }}>
+        <Paper sx={{ 
+          p: isMobile ? 3 : 4,
+          height: isMobile ? '100%' : 'auto',
+          border: isMobile ? 'none' : '1px solid',
+          borderColor: isMobile ? 'transparent' : 'divider',
+          borderRadius: isMobile ? 0 : 2,
+          boxShadow: isMobile ? 'none' : theme.shadows[3],
+          overflow: isMobile ? 'auto' : 'visible'
+        }}>
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
             {formConfig?.title || t('registrationForm.defaultTitle')}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: isMobile ? 3 : 4 }}>
             {formConfig?.description || t('registrationForm.defaultDescription')}
           </Typography>
           
           <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={3}>
+            <Grid container spacing={isMobile ? 2 : 3}>
               <Grid item xs={12} sm={6}>
                 <Controller
                   name="first_name"
@@ -220,6 +266,7 @@ const PublicRegistrationForm: React.FC = () => {
                       label={t('forms.first_name')}
                       variant="outlined"
                       fullWidth
+                      size={isMobile ? "small" : "medium"}
                       error={!!errors.first_name}
                       helperText={errors.first_name?.message}
                       required
@@ -238,6 +285,7 @@ const PublicRegistrationForm: React.FC = () => {
                       label={t('forms.last_name')}
                       variant="outlined"
                       fullWidth
+                      size={isMobile ? "small" : "medium"}
                       error={!!errors.last_name}
                       helperText={errors.last_name?.message}
                       required
@@ -257,6 +305,7 @@ const PublicRegistrationForm: React.FC = () => {
                       type="email"
                       variant="outlined"
                       fullWidth
+                      size={isMobile ? "small" : "medium"}
                       error={!!errors.email}
                       helperText={errors.email?.message}
                       required
@@ -276,6 +325,7 @@ const PublicRegistrationForm: React.FC = () => {
                       type="tel"
                       variant="outlined"
                       fullWidth
+                      size={isMobile ? "small" : "medium"}
                       error={!!errors.phone}
                       helperText={errors.phone?.message}
                     />
@@ -288,7 +338,7 @@ const PublicRegistrationForm: React.FC = () => {
                   name="source"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.source}>
+                    <FormControl fullWidth error={!!errors.source} size={isMobile ? "small" : "medium"}>
                       <FormLabel required>{t('forms.source')}</FormLabel>
                       <Select {...field} variant="outlined">
                         <MenuItem value="website">{t('registrationForm.sources.website')}</MenuItem>
@@ -313,7 +363,7 @@ const PublicRegistrationForm: React.FC = () => {
                   name="activity_of_interest"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth>
+                    <FormControl fullWidth size={isMobile ? "small" : "medium"}>
                       <FormLabel>{t('registrationForm.activityOfInterest')}</FormLabel>
                       <Select {...field} variant="outlined">
                         <MenuItem value="">{t('common.none')}</MenuItem>
@@ -338,8 +388,9 @@ const PublicRegistrationForm: React.FC = () => {
                       label={t('registrationForm.additionalNotes')}
                       variant="outlined"
                       fullWidth
+                      size={isMobile ? "small" : "medium"}
                       multiline
-                      rows={4}
+                      rows={isMobile ? 3 : 4}
                       error={!!errors.notes}
                       helperText={errors.notes?.message}
                     />
@@ -350,6 +401,7 @@ const PublicRegistrationForm: React.FC = () => {
               <Grid item xs={12}>
                 <Box sx={{ 
                   display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row',
                   justifyContent: 'center', 
                   gap: 2, 
                   mt: 2 
@@ -359,7 +411,8 @@ const PublicRegistrationForm: React.FC = () => {
                     variant="outlined"
                     onClick={() => reset()}
                     disabled={isSubmitting}
-                    size="large"
+                    size={isMobile ? "large" : "large"}
+                    fullWidth={isMobile}
                   >
                     {t('actions.reset')}
                   </Button>
@@ -367,7 +420,8 @@ const PublicRegistrationForm: React.FC = () => {
                     type="submit"
                     variant="contained"
                     disabled={isSubmitting}
-                    size="large"
+                    size={isMobile ? "large" : "large"}
+                    fullWidth={isMobile}
                     startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
                   >
                     {isSubmitting ? t('registrationForm.submitting') : t('actions.submit')}

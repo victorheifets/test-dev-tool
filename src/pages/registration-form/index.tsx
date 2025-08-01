@@ -57,10 +57,15 @@ interface FormSettings {
   description: string;
   published: boolean;
   publishedUrl?: string;
+  testField1?: string;
 }
 
 // Extract preview content into separate component
-const PreviewContent: React.FC = () => {
+interface PreviewContentProps {
+  formSettings: FormSettings;
+}
+
+const PreviewContent: React.FC<PreviewContentProps> = ({ formSettings }) => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   
@@ -73,10 +78,10 @@ const PreviewContent: React.FC = () => {
       borderColor: 'divider'
     }}>
       <Typography variant={isMobile ? "h6" : "h5"} gutterBottom sx={{ fontWeight: 600 }}>
-        {t('registrationForm.defaultTitle')}
+        {formSettings.title}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {t('registrationForm.defaultDescription')}
+        {formSettings.testField1}
       </Typography>
       
       <Grid container spacing={isMobile ? 2 : 3}>
@@ -150,13 +155,12 @@ const RegistrationFormNew: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { isMobile } = useBreakpoint();
   const currentLanguage = i18n.language;
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const theme = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
-  const [editingDescription, setEditingDescription] = useState(false);
+  const [editingTestField1, setEditingTestField1] = useState(false);
 
   // Function to handle text direction
   const handleTextDirection = (text: string = '') => {
@@ -181,15 +185,10 @@ const RegistrationFormNew: React.FC = () => {
     title: t('registrationForm.defaultTitle'),
     description: t('registrationForm.defaultDescription'),
     published: false,
-    publishedUrl: undefined
+    publishedUrl: undefined,
+    testField1: currentLanguage === 'he' ? 'הצטרפו אלינו ללמידה מרתקת וחווית לימוד בלתי נשכחת' : 'Join us for exciting learning and an unforgettable educational experience'
   });
   
-  // Update text direction in real-time as user types
-  useEffect(() => {
-    if (descriptionRef.current && editingDescription) {
-      descriptionRef.current.dir = handleTextDirection(formSettings.description);
-    }
-  }, [formSettings.description, editingDescription]);
 
   // Create validation schema with translated messages
   const validationSchemaWithTranslation: yup.ObjectSchema<FormData> = yup.object().shape({
@@ -287,7 +286,7 @@ const RegistrationFormNew: React.FC = () => {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           title: formSettings.title,
-          description: formSettings.description,
+          description: formSettings.testField1,
         }),
       });
 
@@ -558,38 +557,25 @@ const RegistrationFormNew: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            {editingDescription ? (
-              <Box sx={{ width: '100%', position: 'relative' }}>
-                <textarea
-                  ref={descriptionRef}
-                  value={formSettings.description}
-                  onChange={(e) => setFormSettings(prev => ({ ...prev, description: e.target.value }))}
-                  onBlur={() => setEditingDescription(false)}
-                  autoFocus
-                  rows={isMobile ? 2 : 3}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc',
-                    fontFamily: 'inherit',
-                    fontSize: 'inherit',
-                    resize: 'vertical',
-                    backgroundColor: theme.palette.mode === 'dark' ? '#1F2937' : '#fff',
-                    color: theme.palette.mode === 'dark' ? '#F9FAFB' : 'inherit'
-                  }}
-                />
-              </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingTestField1 ? (
+              <TextField
+                fullWidth
+                size="small"
+                value={formSettings.testField1}
+                onChange={(e) => setFormSettings(prev => ({ ...prev, testField1: e.target.value }))}
+                onBlur={() => setEditingTestField1(false)}
+                onKeyPress={(e) => e.key === 'Enter' && setEditingTestField1(false)}
+                autoFocus
+              />
             ) : (
               <>
                 <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                  {formSettings.description}
+                  {formSettings.testField1}
                 </Typography>
                 <IconButton 
-                  onClick={() => setEditingDescription(true)}
-                  size={isMobile ? "small" : "medium"}
-                  sx={{ mt: -0.5 }}
+                  onClick={() => setEditingTestField1(true)}
+                  size="small"
                 >
                   <EditIcon />
                 </IconButton>
@@ -597,6 +583,8 @@ const RegistrationFormNew: React.FC = () => {
             )}
           </Box>
         </Grid>
+
+
 
         <Grid item xs={12}>
           <FormControlLabel
@@ -781,15 +769,13 @@ const RegistrationFormNew: React.FC = () => {
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
           title={t('registrationForm.buttons.preview')}
-          forceMobile={isMobile}
-          maxWidth="md"
-          showActions={true}
-          onCancel={() => setPreviewOpen(false)}
-          cancelButtonText={t('actions.close')}
-          onSave={() => {}} // Empty function instead of undefined
+          forceMobile={true}
+          maxWidth={isMobile ? false : "md"}
+          fullScreen={isMobile}
+          showActions={false}
         >
           <Box sx={{ mt: isMobile ? 1 : 2 }}>
-            <PreviewContent />
+            <PreviewContent formSettings={formSettings} />
           </Box>
         </CommonModalShell>
 
