@@ -110,6 +110,8 @@ export const CourseList = () => {
       deleteActivity({
         resource: 'courses',
         id: selectedActivityId,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.course_deleted'));
@@ -141,6 +143,8 @@ export const CourseList = () => {
           deleteActivity({
             resource: 'courses',
             id,
+            successNotification: false,
+            errorNotification: false,
           }, {
             onSuccess: () => {
               deleteCount++;
@@ -179,6 +183,8 @@ export const CourseList = () => {
       createActivity({
         resource: 'courses',
         values: activityData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.course_created'));
@@ -195,6 +201,8 @@ export const CourseList = () => {
         resource: 'courses',
         id: modalInitialData.id,
         values: activityData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.course_updated'));

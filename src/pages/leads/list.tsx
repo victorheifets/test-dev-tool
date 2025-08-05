@@ -110,6 +110,8 @@ export const LeadsList = () => {
       deleteLead({
         resource: 'leads',
         id: selectedLeadId,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.lead_deleted'));
@@ -141,6 +143,8 @@ export const LeadsList = () => {
           deleteLead({
             resource: 'leads',
             id,
+            successNotification: false,
+            errorNotification: false,
           }, {
             onSuccess: () => {
               deleteCount++;
@@ -179,6 +183,8 @@ export const LeadsList = () => {
       createLead({
         resource: 'leads',
         values: leadData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.lead_created'));
@@ -195,6 +201,8 @@ export const LeadsList = () => {
         resource: 'leads',
         id: modalInitialData.id,
         values: leadData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.lead_updated'));

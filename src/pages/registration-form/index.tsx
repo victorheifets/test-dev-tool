@@ -245,6 +245,8 @@ const RegistrationFormNew: React.FC = () => {
         {
           resource: 'leads',
           values: leadData,
+          successNotification: false,
+          errorNotification: false,
         },
         {
           onSuccess: (result) => {

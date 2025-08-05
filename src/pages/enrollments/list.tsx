@@ -136,6 +136,8 @@ export const EnrollmentsList = () => {
       deleteEnrollment({
         resource: 'enrollments',
         id: selectedEnrollmentId,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.enrollment_deleted'));
@@ -167,6 +169,8 @@ export const EnrollmentsList = () => {
           deleteEnrollment({
             resource: 'enrollments',
             id,
+            successNotification: false,
+            errorNotification: false,
           }, {
             onSuccess: () => {
               deleteCount++;
@@ -205,6 +209,8 @@ export const EnrollmentsList = () => {
       createEnrollment({
         resource: 'enrollments',
         values: enrollmentData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.enrollment_created'));
@@ -221,6 +227,8 @@ export const EnrollmentsList = () => {
         resource: 'enrollments',
         id: modalInitialData.id,
         values: enrollmentData,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.enrollment_updated'));

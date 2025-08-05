@@ -111,6 +111,8 @@ export const ParticipantsList = () => {
       deleteParticipant({
         resource: 'participants',
         id: selectedParticipantId,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.participant_deleted'));
@@ -142,6 +144,8 @@ export const ParticipantsList = () => {
           deleteParticipant({
             resource: 'participants',
             id,
+            successNotification: false,
+            errorNotification: false,
           }, {
             onSuccess: () => {
               deleteCount++;
@@ -180,6 +184,8 @@ export const ParticipantsList = () => {
       createParticipant({
         resource: 'participants',
         values: participant,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.participant_created'));
@@ -196,6 +202,8 @@ export const ParticipantsList = () => {
         resource: 'participants',
         id: modalInitialData.id,
         values: participant,
+        successNotification: false,
+        errorNotification: false,
       }, {
         onSuccess: () => {
           showSuccess(t('messages.participant_updated'));
