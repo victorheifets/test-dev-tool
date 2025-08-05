@@ -26,6 +26,8 @@ import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useDashboard } from '../hooks/useDashboard';
 import { CourseModal } from '../components/courses/CourseModal';
 import { ParticipantModal } from '../components/participants/ParticipantModal';
+import { SmsModal } from '../components/messaging/SmsModal';
+import { RegistrationFormModal } from '../components/registrationForm/RegistrationFormModal';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -46,6 +48,8 @@ export const Dashboard = () => {
   // Modal states
   const [courseModalOpen, setCourseModalOpen] = useState(false);
   const [participantModalOpen, setParticipantModalOpen] = useState(false);
+  const [smsModalOpen, setSmsModalOpen] = useState(false);
+  const [registrationFormModalOpen, setRegistrationFormModalOpen] = useState(false);
 
   const handleQuickAction = (action: string) => {
     switch (action) {
@@ -56,11 +60,10 @@ export const Dashboard = () => {
         setParticipantModalOpen(true);
         break;
       case 'create_form':
-        setCourseModalOpen(true);
+        setRegistrationFormModalOpen(true);
         break;
       case 'send_alert':
-        // Navigate to SMS page for this one
-        window.location.href = '/sms';
+        setSmsModalOpen(true);
         break;
     }
   };
@@ -444,6 +447,28 @@ export const Dashboard = () => {
         onSave={() => {
           setParticipantModalOpen(false);
           refresh(); // Refresh dashboard data
+        }}
+        initialData={null}
+        mode="create"
+      />
+      
+      <SmsModal 
+        open={smsModalOpen}
+        onClose={() => setSmsModalOpen(false)}
+        forceMobile={isMobile}
+        onSave={() => {
+          setSmsModalOpen(false);
+          // No need to refresh dashboard for SMS
+        }}
+      />
+      
+      <RegistrationFormModal 
+        open={registrationFormModalOpen}
+        onClose={() => setRegistrationFormModalOpen(false)}
+        forceMobile={isMobile}
+        onSave={() => {
+          setRegistrationFormModalOpen(false);
+          // No need to refresh dashboard for registration form
         }}
         initialData={null}
         mode="create"

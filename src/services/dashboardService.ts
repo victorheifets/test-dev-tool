@@ -182,43 +182,41 @@ class DashboardService {
 
   async getTopCourses(): Promise<TopCourse[]> {
     try {
-      const activities = await this.httpClient<any[]>(buildApiUrl('activities'));
+      // Fetch both activities and enrollments in parallel
+      const [activities, allEnrollments] = await Promise.all([
+        this.httpClient<any[]>(buildApiUrl('activities')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('enrollments')).catch(() => [])
+      ]);
       
       if (!Array.isArray(activities)) {
         return [];
       }
 
-      // Get enrollment counts for each course
-      const coursesWithEnrollments = await Promise.all(
-        activities.map(async (activity) => {
-          try {
-            const enrollments = await this.httpClient<any[]>(
-              buildApiUrl('enrollments') + `?activity_id=${activity.id}`
-            );
-            
-            const enrolledCount = Array.isArray(enrollments) ? enrollments.length : 0;
-            const capacity = activity.capacity || 50;
-            const progress = capacity > 0 ? Math.round((enrolledCount / capacity) * 100) : 0;
-
-            return {
-              id: activity.id,
-              name: activity.name || 'Unnamed Course',
-              enrolled: enrolledCount,
-              capacity: capacity,
-              progress: Math.min(progress, 100), // Cap at 100%
-            };
-          } catch (error) {
-            console.warn(`Failed to fetch enrollments for activity ${activity.id}:`, error);
-            return {
-              id: activity.id,
-              name: activity.name || 'Unnamed Course',
-              enrolled: 0,
-              capacity: activity.capacity || 50,
-              progress: 0,
-            };
+      // Create enrollment count map for faster lookup
+      const enrollmentCounts = new Map<string, number>();
+      if (Array.isArray(allEnrollments)) {
+        allEnrollments.forEach(enrollment => {
+          const activityId = enrollment.activity_id;
+          if (activityId) {
+            enrollmentCounts.set(activityId, (enrollmentCounts.get(activityId) || 0) + 1);
           }
-        })
-      );
+        });
+      }
+
+      // Process activities with enrollment counts
+      const coursesWithEnrollments = activities.map(activity => {
+        const enrolledCount = enrollmentCounts.get(activity.id) || 0;
+        const capacity = activity.capacity || 50;
+        const progress = capacity > 0 ? Math.round((enrolledCount / capacity) * 100) : 0;
+
+        return {
+          id: activity.id,
+          name: activity.name || 'Unnamed Course',
+          enrolled: enrolledCount,
+          capacity: capacity,
+          progress: Math.min(progress, 100), // Cap at 100%
+        };
+      });
 
       // Sort by enrollment count and return top 6
       return coursesWithEnrollments
@@ -265,12 +263,25 @@ class DashboardService {
 
   async getDashboardData(): Promise<DashboardData> {
     try {
-      const [stats, recentActivity, topCourses, upcomingEvents] = await Promise.all([
-        this.getStats(),
-        this.getRecentActivity(), 
-        this.getTopCourses(),
-        this.getUpcomingEvents()
+      // Fetch all data in one batch to optimize performance
+      const [activities, participants, enrollments, leads] = await Promise.all([
+        this.httpClient<any[]>(buildApiUrl('activities')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('participants')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('enrollments')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('marketing')).catch(() => [])
       ]);
+
+      // Calculate stats
+      const stats = this.calculateStats(activities, participants, enrollments);
+      
+      // Calculate recent activity
+      const recentActivity = this.calculateRecentActivity(enrollments, participants, leads);
+      
+      // Calculate top courses
+      const topCourses = this.calculateTopCourses(activities, enrollments);
+      
+      // Calculate upcoming events
+      const upcomingEvents = this.calculateUpcomingEvents(activities);
 
       return {
         stats,
@@ -282,6 +293,137 @@ class DashboardService {
       console.error('Failed to fetch dashboard data:', error);
       throw error;
     }
+  }
+
+  // Helper methods for processing cached data
+  private calculateStats(activities: any[], participants: any[], enrollments: any[]): DashboardStats {
+    const totalCourses = Array.isArray(activities) ? activities.length : 0;
+    const activeStudents = Array.isArray(participants) ? participants.filter(p => p.is_active !== false).length : 0;
+    
+    const totalEnrollments = Array.isArray(enrollments) ? enrollments.length : 0;
+    const completedEnrollments = Array.isArray(enrollments) ? 
+      enrollments.filter(e => e.status === 'completed' || e.status === 'done').length : 0;
+    const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+
+    const revenue = Array.isArray(activities) ? 
+      activities.reduce((sum, activity) => {
+        const price = activity.pricing?.amount || activity.price || 0;
+        const enrolled = activity.enrolled || 0;
+        return sum + (price * enrolled);
+      }, 0) : 0;
+
+    return { totalCourses, activeStudents, completionRate, revenue };
+  }
+
+  private calculateRecentActivity(enrollments: any[], participants: any[], leads: any[]): RecentActivity[] {
+    const activities: RecentActivity[] = [];
+
+    // Add recent enrollments
+    if (Array.isArray(enrollments)) {
+      enrollments
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+        .forEach(enrollment => {
+          activities.push({
+            id: `enrollment-${enrollment.id}`,
+            type: 'enrollment',
+            student: `${enrollment.participant?.first_name || 'Unknown'} ${enrollment.participant?.last_name || 'Student'}`,
+            course: enrollment.activity?.name || 'Unknown Course',
+            time: this.formatTimeAgo(enrollment.created_at),
+            avatar: this.getInitials(`${enrollment.participant?.first_name || ''} ${enrollment.participant?.last_name || ''}`)
+          });
+        });
+    }
+
+    // Add recent participants
+    if (Array.isArray(participants)) {
+      participants
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 3)
+        .forEach(participant => {
+          activities.push({
+            id: `participant-${participant.id}`,
+            type: 'enrollment',
+            student: `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 'New Student',
+            course: 'General Registration',
+            time: this.formatTimeAgo(participant.created_at),
+            avatar: this.getInitials(`${participant.first_name || ''} ${participant.last_name || ''}`)
+          });
+        });
+    }
+
+    // Add recent leads
+    if (Array.isArray(leads)) {
+      leads
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 2)
+        .forEach(lead => {
+          activities.push({
+            id: `lead-${lead.id}`,
+            type: 'lead',
+            student: `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'New Lead',
+            course: lead.activity_of_interest || 'Interest Inquiry',
+            time: this.formatTimeAgo(lead.created_at),
+            avatar: this.getInitials(`${lead.first_name || ''} ${lead.last_name || ''}`)
+          });
+        });
+    }
+
+    return activities
+      .sort((a, b) => this.parseTimeAgo(a.time) - this.parseTimeAgo(b.time))
+      .slice(0, 8);
+  }
+
+  private calculateTopCourses(activities: any[], enrollments: any[]): TopCourse[] {
+    if (!Array.isArray(activities)) return [];
+
+    // Create enrollment count map
+    const enrollmentCounts = new Map<string, number>();
+    if (Array.isArray(enrollments)) {
+      enrollments.forEach(enrollment => {
+        const activityId = enrollment.activity_id;
+        if (activityId) {
+          enrollmentCounts.set(activityId, (enrollmentCounts.get(activityId) || 0) + 1);
+        }
+      });
+    }
+
+    return activities.map(activity => {
+      const enrolledCount = enrollmentCounts.get(activity.id) || 0;
+      const capacity = activity.capacity || 50;
+      const progress = capacity > 0 ? Math.round((enrolledCount / capacity) * 100) : 0;
+
+      return {
+        id: activity.id,
+        name: activity.name || 'Unnamed Course',
+        enrolled: enrolledCount,
+        capacity: capacity,
+        progress: Math.min(progress, 100),
+      };
+    })
+    .sort((a, b) => b.enrolled - a.enrolled)
+    .slice(0, 6);
+  }
+
+  private calculateUpcomingEvents(activities: any[]): UpcomingEvent[] {
+    if (!Array.isArray(activities)) return [];
+
+    const now = new Date();
+    return activities
+      .filter(activity => {
+        if (!activity.start_date) return false;
+        const startDate = new Date(activity.start_date);
+        return startDate > now;
+      })
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+      .slice(0, 5)
+      .map(activity => ({
+        id: activity.id,
+        title: activity.name || 'Unnamed Event',
+        date: this.formatDate(activity.start_date),
+        time: this.formatTime(activity.start_date),
+        type: this.getEventType(activity.type || activity.category)
+      }));
   }
 
   // Helper methods
