@@ -32,8 +32,10 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
     login(
       { google_token: googleToken },
       {
-        onSuccess: () => {
-          console.log('Google login successful');
+        onSuccess: (data) => {
+          console.log('Google login successful:', data);
+          console.log('Token stored:', localStorage.getItem('auth-token'));
+          console.log('User stored:', localStorage.getItem('user-info'));
           onSuccess?.();
         },
         onError: (error: any) => {

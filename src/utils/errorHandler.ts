@@ -67,8 +67,11 @@ export const parseError = (error: any): ApiError => {
 
   // API error response
   if (error && typeof error === 'object') {
+    // Check for nested details with user-friendly message
+    const userMessage = error.details?.details || error.details?.message || error.message || error.detail || 'errors.generic';
+    
     return {
-      message: error.message || error.detail || 'errors.generic',
+      message: userMessage,
       status: error.status || error.statusCode,
       code: error.code || error.error_code,
       details: error.details || error,

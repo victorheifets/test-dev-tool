@@ -153,6 +153,7 @@ export const authProvider: AuthProvider = {
   // Check authentication status
   check: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
+    console.log("[Auth] Check called, token exists:", !!token);
     
     if (!token) {
       console.log("[Auth] No token found");
