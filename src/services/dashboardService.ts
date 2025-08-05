@@ -73,14 +73,36 @@ class DashboardService {
 
   async getStats(): Promise<DashboardStats> {
     try {
-      const url = buildApiUrl('statistics');
-      const stats = await this.httpClient<any>(url);
+      // Fetch data from available endpoints since /statistics might not exist
+      const [activities, participants, enrollments] = await Promise.all([
+        this.httpClient<any[]>(buildApiUrl('activities')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('participants')).catch(() => []),
+        this.httpClient<any[]>(buildApiUrl('enrollments')).catch(() => [])
+      ]);
+
+      // Calculate basic statistics from actual data
+      const totalCourses = Array.isArray(activities) ? activities.length : 0;
+      const activeStudents = Array.isArray(participants) ? participants.filter(p => p.is_active !== false).length : 0;
       
+      // Calculate completion rate from enrollments
+      const totalEnrollments = Array.isArray(enrollments) ? enrollments.length : 0;
+      const completedEnrollments = Array.isArray(enrollments) ? 
+        enrollments.filter(e => e.status === 'completed' || e.status === 'done').length : 0;
+      const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+
+      // Calculate revenue from activities with pricing
+      const revenue = Array.isArray(activities) ? 
+        activities.reduce((sum, activity) => {
+          const price = activity.pricing?.amount || activity.price || 0;
+          const enrolled = activity.enrolled || 0;
+          return sum + (price * enrolled);
+        }, 0) : 0;
+
       return {
-        totalCourses: stats.totalActivities || 0,
-        activeStudents: stats.totalParticipants || 0,
-        completionRate: stats.completionRate || 0,
-        revenue: stats.totalRevenue || 0,
+        totalCourses,
+        activeStudents,
+        completionRate,
+        revenue,
       };
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error);

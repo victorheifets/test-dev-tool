@@ -20,10 +20,12 @@ import {
   Skeleton
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { StatCard } from '../components/StatCard';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useDashboard } from '../hooks/useDashboard';
+import { CourseModal } from '../components/courses/CourseModal';
+import { ParticipantModal } from '../components/participants/ParticipantModal';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -39,22 +41,26 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 export const Dashboard = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
-  const navigate = useNavigate();
   const { data, loading, error, refresh } = useDashboard();
+  
+  // Modal states
+  const [courseModalOpen, setCourseModalOpen] = useState(false);
+  const [participantModalOpen, setParticipantModalOpen] = useState(false);
 
   const handleQuickAction = (action: string) => {
     switch (action) {
       case 'create_course':
-        navigate('/courses/create');
+        setCourseModalOpen(true);
         break;
       case 'create_student':
-        navigate('/participants/create');
+        setParticipantModalOpen(true);
         break;
       case 'schedule_event':
-        navigate('/courses');
+        setCourseModalOpen(true);
         break;
       case 'send_alert':
-        navigate('/sms');
+        // Navigate to SMS page for this one
+        window.location.href = '/sms';
         break;
     }
   };
@@ -414,6 +420,31 @@ export const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Modals */}
+      <CourseModal 
+        open={courseModalOpen}
+        onClose={() => setCourseModalOpen(false)}
+        forceMobile={isMobile}
+        onSave={() => {
+          setCourseModalOpen(false);
+          refresh(); // Refresh dashboard data
+        }}
+        initialData={null}
+        mode="create"
+      />
+      
+      <ParticipantModal 
+        open={participantModalOpen}
+        onClose={() => setParticipantModalOpen(false)}
+        forceMobile={isMobile}
+        onSave={() => {
+          setParticipantModalOpen(false);
+          refresh(); // Refresh dashboard data
+        }}
+        initialData={null}
+        mode="create"
+      />
     </Box>
   );
 }; 
