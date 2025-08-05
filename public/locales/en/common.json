@@ -135,6 +135,7 @@
     "new_participant": "New Participant",
     "from_lead": "From Lead",
     "new_participant_details": "New Participant Details",
+    "enrollment_notes_placeholder": "Add any notes about this enrollment...",
     "email": "Email",
     "phone": "Phone"
   },

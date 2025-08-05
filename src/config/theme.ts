@@ -136,6 +136,14 @@ const baseThemeOptions: ThemeOptions = {
         }
       },
     },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: designTokens.borderRadius.button,
+        },
+      },
+    },
     MuiDialog: {
       styleOverrides: {
         paper: {
@@ -219,7 +227,7 @@ export const darkTheme = createTheme({
           styleOverrides: {
             root: {
               boxShadow: designTokens.shadows.header,
-              backgroundColor: '#283046', // Dark theme background
+              backgroundColor: 'transparent', // Let component control background
               color: '#D0D2D6', // Brighter text color for dark theme
               borderRadius: designTokens.borderRadius.none,
               '& .MuiIconButton-root': {
@@ -301,6 +309,14 @@ export const darkTheme = createTheme({
               }
             }
           }
+        },
+        MuiToggleButton: {
+          styleOverrides: {
+            root: {
+              textTransform: 'none',
+              borderRadius: designTokens.borderRadius.button,
+            },
+          },
         },
         MuiDialog: {
           styleOverrides: {

@@ -145,6 +145,8 @@ export const CourseForm: React.FC<CourseFormProps> = ({ form, errors }) => {
               <DatePicker
                 label={t('course_fields.start_date')}
                 value={field.value ? new Date(field.value) : null}
+                format="dd/MM/yyyy"
+                closeOnSelect
                 onChange={(date) => {
                   const formattedDate = date ? date.toISOString().split('T')[0] : '';
                   field.onChange(formattedDate);
@@ -155,13 +157,23 @@ export const CourseForm: React.FC<CourseFormProps> = ({ form, errors }) => {
                     error: !!errors.start_date,
                     helperText: errors.start_date?.message,
                     inputProps: { 
-                      style: { fontSize: isMobile ? '16px' : '14px' }
+                      style: { fontSize: isMobile ? '16px' : '14px' },
+                      placeholder: 'DD/MM/YYYY'
                     },
                     sx: {
                       '& .MuiOutlinedInput-root': {
                         borderRadius: isMobile ? 2 : 1.5,
                       },
                     }
+                  },
+                  popper: {
+                    placement: 'bottom-start',
+                    modifiers: [
+                      {
+                        name: 'offset',
+                        options: { offset: [0, 4] }
+                      }
+                    ]
                   }
                 }}
               />
@@ -177,6 +189,8 @@ export const CourseForm: React.FC<CourseFormProps> = ({ form, errors }) => {
               <DatePicker
                 label={t('course_fields.end_date')}
                 value={field.value ? new Date(field.value) : null}
+                format="dd/MM/yyyy"
+                closeOnSelect
                 onChange={(date) => {
                   const formattedDate = date ? date.toISOString().split('T')[0] : '';
                   field.onChange(formattedDate);
@@ -188,13 +202,23 @@ export const CourseForm: React.FC<CourseFormProps> = ({ form, errors }) => {
                     error: !!errors.end_date,
                     helperText: errors.end_date?.message,
                     inputProps: { 
-                      style: { fontSize: isMobile ? '16px' : '14px' }
+                      style: { fontSize: isMobile ? '16px' : '14px' },
+                      placeholder: 'DD/MM/YYYY'
                     },
                     sx: {
                       '& .MuiOutlinedInput-root': {
                         borderRadius: isMobile ? 2 : 1.5,
                       },
                     }
+                  },
+                  popper: {
+                    placement: 'bottom-start',
+                    modifiers: [
+                      {
+                        name: 'offset',
+                        options: { offset: [0, 4] }
+                      }
+                    ]
                   }
                 }}
               />

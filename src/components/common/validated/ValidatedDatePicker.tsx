@@ -52,6 +52,8 @@ export const ValidatedDatePicker = <T extends FieldValues>({
           <DatePicker
             label={label}
             value={parseDate(field.value)}
+            format="dd/MM/yyyy"
+            closeOnSelect
             onChange={(newValue) => {
               field.onChange(formatDate(newValue));
             }}
@@ -64,7 +66,19 @@ export const ValidatedDatePicker = <T extends FieldValues>({
                 required,
                 error: !!error,
                 helperText: error?.message,
+                inputProps: {
+                  placeholder: 'DD/MM/YYYY'
+                },
                 ...slotProps?.textField,
+              },
+              popper: {
+                placement: 'bottom-start',
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: { offset: [0, 4] }
+                  }
+                ]
               },
               ...slotProps,
             }}

@@ -190,7 +190,7 @@ export const RegistrationFormModal: React.FC<RegistrationFormModalProps> = ({
             {/* Publish/Unpublish Status Switch */}
             <Box sx={{ 
               p: 2, 
-              backgroundColor: 'grey.50', 
+              backgroundColor: 'action.hover', 
               borderRadius: 1, 
               border: '1px solid', 
               borderColor: 'divider' 
@@ -232,7 +232,7 @@ export const RegistrationFormModal: React.FC<RegistrationFormModalProps> = ({
             {mode === 'edit' && initialData?.form_url && (
               <Box sx={{ 
                 p: 2, 
-                backgroundColor: 'grey.50', 
+                backgroundColor: 'action.hover', 
                 borderRadius: 1, 
                 border: '1px solid', 
                 borderColor: 'divider' 

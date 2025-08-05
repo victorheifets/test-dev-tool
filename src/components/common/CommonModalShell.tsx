@@ -117,7 +117,7 @@ export const CommonModalShell: React.FC<CommonModalShellProps> = ({
       
       <DialogContent 
         sx={{
-          backgroundColor: isMobile ? '#f8f9fa' : 'background.paper',
+          backgroundColor: 'background.paper',
           px: isMobile ? 2 : 3,
           py: isMobile ? 2 : 2,
           overflow: 'auto',

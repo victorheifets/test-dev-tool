@@ -72,7 +72,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({ formSettings }) => {
   const FormPreview = () => (
     <Box sx={{ 
       p: isMobile ? 2 : 3, 
-      backgroundColor: isMobile ? 'grey.50' : 'background.paper',
+      backgroundColor: 'background.paper',
       borderRadius: 2,
       border: isMobile ? 'none' : '1px solid',
       borderColor: 'divider'
@@ -734,7 +734,7 @@ const RegistrationFormNew: React.FC = () => {
             <TabPanel value={mobileTab} index={0}>
               <Box sx={{ 
                 p: 2, 
-                backgroundColor: 'grey.50',
+                backgroundColor: 'background.paper',
                 borderRadius: 2,
                 minHeight: '60vh'
               }}>
@@ -744,7 +744,7 @@ const RegistrationFormNew: React.FC = () => {
             <TabPanel value={mobileTab} index={1}>
               <Box sx={{ 
                 p: 2, 
-                backgroundColor: 'grey.50',
+                backgroundColor: 'background.paper',
                 borderRadius: 2,
                 minHeight: '60vh'
               }}>

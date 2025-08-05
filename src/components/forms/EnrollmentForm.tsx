@@ -221,7 +221,7 @@ export const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
         <TextField
           {...register('notes')}
           label={t('forms.notes')}
-          placeholder="Add any notes about this enrollment..."
+          placeholder={t('forms.enrollment_notes_placeholder')}
           fullWidth
           multiline
           rows={3}
