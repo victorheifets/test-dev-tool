@@ -3,7 +3,7 @@ import { buildApiUrl, getAuthHeaders } from '../config/api';
 export interface DashboardStats {
   totalCourses: number;
   activeStudents: number;
-  completionRate: number;
+  totalLeads: number;
   revenue: number;
 }
 
@@ -272,7 +272,7 @@ class DashboardService {
       ]);
 
       // Calculate stats
-      const stats = this.calculateStats(activities, participants, enrollments);
+      const stats = this.calculateStats(activities, participants, enrollments, leads);
       
       // Calculate recent activity
       const recentActivity = this.calculateRecentActivity(enrollments, participants, leads);
@@ -296,14 +296,10 @@ class DashboardService {
   }
 
   // Helper methods for processing cached data
-  private calculateStats(activities: any[], participants: any[], enrollments: any[]): DashboardStats {
+  private calculateStats(activities: any[], participants: any[], enrollments: any[], leads: any[]): DashboardStats {
     const totalCourses = Array.isArray(activities) ? activities.length : 0;
     const activeStudents = Array.isArray(participants) ? participants.filter(p => p.is_active !== false).length : 0;
-    
-    const totalEnrollments = Array.isArray(enrollments) ? enrollments.length : 0;
-    const completedEnrollments = Array.isArray(enrollments) ? 
-      enrollments.filter(e => e.status === 'completed' || e.status === 'done').length : 0;
-    const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+    const totalLeads = Array.isArray(leads) ? leads.length : 0;
 
     const revenue = Array.isArray(activities) ? 
       activities.reduce((sum, activity) => {
@@ -312,7 +308,7 @@ class DashboardService {
         return sum + (price * enrolled);
       }, 0) : 0;
 
-    return { totalCourses, activeStudents, completionRate, revenue };
+    return { totalCourses, activeStudents, totalLeads, revenue };
   }
 
   private calculateRecentActivity(enrollments: any[], participants: any[], leads: any[]): RecentActivity[] {

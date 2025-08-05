@@ -26,11 +26,10 @@ import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useDashboard } from '../hooks/useDashboard';
 import { CourseModal } from '../components/courses/CourseModal';
 import { ParticipantModal } from '../components/participants/ParticipantModal';
-import { SmsModal } from '../components/messaging/SmsModal';
 import { RegistrationFormModal } from '../components/registrationForm/RegistrationFormModal';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
@@ -48,7 +47,6 @@ export const Dashboard = () => {
   // Modal states
   const [courseModalOpen, setCourseModalOpen] = useState(false);
   const [participantModalOpen, setParticipantModalOpen] = useState(false);
-  const [smsModalOpen, setSmsModalOpen] = useState(false);
   const [registrationFormModalOpen, setRegistrationFormModalOpen] = useState(false);
 
   const handleQuickAction = (action: string) => {
@@ -63,7 +61,7 @@ export const Dashboard = () => {
         setRegistrationFormModalOpen(true);
         break;
       case 'send_alert':
-        setSmsModalOpen(true);
+        window.location.href = '/sms';
         break;
     }
   };
@@ -136,9 +134,9 @@ export const Dashboard = () => {
             <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
           ) : (
             <StatCard 
-              title={t('dashboard.course_completion')} 
-              value={formatPercentage(data?.stats.completionRate || 0)} 
-              icon={<TrendingUpIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} 
+              title={t('leads')} 
+              value={data?.stats.totalLeads?.toString() || '0'} 
+              icon={<PersonAddIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} 
               color="info" 
             />
           )}
@@ -450,16 +448,6 @@ export const Dashboard = () => {
         }}
         initialData={null}
         mode="create"
-      />
-      
-      <SmsModal 
-        open={smsModalOpen}
-        onClose={() => setSmsModalOpen(false)}
-        forceMobile={isMobile}
-        onSave={() => {
-          setSmsModalOpen(false);
-          // No need to refresh dashboard for SMS
-        }}
       />
       
       <RegistrationFormModal 

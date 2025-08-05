@@ -39,9 +39,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { mode, setMode } = useContext(ThemeContext);
   const { i18n, t } = useTranslation();
   
-  // Force Hebrew translation for logout
+  // Get logout text from translation system
   const getLogoutText = () => {
-    return i18n.language === 'he' ? 'התנתק' : 'Logout';
+    return t('header.logout');
   };
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
@@ -93,9 +93,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   return (
     <AppBar position={sticky ? "sticky" : "relative"} sx={{ boxShadow: 'none', backgroundColor: 'background.paper' }}>
       <Toolbar>
+        {!isMobile && <HamburgerMenu />}
         <Box sx={{ flexGrow: 1 }} />
         <Stack direction="row" spacing={2} alignItems="center">
-          {!isMobile && <HamburgerMenu />}
           <IconButton
             color="inherit"
             aria-controls="language-menu"
