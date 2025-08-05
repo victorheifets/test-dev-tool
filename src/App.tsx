@@ -102,10 +102,7 @@ const AppContent = () => {
         dataProvider={dataProvider}
         authProvider={authProvider}
         routerProvider={routerBindings}
-        notificationProvider={{
-          open: () => {}, // Disable all automatic notifications
-          close: () => {},
-        }}
+        notificationProvider={useNotificationProvider()}
         resources={resources}
                 options={{
                   syncWithLocation: true,
