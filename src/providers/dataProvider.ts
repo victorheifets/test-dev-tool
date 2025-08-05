@@ -32,83 +32,83 @@ const translateApiError = (message: string): string => {
   const errorPatterns = [
     {
       pattern: /participant with email (.+) already exists/i,
-      en: (match: RegExpMatchArray) => \`A participant with email \${match[1]} already exists\`,
-      he: (match: RegExpMatchArray) => \`משתתף עם אימייל \${match[1]} כבר קיים\`
+      en: (match: RegExpMatchArray) => `A participant with email ${match[1]} already exists`,
+      he: (match: RegExpMatchArray) => `משתתף עם אימייל ${match[1]} כבר קיים`
     },
     {
       pattern: /user with email (.+) already exists/i,
-      en: (match: RegExpMatchArray) => \`A user with email \${match[1]} already exists\`,
-      he: (match: RegExpMatchArray) => \`משתמש עם אימייל \${match[1]} כבר קיים\`
+      en: (match: RegExpMatchArray) => `A user with email ${match[1]} already exists`,
+      he: (match: RegExpMatchArray) => `משתמש עם אימייל ${match[1]} כבר קיים`
     },
     {
       pattern: /email already exists/i,
-      en: () => \`This email address is already registered\`,
-      he: () => \`כתובת אימייל זו כבר רשומה במערכת\`
+      en: () => `This email address is already registered`,
+      he: () => `כתובת אימייל זו כבר רשומה במערכת`
     },
     {
       pattern: /course with name (.+) already exists/i,
-      en: (match: RegExpMatchArray) => \`A course named "\${match[1]}" already exists\`,
-      he: (match: RegExpMatchArray) => \`קורס בשם "\${match[1]}" כבר קיים\`
+      en: (match: RegExpMatchArray) => `A course named "${match[1]}" already exists`,
+      he: (match: RegExpMatchArray) => `קורס בשם "${match[1]}" כבר קיים`
     },
     {
       pattern: /activity with name (.+) already exists/i,
-      en: (match: RegExpMatchArray) => \`An activity named "\${match[1]}" already exists\`,
-      he: (match: RegExpMatchArray) => \`פעילות בשם "\${match[1]}" כבר קיימת\`
+      en: (match: RegExpMatchArray) => `An activity named "${match[1]}" already exists`,
+      he: (match: RegExpMatchArray) => `פעילות בשם "${match[1]}" כבר קיימת`
     },
     {
       pattern: /(.+) with id (.+) not found/i,
-      en: (match: RegExpMatchArray) => \`\${match[1]} not found\`,
-      he: (match: RegExpMatchArray) => \`\${match[1]} לא נמצא\`
+      en: (match: RegExpMatchArray) => `${match[1]} not found`,
+      he: (match: RegExpMatchArray) => `${match[1]} לא נמצא`
     },
     {
       pattern: /participant not found/i,
-      en: () => \`Participant not found\`,
-      he: () => \`משתתף לא נמצא\`
+      en: () => `Participant not found`,
+      he: () => `משתתף לא נמצא`
     },
     {
       pattern: /user not found/i,
-      en: () => \`User not found\`,
-      he: () => \`משתמש לא נמצא\`
+      en: () => `User not found`,
+      he: () => `משתמש לא נמצא`
     },
     {
       pattern: /course not found/i,
-      en: () => \`Course not found\`,
-      he: () => \`קורס לא נמצא\`
+      en: () => `Course not found`,
+      he: () => `קורס לא נמצא`
     },
     {
       pattern: /invalid email format/i,
-      en: () => \`Please enter a valid email address\`,
-      he: () => \`אנא הזן כתובת אימייל תקינה\`
+      en: () => `Please enter a valid email address`,
+      he: () => `אנא הזן כתובת אימייל תקינה`
     },
     {
       pattern: /phone number must be at least (\d+) digits/i,
-      en: (match: RegExpMatchArray) => \`Phone number must be at least \${match[1]} digits\`,
-      he: (match: RegExpMatchArray) => \`מספר הטלפון חייב להיות לפחות \${match[1]} ספרות\`
+      en: (match: RegExpMatchArray) => `Phone number must be at least ${match[1]} digits`,
+      he: (match: RegExpMatchArray) => `מספר הטלפון חייב להיות לפחות ${match[1]} ספרות`
     },
     {
       pattern: /field required/i,
-      en: () => \`This field is required\`,
-      he: () => \`שדה זה נדרש\`
+      en: () => `This field is required`,
+      he: () => `שדה זה נדרש`
     },
     {
       pattern: /database operation failed/i,
-      en: () => \`Operation failed. Please try again.\`,
-      he: () => \`הפעולה נכשלה. אנא נסה שוב.\`
+      en: () => `Operation failed. Please try again.`,
+      he: () => `הפעולה נכשלה. אנא נסה שוב.`
     },
     {
       pattern: /validation error/i,
-      en: () => \`Please check your input and try again\`,
-      he: () => \`אנא בדוק את הקלט ונסה שוב\`
+      en: () => `Please check your input and try again`,
+      he: () => `אנא בדוק את הקלט ונסה שוב`
     },
     {
       pattern: /access denied|permission denied|unauthorized/i,
-      en: () => \`You don't have permission to perform this action\`,
-      he: () => \`אין לך הרשאה לבצע פעולה זו\`
+      en: () => `You don't have permission to perform this action`,
+      he: () => `אין לך הרשאה לבצע פעולה זו`
     },
     {
       pattern: /network error|connection error/i,
-      en: () => \`Connection error. Please check your internet connection.\`,
-      he: () => \`שגיאת חיבור. אנא בדוק את חיבור האינטרנט שלך.\`
+      en: () => `Connection error. Please check your internet connection.`,
+      he: () => `שגיאת חיבור. אנא בדוק את חיבור האינטרנט שלך.`
     }
   ];
   
