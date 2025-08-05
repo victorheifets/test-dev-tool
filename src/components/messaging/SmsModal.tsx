@@ -32,19 +32,25 @@ export const SmsModal: React.FC<SmsModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Fetch participants for SMS recipients
-  const { data: participants = [] } = useList({
+  const { data: participantsData, isLoading: participantsLoading } = useList({
     resource: 'participants',
     pagination: { pageSize: 100 }
   });
 
-  // Convert participants to SMS recipients
-  const availableRecipients: SMSRecipient[] = participants.map(participant => ({
-    id: participant.id,
-    phone: participant.phone || '',
-    name: `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 'Unknown',
-    type: 'participant' as const,
-    display: `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 'Unknown'
-  })).filter(recipient => recipient.phone); // Only include participants with phone numbers
+  // Convert participants to SMS recipients with proper type checking
+  const availableRecipients: SMSRecipient[] = React.useMemo(() => {
+    if (!participantsData || !Array.isArray(participantsData)) {
+      return [];
+    }
+    
+    return participantsData.map(participant => ({
+      id: participant.id,
+      phone: participant.phone || '',
+      name: `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 'Unknown',
+      type: 'participant' as const,
+      display: `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 'Unknown'
+    })).filter(recipient => recipient.phone); // Only include participants with phone numbers
+  }, [participantsData]);
 
   const handleSend = async () => {
     if (!message.trim() || selectedRecipients.length === 0) {
@@ -94,7 +100,7 @@ export const SmsModal: React.FC<SmsModalProps> = ({
       onSave={handleSend}
       cancelButtonText={t('actions.cancel')}
       saveButtonText={sending ? t('sms.buttons.sending', 'Sending...') : t('sms.buttons.send_sms', 'Send SMS')}
-      saveButtonDisabled={!message.trim() || selectedRecipients.length === 0 || sending}
+      saveButtonDisabled={!message.trim() || selectedRecipients.length === 0 || sending || participantsLoading}
     >
       <Box sx={{ pt: 2 }}>
         {error && (
@@ -124,21 +130,29 @@ export const SmsModal: React.FC<SmsModalProps> = ({
             <TextField
               {...params}
               label={t('sms.labels.recipients', 'Recipients')}
-              placeholder={availableRecipients.length === 0 
+              placeholder={participantsLoading 
+                ? t('common.loading', 'Loading...')
+                : availableRecipients.length === 0 
                 ? t('sms.placeholders.no_participants', 'No participants with phone numbers')
                 : t('sms.placeholders.select_recipients', 'Select recipients...')
               }
               fullWidth
-              disabled={availableRecipients.length === 0}
+              disabled={availableRecipients.length === 0 || participantsLoading}
             />
           )}
           sx={{ mb: 2 }}
           disabled={sending}
         />
 
-        {availableRecipients.length === 0 && (
+        {availableRecipients.length === 0 && !participantsLoading && (
           <Alert severity="info" sx={{ mb: 2 }}>
             {t('sms.messages.no_recipients', 'No participants with phone numbers found. Add participants with phone numbers to send SMS messages.')}
+          </Alert>
+        )}
+
+        {participantsLoading && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            {t('sms.messages.loading_participants', 'Loading participants...')}
           </Alert>
         )}
 
