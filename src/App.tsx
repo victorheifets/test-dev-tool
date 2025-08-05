@@ -6,8 +6,8 @@ import {
   RefineSnackbarProvider,
   ThemedLayoutV2,
   ThemedSiderV2,
-  useNotificationProvider,
   AuthPage,
+  useNotificationProvider,
 } from "@refinedev/mui";
 import {
   List,
@@ -48,6 +48,7 @@ import { LeadsList } from './pages/leads/list';
 import SimpleSMS from './pages/messaging/SimpleSMS';
 import { LandingPagesExamples } from './pages/landing-pages-examples';
 import RegistrationForm from './pages/registration-form';
+import { RegistrationFormsList } from './pages/registration-form/manage';
 import PublicRegistrationForm from './pages/registration-form/public';
 import CustomLoginPage from './pages/login';
 import { MobileBottomNavigation } from './components/mobile/BottomNavigation';
@@ -101,7 +102,10 @@ const AppContent = () => {
         dataProvider={dataProvider}
         authProvider={authProvider}
         routerProvider={routerBindings}
-        notificationProvider={notificationProvider}
+        notificationProvider={{
+          open: () => {}, // Disable all automatic notifications
+          close: () => {},
+        }}
         resources={resources}
                 options={{
                   syncWithLocation: true,
@@ -141,6 +145,7 @@ const AppContent = () => {
                     <Route path="/sms" element={<SimpleSMS />} />
                     <Route path="/landing-pages-examples" element={<LandingPagesExamples />} />
                     <Route path="/registration" element={<RegistrationForm />} />
+                    <Route path="/registration-forms" element={<RegistrationFormsList />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                   <Route

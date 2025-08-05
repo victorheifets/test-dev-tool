@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Avatar } from '@mui/material';
+import { Box, Typography, Avatar, useTheme } from '@mui/material';
 import { Enrollment } from '../../../types/enrollment';
 import { StatusChip } from '../../enrollments/StatusChip';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ interface CompactEnrollmentContentProps {
 
 export const CompactEnrollmentContent: React.FC<CompactEnrollmentContentProps> = ({ enrollment }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const formatDate = (dateString?: string): string => {
     if (!dateString) return t('common.not_set', 'Not set');
@@ -29,12 +30,12 @@ export const CompactEnrollmentContent: React.FC<CompactEnrollmentContentProps> =
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'confirmed': return '#4CAF50';
-      case 'pending': return '#FF9800';
-      case 'cancelled': return '#F44336';
-      case 'completed': return '#2196F3';
-      case 'waitlisted': return '#9C27B0';
-      default: return '#757575';
+      case 'confirmed': return theme.palette.success.main;
+      case 'pending': return theme.palette.warning.main;
+      case 'cancelled': return theme.palette.error.main;
+      case 'completed': return theme.palette.info.main;
+      case 'waitlisted': return theme.palette.secondary.main;
+      default: return theme.palette.grey[500];
     }
   };
 
@@ -70,7 +71,7 @@ export const CompactEnrollmentContent: React.FC<CompactEnrollmentContentProps> =
                 maxWidth: '200px',
               }}
             >
-              {enrollment.participant_id}
+              {(enrollment as any).participant_name || enrollment.participant_id}
             </Typography>
           </Box>
           
@@ -92,7 +93,7 @@ export const CompactEnrollmentContent: React.FC<CompactEnrollmentContentProps> =
               whiteSpace: 'nowrap',
             }}
           >
-            {enrollment.activity_id}
+            {(enrollment as any).activity_name || enrollment.activity_id}
           </Typography>
         </Box>
         

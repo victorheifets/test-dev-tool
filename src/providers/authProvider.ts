@@ -35,9 +35,24 @@ interface LoginResponse {
   user?: UserInfo;
 }
 
+// Check if we're in development mode
+const isDevelopment = import.meta.env.DEV;
+
 export const authProvider: AuthProvider = {
   // Login method - supports both email/password and Google auth
   login: async (params: LoginParams | GoogleLoginParams) => {
+    // Development mode: auto-login
+    if (isDevelopment) {
+      localStorage.setItem(TOKEN_KEY, 'dev-token');
+      localStorage.setItem(USER_KEY, JSON.stringify({
+        user_id: 'dev-user',
+        email: 'dev@example.com',
+        name: 'Development User',
+        role: 'admin',
+        provider_id: 'ffa6c96f-e4a2-4df2-8298-415daa45d23c'
+      }));
+      return { success: true, redirectTo: "/" };
+    }
     // Check if this is Google authentication
     if ('google_token' in params) {
       return await loginWithGoogle(params);
@@ -151,6 +166,22 @@ export const authProvider: AuthProvider = {
 
   // Check authentication status
   check: async () => {
+    // Development mode: always authenticated
+    if (isDevelopment) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        // Auto-set development token
+        localStorage.setItem(TOKEN_KEY, 'dev-token');
+        localStorage.setItem(USER_KEY, JSON.stringify({
+          user_id: 'dev-user',
+          email: 'dev@example.com',
+          name: 'Development User',
+          role: 'admin',
+          provider_id: 'ffa6c96f-e4a2-4df2-8298-415daa45d23c'
+        }));
+      }
+      return { authenticated: true };
+    }
     
     const token = localStorage.getItem(TOKEN_KEY);
     

@@ -1064,7 +1064,7 @@ const SimpleSMSNew: React.FC = React.memo(() => {
       pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
       px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
       minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
-      backgroundColor: isMobile ? '#f8f9fa' : 'background.default',
+      backgroundColor: 'background.default',
       overflow: 'visible', // Use natural document scrolling
     }}>
       {/* Stats Cards */}

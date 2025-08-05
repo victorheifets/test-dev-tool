@@ -7,6 +7,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import WebIcon from '@mui/icons-material/Web';
 import MessageIcon from '@mui/icons-material/Message';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useTranslation } from 'react-i18next';
 
 import type { RefineProps } from '@refinedev/core';
@@ -81,6 +82,14 @@ export const useResources = (): RefineProps['resources'] => {
       meta: {
         label: t('navigation.registration_form'),
         icon: <AppRegistrationIcon />,
+      },
+    },
+    {
+      name: 'registration-forms',
+      list: '/registration-forms',
+      meta: {
+        label: t('navigation.registration_forms'),
+        icon: <AssignmentIcon />,
       },
     },
   ];

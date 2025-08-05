@@ -32,7 +32,12 @@
     "close": "Close",
     "resend": "Resend",
     "reset": "Reset",
-    "submit": "Submit"
+    "submit": "Submit",
+    "copy_url": "Copy URL",
+    "preview": "Preview",
+    "creating": "Creating...",
+    "updating": "Updating...",
+    "update": "Update"
   },
   
   "messages": {
@@ -54,6 +59,10 @@
     "lead_deleted": "Lead deleted successfully!",
     "lead_created": "Lead created successfully!",
     "lead_updated": "Lead updated successfully!",
+    "registration_form_deleted": "Registration form deleted successfully!",
+    "registration_form_created": "Registration form created successfully!",
+    "registration_form_updated": "Registration form updated successfully!",
+    "url_copied": "URL copied to clipboard!",
     "data_refreshed": "Data refreshed successfully"
   },
   
@@ -87,41 +96,9 @@
     "providers": "Providers",
     "settings": "Settings",
     "apps_pages": "APPS & PAGES",
-    "marketing": "MARKETING"
-  },
-  
-  "common": {
-    "english": "English",
-    "hebrew": "Hebrew",
-    "id": "ID",
-    "name": "Name",
-    "email": "Email",
-    "phone": "Phone",
-    "address": "Address",
-    "actions": "Actions",
-    "dates": "Dates",
-    "enrollment": "Enrollment",
-    "not_available": "N/A",
-    "loading": "Loading...",
-    "connected": "Connected",
-    "failed": "Failed",
-    "authenticated": "Authenticated",
-    "not_authenticated": "Not Authenticated",
-    "not_assigned": "Not Assigned",
-    "all": "All",
-    "active": "Active",
-    "first_name": "First Name",
-    "last_name": "Last Name",
-    "created_at": "Created At",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "refresh": "Refresh",
-    "refreshing": "Refreshing...",
-    "pull_to_refresh": "Pull to refresh",
-    "release_to_refresh": "Release to refresh",
-    "not_set": "Not set",
-    "invalid_date": "Invalid date",
-    "none": "None"
+    "marketing": "MARKETING",
+    "registration_form": "Registration Form",
+    "registration_forms": "Registration Forms"
   },
   
   "search": {
@@ -129,6 +106,7 @@
     "placeholder_participants": "Search participants...",
     "placeholder_enrollments": "Search enrollments...",
     "placeholder_leads": "Search leads...",
+    "placeholder_registration_forms": "Search registration forms...",
     "placeholder_students": "Search students...",
     "select_participant": "Select participant...",
     "select_lead": "Select lead..."
@@ -176,6 +154,17 @@
     "inactive": "Inactive",
     "pending": "Pending",
     "active": "Active",
+    "confirmed": "Confirmed",
+    "waitlisted": "Waitlisted",
+    "no_show": "No Show"
+  },
+
+  "enrollment_status": {
+    "enrolled": "Enrolled",
+    "active": "Active", 
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "pending": "Pending",
     "confirmed": "Confirmed",
     "waitlisted": "Waitlisted",
     "no_show": "No Show"
@@ -341,11 +330,14 @@
     "defaultDescription": "Sign up for our amazing courses and start your learning journey today!",
     "preview": "Form Preview",
     "publishedUrl": "Published URL",
+    "publicUrl": "Public URL",
     "publishConfirmation": "Are you sure you want to publish this form? Once published, it will be available online.",
     "publishing": "Publishing...",
     "formTitle": "Registration Form",
     "formSettings": "Form Settings",
     "published": "Published",
+    "publishedAt": "Published At",
+    "notPublished": "Not Published",
     "submitSuccess": "Form submitted successfully!",
     "submitError": "Failed to submit form. Please try again.",
     "publishSuccess": "Form published successfully!",
@@ -353,6 +345,20 @@
     "submitting": "Submitting...",
     "activityOfInterest": "Activity of Interest",
     "additionalNotes": "Additional Notes",
+    "form": "Form",
+    "forms": "Forms",
+    "createForm": "Create Registration Form",
+    "editForm": "Edit Registration Form",
+    "duplicateForm": "Duplicate Registration Form",
+    "draft": "Draft",
+    "drafts": "Drafts",
+    "totalForms": "Total Forms", 
+    "status": "Status",
+    "publishedDescription": "This form is live and accessible via public URL",
+    "draftDescription": "This form is saved but not publicly accessible",
+    "activeStatus": "Active Status",
+    "activeStatusDescription": "Enable to make this form active and accessible",
+    "description": "Description",
     "sources": {
       "website": "Website",
       "social": "Social Media",
@@ -414,7 +420,13 @@
     "required_field": "This field is required",
     "invalid_email": "Invalid email format",
     "start_date_required": "Start date is required",
-    "end_date_required": "End date is required"
+    "end_date_required": "End date is required",
+    "title_required": "Title is required",
+    "title_min_length": "Title must be at least 1 character",
+    "title_max_length": "Title cannot exceed 200 characters",
+    "description_required": "Description is required", 
+    "description_min_length": "Description must be at least 1 character",
+    "description_max_length": "Description cannot exceed 1000 characters"
   },
 
   "auth": {
@@ -574,5 +586,54 @@
       }
     },
     "no_messages": "No messages yet. Click the button below to send your first SMS!"
+  },
+
+  "enrollment": {
+    "enrolled_on": "Enrolled on",
+    "progress": "Progress"
+  },
+
+  "lead_status": {
+    "new": "New",
+    "contacted": "Contacted", 
+    "qualified": "Qualified",
+    "converted": "Converted",
+    "lost": "Lost"
+  },
+
+  "common": {
+    "english": "English",
+    "hebrew": "Hebrew",
+    "id": "ID",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "actions": "Actions",
+    "dates": "Dates",
+    "enrollment": "Enrollment",
+    "not_available": "N/A",
+    "loading": "Loading...",
+    "connected": "Connected",
+    "failed": "Failed",
+    "authenticated": "Authenticated",
+    "not_authenticated": "Not Authenticated",
+    "not_assigned": "Not Assigned",
+    "all": "All",
+    "active": "Active",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "created_at": "Created At",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "pull_to_refresh": "Pull to refresh",
+    "release_to_refresh": "Release to refresh",
+    "not_set": "Not set",
+    "invalid_date": "Invalid date",
+    "none": "None",
+    "inactive": "Inactive",
+    "days_remaining": "days remaining"
   }
 } 

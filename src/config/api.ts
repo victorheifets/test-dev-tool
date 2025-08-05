@@ -30,7 +30,8 @@ export const API_CONFIG = {
     providers: '/providers',
     statistics: '/statistics',
     auth: '/auth',
-    sms: '/sms'
+    sms: '/sms',
+    'registration-forms': '/registration-forms'
   },
   
   // Request headers
@@ -56,7 +57,13 @@ export interface ApiError {
 // Helper function to build full endpoint URL
 export const buildApiUrl = (endpoint: keyof typeof API_CONFIG.endpoints, id?: string): string => {
   const baseUrl = API_CONFIG.baseURL + API_CONFIG.endpoints[endpoint];
-  return id ? `${baseUrl}/${id}` : baseUrl;
+  if (id) {
+    // For individual resource access, no trailing slash before ID
+    return `${baseUrl}/${id}`;
+  } else {
+    // For list access, add trailing slash for registration-forms
+    return endpoint === 'registration-forms' ? `${baseUrl}/` : baseUrl;
+  }
 };
 
 // Helper function to extract provider ID from JWT token
@@ -90,6 +97,9 @@ export const getAuthHeaders = (): Record<string, string> => {
     if (providerId) {
       headers['X-Provider-ID'] = providerId;
     }
+  } else if (isDevelopment) {
+    // Development mode: add default provider ID for testing
+    headers['X-Provider-ID'] = 'ffa6c96f-e4a2-4df2-8298-415daa45d23c';
   }
 
   return headers;

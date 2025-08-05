@@ -78,6 +78,11 @@ const httpClient = async (url: string, options: RequestInit = {}): Promise<any> 
     },
   };
 
+  // console.log(`[httpClient] Making request to: ${url}`);
+  // console.log(`[httpClient] Headers:`, config.headers);
+  // console.log(`[httpClient] Method:`, config.method || 'GET');
+  // if (config.body) console.log(`[httpClient] Body:`, config.body);
+
   try {
     const response = await fetch(url, config);
     
@@ -160,7 +165,8 @@ const resourceMap: Record<string, keyof typeof API_CONFIG.endpoints> = {
   'marketing': 'marketing',
   'instructors': 'instructors',
   'sms': 'sms',
-  'sms/history': 'sms'
+  'sms/history': 'sms',
+  'registration-forms': 'registration-forms'
 };
 
 export const dataProvider: DataProvider = {
@@ -195,6 +201,10 @@ export const dataProvider: DataProvider = {
     }
     
     const fullUrl = params.toString() ? `${url}?${params.toString()}` : url;
+    
+    // console.log(`[DataProvider] Full URL: ${fullUrl}`);
+    // console.log(`[DataProvider] API Resource: ${apiResource}`);
+    // console.log(`[DataProvider] Resource Map Result: ${resourceMap[resource]}`);
     
     try {
       const response = await httpClient(fullUrl);
@@ -260,7 +270,7 @@ export const dataProvider: DataProvider = {
   },
 
   // Create a new record
-  create: async ({ resource, variables, meta }) => {
+  create: async ({ resource, variables, meta, successNotification, errorNotification }) => {
     console.log(`[DataProvider] create called for resource: ${resource}`, variables);
     
     const apiResource = resourceMap[resource] || resource as keyof typeof API_CONFIG.endpoints;

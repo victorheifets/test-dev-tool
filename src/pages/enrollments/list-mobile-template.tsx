@@ -300,7 +300,7 @@ export const ParticipantsList = () => {
       pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
       px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
       minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
-      backgroundColor: isMobile ? '#f8f9fa' : 'background.default',
+      backgroundColor: 'background.default',
       overflow: isMobile ? 'hidden' : 'visible', // Force hide scrollbar on mobile
       '&::-webkit-scrollbar': isMobile ? { display: 'none' } : {}, // Hide webkit scrollbars on mobile
       scrollbarWidth: isMobile ? 'none' : 'auto', // Hide Firefox scrollbars on mobile

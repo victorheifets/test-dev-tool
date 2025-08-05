@@ -301,6 +301,26 @@ export const darkTheme = createTheme({
               }
             }
           }
-        }
+        },
+        MuiDialog: {
+          styleOverrides: {
+            paper: {
+              borderRadius: designTokens.borderRadius.dialog,
+              boxShadow: designTokens.shadows.card,
+              backgroundColor: '#283046', // Dark theme dialog background
+              color: '#D0D2D6', // Dark theme text color
+            },
+          },
+        },
+        MuiModal: {
+          styleOverrides: {
+            root: {
+              '& .MuiPaper-root': {
+                backgroundColor: '#283046', // Dark theme modal background
+                color: '#D0D2D6',
+              }
+            }
+          }
+        },
     }
 }); 

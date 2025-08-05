@@ -36,7 +36,7 @@ import * as yup from 'yup';
 import { Edit as EditIcon, Preview as PreviewIcon, Publish as PublishIcon, Save as SaveIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { CommonModalShell } from '../../components/common/CommonModalShell';
-import { useCreate, useList } from '@refinedev/core';
+import { useCreate, useList, useInvalidate } from '@refinedev/core';
 
 // FAB positioning constants
 const FAB_BOTTOM_OFFSET = 90; // Above bottom navigation
@@ -161,6 +161,7 @@ const RegistrationFormNew: React.FC = () => {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingTestField1, setEditingTestField1] = useState(false);
+  const invalidate = useInvalidate();
 
   // Function to handle text direction
   const handleTextDirection = (text: string = '') => {
@@ -310,6 +311,9 @@ const RegistrationFormNew: React.FC = () => {
           severity: 'success'
         });
         setPublishDialogOpen(false);
+        
+        // Invalidate registration-forms cache so CRUD table shows the new form
+        invalidate({ resource: 'registration-forms', invalidates: ['list'] });
       } else {
         throw new Error('Failed to publish form - no form ID returned');
       }

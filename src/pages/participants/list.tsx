@@ -275,7 +275,7 @@ export const ParticipantsList = () => {
       pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
       px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
       minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
-      backgroundColor: isMobile ? '#f8f9fa' : 'background.default',
+      backgroundColor: 'background.default',
       overflow: 'visible', // Use natural document scrolling
     }}>
       {/* Statistics Cards */}
@@ -366,7 +366,17 @@ export const ParticipantsList = () => {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS,
+                  backgroundColor: 'background.paper',
+                  '& fieldset': {
+                    borderColor: 'divider'
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main'
+                  }
                 }
               }}
             />
@@ -382,7 +392,19 @@ export const ParticipantsList = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 sx={{
-                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS,
+                  backgroundColor: 'background.paper',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'divider'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main'
+                    }
+                  }
                 }}
               >
                 <MenuItem value="">{t('common.all')}</MenuItem>

@@ -29,11 +29,13 @@ interface CommonModalShellProps {
   onCancel?: () => void;
   forceMobile?: boolean;
   children: React.ReactNode;
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   saveButtonText?: string;
   cancelButtonText?: string;
   saveButtonDisabled?: boolean;
+  saveButtonStartIcon?: React.ReactNode;
   showActions?: boolean;
+  fullScreen?: boolean;
 }
 
 export const CommonModalShell: React.FC<CommonModalShellProps> = ({
@@ -48,7 +50,9 @@ export const CommonModalShell: React.FC<CommonModalShellProps> = ({
   saveButtonText = 'Save',
   cancelButtonText = 'Cancel',
   saveButtonDisabled = false,
+  saveButtonStartIcon,
   showActions = true,
+  fullScreen,
 }) => {
   const theme = useTheme();
   const isMobileDetected = useMediaQuery(theme.breakpoints.down('md'));
@@ -68,7 +72,7 @@ export const CommonModalShell: React.FC<CommonModalShellProps> = ({
       onClose={onClose}
       maxWidth={maxWidth}
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen !== undefined ? fullScreen : isMobile}
       TransitionComponent={isMobile ? Transition : undefined}
       PaperProps={{
         sx: {
@@ -147,6 +151,7 @@ export const CommonModalShell: React.FC<CommonModalShellProps> = ({
             onClick={onSave} 
             variant="contained"
             disabled={saveButtonDisabled}
+            startIcon={saveButtonStartIcon}
             sx={{
               minWidth: isMobile ? 80 : 64,
               height: isMobile ? 44 : 36,
