@@ -13,6 +13,7 @@
   "enrollments": "Enrollments",
   "enrollment": "Enrollment",
   "leads": "Leads",
+  "new_leads": "New Leads", 
   "lead": "Lead",
   "marketing": "Marketing",
   "instructors": "Instructors",
@@ -206,7 +207,7 @@
   },
   
   "dashboard": {
-    "welcome": "Welcome back, Victor!",
+    "welcome": "Welcome back, {{name}}!",
     "subtitle": "Here's what's happening with your courses today.",
     "active_students": "Active Students",
     "course_completion": "Course Completion",
@@ -217,7 +218,9 @@
     "upcoming_events": "Upcoming Events",
     "quick_actions": "Quick Actions",
     "schedule_event": "Schedule Event",
-    "send_alert": "Send Alert"
+    "send_alert": "Send Alert",
+    "no_upcoming_courses": "No upcoming courses scheduled.",
+    "create_courses_hint": "Create courses with future start dates to see them here."
   },
 
   "landing_pages": {
@@ -304,7 +307,8 @@
     "explore": "Explore",
     "my_learning": "My Learning",
     "undo": "Undo",
-    "redo": "Redo"
+    "redo": "Redo",
+    "logout": "Logout"
   },
 
   "login": {
@@ -456,20 +460,7 @@
     }
   },
 
-  "navigation": {
-    "dashboard": "Dashboard",
-    "courses": "Courses",
-    "participants": "Students",
-    "enrollments": "Enrollments",
-    "leads": "Leads",
-    "providers": "Providers",
-    "settings": "Settings",
-    "apps_pages": "APPS & PAGES",
-    "marketing": "MARKETING",
-    "sms_messaging": "SMS Messaging",
-    "landing_page_examples": "Landing Page Examples",
-    "registration_form": "Registration Form"
-  },
+
 
   "sms": {
     "title": "SMS Messaging",

@@ -41,7 +41,12 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   
   // Get logout text from translation system
   const getLogoutText = () => {
-    return t('header.logout');
+    const logoutText = t('header.logout');
+    // Fallback if translation is not loaded yet
+    if (logoutText === 'header.logout') {
+      return i18n.language === 'he' ? 'התנתק' : 'Logout';
+    }
+    return logoutText;
   };
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
@@ -93,7 +98,15 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   return (
     <AppBar position={sticky ? "sticky" : "relative"} sx={{ boxShadow: 'none', backgroundColor: 'background.paper' }}>
       <Toolbar>
-        {!isMobile && <HamburgerMenu />}
+        {!isMobile && (
+          <HamburgerMenu 
+            sx={(theme) => ({
+              '& .MuiSvgIcon-root': {
+                transform: theme.direction === 'rtl' ? 'scaleX(-1)' : 'none'
+              }
+            })}
+          />
+        )}
         <Box sx={{ flexGrow: 1 }} />
         <Stack direction="row" spacing={2} alignItems="center">
           <IconButton

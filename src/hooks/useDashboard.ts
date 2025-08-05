@@ -27,7 +27,7 @@ export const useDashboard = (): UseDashboardReturn => {
         stats: {
           totalCourses: 0,
           activeStudents: 0,
-          completionRate: 0,
+          totalLeads: 0,
           revenue: 0,
         },
         recentActivity: [],

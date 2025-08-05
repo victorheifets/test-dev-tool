@@ -68,6 +68,10 @@ class DashboardService {
     }
     
     const data = JSON.parse(text);
+    // Handle paginated responses with 'items' key
+    if (data.items && Array.isArray(data.items)) {
+      return data.items as T;
+    }
     return data.data || data;
   }
 
@@ -84,11 +88,9 @@ class DashboardService {
       const totalCourses = Array.isArray(activities) ? activities.length : 0;
       const activeStudents = Array.isArray(participants) ? participants.filter(p => p.is_active !== false).length : 0;
       
-      // Calculate completion rate from enrollments
-      const totalEnrollments = Array.isArray(enrollments) ? enrollments.length : 0;
-      const completedEnrollments = Array.isArray(enrollments) ? 
-        enrollments.filter(e => e.status === 'completed' || e.status === 'done').length : 0;
-      const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+      // Calculate leads count from marketing endpoint
+      const leads = await this.httpClient<any[]>(buildApiUrl('marketing')).catch(() => []);
+      const totalLeads = Array.isArray(leads) ? leads.length : 0;
 
       // Calculate revenue from activities with pricing
       const revenue = Array.isArray(activities) ? 
@@ -101,7 +103,7 @@ class DashboardService {
       return {
         totalCourses,
         activeStudents,
-        completionRate,
+        totalLeads,
         revenue,
       };
     } catch (error) {
@@ -110,7 +112,7 @@ class DashboardService {
       return {
         totalCourses: 0,
         activeStudents: 0,
-        completionRate: 0,
+        totalLeads: 0,
         revenue: 0,
       };
     }
@@ -299,7 +301,17 @@ class DashboardService {
   private calculateStats(activities: any[], participants: any[], enrollments: any[], leads: any[]): DashboardStats {
     const totalCourses = Array.isArray(activities) ? activities.length : 0;
     const activeStudents = Array.isArray(participants) ? participants.filter(p => p.is_active !== false).length : 0;
-    const totalLeads = Array.isArray(leads) ? leads.length : 0;
+    
+    // Calculate new leads (leads from the last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const totalLeads = Array.isArray(leads) ? 
+      leads.filter(lead => {
+        if (!lead.created_at) return false;
+        const createdDate = new Date(lead.created_at);
+        return createdDate >= thirtyDaysAgo;
+      }).length : 0;
 
     const revenue = Array.isArray(activities) ? 
       activities.reduce((sum, activity) => {

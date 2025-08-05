@@ -52,6 +52,7 @@ import { RegistrationFormsList } from './pages/registration-form/manage';
 import PublicRegistrationForm from './pages/registration-form/public';
 import CustomLoginPage from './pages/login';
 import { MobileBottomNavigation } from './components/mobile/BottomNavigation';
+import { CustomSider } from './components/layout/CustomSider';
 
 const Title = ({ collapsed }: { collapsed: boolean }) => {
   const { t } = useTranslation();
@@ -77,10 +78,11 @@ const Title = ({ collapsed }: { collapsed: boolean }) => {
           fontWeight: 700,
           background: 'linear-gradient(135deg, #7367F0, #9C88FF)',
           backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
+          WebkitBackgroundClip: 'text', 
           WebkitTextFillColor: 'transparent',
           textShadow: '0 2px 4px rgba(115, 103, 240, 0.2)',
           letterSpacing: '0.5px',
+          whiteSpace: 'nowrap',
         }}
       >
         {t('app.title')}
@@ -120,7 +122,7 @@ const AppContent = () => {
                       >
                         <ThemedLayoutV2 
                           Header={() => <Header sticky={false} />}
-                          Sider={isMobile ? () => null : (props) => <ThemedSiderV2 {...props} Title={Title} />}
+                          Sider={isMobile ? () => null : (props) => <CustomSider {...props} Title={Title} />}
                         >
                           <Box sx={{ pb: isMobile ? 12 : 0 }}>
                             <Outlet />

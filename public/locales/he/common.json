@@ -13,6 +13,7 @@
   "enrollments": "הרשמות",
   "enrollment": "הרשמה",
   "leads": "לידים",
+  "new_leads": "לידים חדשים",
   "lead": "ליד",
   "marketing": "שיווק",
   "instructors": "מדריכים",
@@ -32,7 +33,9 @@
     "close": "סגור",
     "resend": "שלח שוב",
     "reset": "איפוס",
-    "submit": "שלח"
+    "submit": "שלח",
+    "copy_url": "העתק כתובת",
+    "preview": "תצוגה מקדימה"
   },
   
   "messages": {
@@ -54,6 +57,10 @@
     "lead_deleted": "ליד נמחק בהצלחה!",
     "lead_created": "ליד נוצר בהצלחה!",
     "lead_updated": "ליד עודכן בהצלחה!",
+    "registration_form_created": "טופס הרשמה נוצר בהצלחה!",
+    "registration_form_updated": "טופס הרשמה עודכן בהצלחה!",
+    "registration_form_deleted": "טופס הרשמה נמחק בהצלחה!",
+    "url_copied": "הכתובת הועתקה ללוח",
     "data_refreshed": "הנתונים רועננו בהצלחה"
   },
   
@@ -135,6 +142,7 @@
     "placeholder_enrollments": "חיפוש הרשמות...",
     "placeholder_leads": "חיפוש לידים...",
     "placeholder_students": "חיפוש תלמידים...",
+    "placeholder_registration_forms": "חיפוש טפסי הרשמה...",
     "select_participant": "בחר משתתף...",
     "select_lead": "בחר ליד..."
   },
@@ -221,7 +229,7 @@
   },
   
   "dashboard": {
-    "welcome": "ברוך הבא, ויקטור!",
+    "welcome": "ברוך הבא, {{name}}!",
     "subtitle": "הנה מה קורה עם הקורסים שלך היום.",
     "active_students": "תלמידים פעילים",
     "course_completion": "השלמת קורס",
@@ -229,10 +237,12 @@
     "recent_activity": "פעילות אחרונה",
     "top_courses": "קורסים מובילים",
     "enrolled": "נרשמו",
-    "upcoming_events": "אירועים קרובים",
+    "upcoming_events": "אירועים קרובים", 
     "quick_actions": "פעולות מהירות",
     "schedule_event": "תזמן אירוע",
-    "send_alert": "שלח התראה"
+    "send_alert": "שלח התראה",
+    "no_upcoming_courses": "אין קורסים מתוכננים בקרוב.",
+    "create_courses_hint": "צור קורסים עם תאריכי התחלה עתידיים כדי לראות אותם כאן."
   },
 
   "landing_pages": {
@@ -319,7 +329,8 @@
     "explore": "חקור",
     "my_learning": "הלמידה שלי",
     "undo": "בטל",
-    "redo": "בצע שוב"
+    "redo": "בצע שוב",
+    "logout": "התנתק"
   },
 
   "login": {
@@ -342,15 +353,24 @@
 
   "registrationForm": {
     "title": "בונה טפסי הרשמה",
+    "form": "טופס הרשמה",
+    "forms": "טפסי הרשמה",
+    "createForm": "צור טופס הרשמה",
     "defaultTitle": "הרשמה לקורס",
     "defaultDescription": "הירשמו לקורסים המדהימים שלנו והתחילו את מסע הלמידה שלכם היום!",
     "preview": "תצוגה מקדימה של הטופס",
     "publishedUrl": "כתובת URL מפורסמת",
+    "publishedAt": "פורסם ב",
+    "publicUrl": "כתובת ציבורית",
+    "description": "תיאור",
     "publishConfirmation": "האם אתה בטוח שברצונך לפרסם טופס זה? לאחר הפרסום, הוא יהיה זמין באינטרנט.",
     "publishing": "מפרסם...",
     "formTitle": "טופס הרשמה",
     "formSettings": "הגדרות טופס",
     "published": "מפורסם",
+    "draft": "טיוטה",
+    "drafts": "טיוטות", 
+    "totalForms": "סך הטפסים",
     "submitSuccess": "הטופס נשלח בהצלחה!",
     "submitError": "שליחת הטופס נכשלה. אנא נסה שוב.",
     "publishSuccess": "הטופס פורסם בהצלחה!",

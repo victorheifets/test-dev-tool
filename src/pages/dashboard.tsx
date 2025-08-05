@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { useGetIdentity } from '@refinedev/core';
 import { StatCard } from '../components/StatCard';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useDashboard } from '../hooks/useDashboard';
@@ -43,6 +44,7 @@ export const Dashboard = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   const { data, loading, error, refresh } = useDashboard();
+  const { data: user } = useGetIdentity();
   
   // Modal states
   const [courseModalOpen, setCourseModalOpen] = useState(false);
@@ -85,7 +87,7 @@ export const Dashboard = () => {
       <Box sx={{ mb: isMobile ? 3 : 4, px: isMobile ? 1 : 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
           <Typography variant={isMobile ? "h5" : "h4"} sx={{ fontWeight: 600 }}>
-            {t('dashboard.welcome')} 👋
+            {t('dashboard.welcome', { name: user?.name || 'User' })} 👋
           </Typography>
           {!loading && (
             <IconButton onClick={refresh} color="primary" size="small">
@@ -134,7 +136,7 @@ export const Dashboard = () => {
             <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
           ) : (
             <StatCard 
-              title={t('leads')} 
+              title={t('new_leads')} 
               value={data?.stats.totalLeads?.toString() || '0'} 
               icon={<PersonAddIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} 
               color="info" 
@@ -316,9 +318,9 @@ export const Dashboard = () => {
                 <Box>
                   {data?.upcomingEvents.length === 0 ? (
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                      No upcoming courses scheduled.<br/>
+                      {t('dashboard.no_upcoming_courses')}<br/>
                       <Typography variant="caption" color="text.secondary">
-                        Create courses with future start dates to see them here.
+                        {t('dashboard.create_courses_hint')}
                       </Typography>
                     </Typography>
                   ) : (

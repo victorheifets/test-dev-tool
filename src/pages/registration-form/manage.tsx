@@ -1,41 +1,40 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Button, Grid, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, Fab, InputAdornment, Chip } from '@mui/material';
+import { Box, Grid, IconButton, Fab, Button, TextField, FormControl, InputLabel, Select, MenuItem, InputAdornment, Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { GridColDef } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import PublishIcon from '@mui/icons-material/Publish';
 import LinkIcon from '@mui/icons-material/Link';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useDelete, useCreate, useUpdate, useInvalidate } from '@refinedev/core';
 import { useDataGrid } from '@refinedev/mui';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { RegistrationForm, RegistrationFormCreate } from '../../types/registration-form';
 import { ActionMenu } from '../../components/leads/ActionMenu';
 import { ConfirmationDialog } from '../../components/common/ConfirmationDialog';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { RegistrationFormModal } from '../../components/registrationForm/RegistrationFormModal';
 import { StatCard } from '../../components/StatCard';
-import { SharedDataGrid } from '../../components/common/SharedDataGrid';
 import { CompactCardShell } from '../../components/mobile/CompactCardShell';
 import { CompactRegistrationFormContent } from '../../components/mobile/content/CompactRegistrationFormContent';
-import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { SharedDataGrid } from '../../components/common/SharedDataGrid';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
+import PublishIcon from '@mui/icons-material/Publish';
 
-// UI Constants (matching leads pattern)
+// UI Constants (matching original)
 const MOBILE_BOTTOM_PADDING = 10;
 const MOBILE_SIDE_PADDING = 1;
 const MOBILE_ICON_SIZE = 24;
 const DESKTOP_ICON_SIZE = 40;
-const MOBILE_SEARCH_BORDER_RADIUS = 3;
 const DESKTOP_BORDER_RADIUS = 1.5;
+const MOBILE_SEARCH_BORDER_RADIUS = 3;
 const FAB_BOTTOM_OFFSET = 90;
 const FAB_RIGHT_OFFSET = 16;
 const FAB_Z_INDEX = 1000;
-const DATA_GRID_HEIGHT = 500;
 
 export const RegistrationFormsList = () => {
   const { t } = useTranslation();
@@ -60,9 +59,6 @@ export const RegistrationFormsList = () => {
   const { dataGridProps } = useDataGrid<RegistrationForm>({
     resource: 'registration-forms',
   });
-  
-  // Debug logging
-  // console.log('[RegistrationFormsList] dataGridProps.rows:', dataGridProps.rows);
   
   // Get forms from dataGridProps and apply client-side filtering
   const allForms = dataGridProps.rows || [];
@@ -110,7 +106,6 @@ export const RegistrationFormsList = () => {
   };
 
   const confirmDelete = () => {
-    console.log('[RegistrationFormsList] confirmDelete called for ID:', selectedFormId);
     if (selectedFormId) {
       deleteForm({
         resource: 'registration-forms',
@@ -120,8 +115,6 @@ export const RegistrationFormsList = () => {
       }, {
         onSuccess: () => {
           showSuccess(t('messages.registration_form_deleted'));
-          // Invalidate cache to refresh the table
-          invalidate({ resource: 'registration-forms', invalidates: ['list'] });
         },
         onError: (error) => {
           handleError(error, t('actions.delete') + ' ' + t('registrationForm.form'));
@@ -177,11 +170,6 @@ export const RegistrationFormsList = () => {
 
     setBulkDeleteDialogOpen(false);
     setSelectedRows([]);
-    
-    // Invalidate cache to refresh the table after bulk delete
-    if (deleteCount > 0) {
-      invalidate({ resource: 'registration-forms', invalidates: ['list'] });
-    }
   };
   
   const handleAddNew = () => {
@@ -191,7 +179,6 @@ export const RegistrationFormsList = () => {
   };
 
   const handleSave = (formData: RegistrationFormCreate) => {
-    console.log('[RegistrationFormsList] handleSave called with:', formData, 'mode:', modalMode);
     if (modalMode === 'create' || modalMode === 'duplicate') {
       createForm({
         resource: 'registration-forms',
@@ -199,15 +186,13 @@ export const RegistrationFormsList = () => {
         successNotification: false,
         errorNotification: false,
       }, {
-        onSuccess: (data) => {
-          console.log('[RegistrationFormsList] Create success:', data);
+        onSuccess: () => {
           showSuccess(t('messages.registration_form_created'));
           setIsModalOpen(false);
           setModalInitialData(null);
           invalidate({ resource: 'registration-forms', invalidates: ['list'] });
         },
         onError: (error) => {
-          console.error('[RegistrationFormsList] Create error:', error);
           handleError(error, t('actions.create') + ' ' + t('registrationForm.form'));
         }
       });
@@ -219,16 +204,13 @@ export const RegistrationFormsList = () => {
         successNotification: false,
         errorNotification: false,
       }, {
-        onSuccess: (data) => {
-          console.log('[RegistrationFormsList] Update success:', data);
+        onSuccess: () => {
           showSuccess(t('messages.registration_form_updated'));
           setIsModalOpen(false);
           setModalInitialData(null);
-          // Force refresh the data
           invalidate({ resource: 'registration-forms', invalidates: ['list'] });
         },
         onError: (error) => {
-          console.error('[RegistrationFormsList] Update error:', error);
           handleError(error, t('actions.edit') + ' ' + t('registrationForm.form'));
         }
       });
@@ -328,7 +310,7 @@ export const RegistrationFormsList = () => {
     {
       field: 'action',
       headerName: t('common.actions'),
-      width: 120,
+      flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton onClick={() => handleEdit(params.row.id)} color="primary" title={t('actions.edit')}>
@@ -352,18 +334,18 @@ export const RegistrationFormsList = () => {
   return (
     <Box sx={{ 
       width: '100%',
-      pb: isMobile ? MOBILE_BOTTOM_PADDING : 0,
-      px: isMobile ? MOBILE_SIDE_PADDING : 0,
-      minHeight: isMobile ? 'auto' : '100vh',
+      pb: isMobile ? MOBILE_BOTTOM_PADDING : 0, // Add bottom padding on mobile for bottom navigation
+      px: isMobile ? MOBILE_SIDE_PADDING : 0, // Add side padding on mobile
+      minHeight: isMobile ? 'auto' : '100vh', // Remove minHeight on mobile
       backgroundColor: 'background.default',
-      overflow: 'visible',
+      overflow: 'visible', // Use natural document scrolling
     }}>
       {/* Statistics Cards */}
       <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('registrationForm.forms')} 
-            value={forms.length.toString()} 
+            value={allForms.length.toString()} 
             icon={<AssignmentIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="primary" 
           />
@@ -371,7 +353,7 @@ export const RegistrationFormsList = () => {
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('registrationForm.published')} 
-            value={forms.filter(f => f.is_active).length.toString()} 
+            value={allForms.filter(f => f.is_active).length.toString()} 
             icon={<CheckCircleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="success" 
           />
@@ -379,7 +361,7 @@ export const RegistrationFormsList = () => {
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('registrationForm.drafts')} 
-            value={forms.filter(f => !f.is_active).length.toString()} 
+            value={allForms.filter(f => !f.is_active).length.toString()} 
             icon={<PauseCircleIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="warning" 
           />
@@ -387,7 +369,7 @@ export const RegistrationFormsList = () => {
         <Grid item xs={6} sm={6} md={3}>
           <StatCard 
             title={t('registrationForm.totalForms')} 
-            value={forms.length.toString()} 
+            value={allForms.length.toString()} 
             icon={<PublishIcon sx={{ fontSize: isMobile ? MOBILE_ICON_SIZE : DESKTOP_ICON_SIZE }} />} 
             color="info" 
           />
@@ -446,7 +428,17 @@ export const RegistrationFormsList = () => {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS,
+                  backgroundColor: 'background.paper',
+                  '& fieldset': {
+                    borderColor: 'divider'
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main'
+                  }
                 }
               }}
             />
@@ -462,7 +454,19 @@ export const RegistrationFormsList = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 sx={{
-                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS
+                  borderRadius: isMobile ? MOBILE_SEARCH_BORDER_RADIUS : DESKTOP_BORDER_RADIUS,
+                  backgroundColor: 'background.paper',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'divider'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main'
+                    }
+                  }
                 }}
               >
                 <MenuItem value="">{t('common.all')}</MenuItem>
@@ -493,10 +497,10 @@ export const RegistrationFormsList = () => {
               selectedRows={selectedRows}
               onSelectionChange={(selection) => setSelectedRows(selection as string[])}
               onCreateNew={handleAddNew}
-              createButtonText={`+ ${t('actions.create')} ${t('registrationForm.form')}`}
+              createButtonText={`+ ${t('registrationForm.createForm')}`}
               onBulkDelete={handleBulkDelete}
               bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
-              height={DATA_GRID_HEIGHT}
+              height={500}
               pageSizeOptions={[5, 10, 25, 50]}
               disableRowSelectionOnClick={true}
             />
@@ -528,11 +532,12 @@ export const RegistrationFormsList = () => {
           )}
         </ErrorBoundary>
       </Box>
-      
-      {/* Floating Action Button for Create Form - Mobile Only */}
+
+      {/* Mobile FAB */}
       {isMobile && (
         <Fab
           color="primary"
+          aria-label="add"
           onClick={handleAddNew}
           sx={{
             position: 'fixed',
@@ -545,7 +550,8 @@ export const RegistrationFormsList = () => {
           <AddIcon />
         </Fab>
       )}
-      
+
+      {/* Dialogs */}
       <ConfirmationDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -553,6 +559,7 @@ export const RegistrationFormsList = () => {
         title={`${t('actions.delete')} ${t('registrationForm.form')}`}
         description={t('messages.confirm_delete')}
       />
+      
       <ConfirmationDialog
         open={bulkDeleteDialogOpen}
         onClose={() => setBulkDeleteDialogOpen(false)}
@@ -560,23 +567,18 @@ export const RegistrationFormsList = () => {
         title={`${t('actions.bulk_delete')} ${selectedRows.length} ${t('registrationForm.forms')}`}
         description={t('messages.confirm_bulk_delete', { count: selectedRows.length })}
       />
-      <ErrorBoundary onError={(error, errorInfo) => {
-        console.error('Registration form modal error:', error, errorInfo);
-        handleError(error, 'Registration Form Modal');
-        setIsModalOpen(false); // Close modal on error
-      }}>
-        <RegistrationFormModal 
-          open={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setModalInitialData(null);
-          }}
-          forceMobile={isMobile}
-          onSave={handleSave}
-          initialData={modalInitialData}
-          mode={modalMode}
-        />
-      </ErrorBoundary>
+      
+      <RegistrationFormModal 
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalInitialData(null);
+        }}
+        initialData={modalInitialData}
+        mode={modalMode}
+        onSave={handleSave}
+        forceMobile={isMobile}
+      />
     </Box>
   );
 };
