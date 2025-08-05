@@ -474,7 +474,7 @@ export const EnrollmentsList = () => {
               selectedRows={selectedRows}
               onSelectionChange={(selection) => setSelectedRows(selection as string[])}
               onCreateNew={handleAddNew}
-              createButtonText={`+ ${t('actions.create')} ${t('enrollment')}`}
+              createButtonText={`+ ${t('actions.create')} ${t('enrollments').slice(0, -1)}`}
               onBulkDelete={handleBulkDelete}
               bulkDeleteText={`${t('actions.delete')} (${selectedRows.length})`}
               height={DATA_GRID_HEIGHT}
@@ -527,7 +527,7 @@ export const EnrollmentsList = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={confirmDelete}
-        title={`${t('actions.delete')} ${t('enrollment')}`}
+        title={`${t('actions.delete')} ${t('enrollments').slice(0, -1)}`}
         description={t('messages.confirm_delete')}
       />
       <ConfirmationDialog

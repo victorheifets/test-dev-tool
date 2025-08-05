@@ -55,7 +55,7 @@ export const Dashboard = () => {
       case 'create_student':
         setParticipantModalOpen(true);
         break;
-      case 'schedule_event':
+      case 'create_form':
         setCourseModalOpen(true);
         break;
       case 'send_alert':
@@ -110,7 +110,7 @@ export const Dashboard = () => {
           ) : (
             <StatCard 
               title={t('courses')} 
-              value={data?.stats.totalCourses.toString() || '0'} 
+              value={data?.stats.totalCourses?.toString() || '0'} 
               icon={<SchoolIcon sx={{ fontSize: isMobile ? 32 : 40 }} />} 
               color="primary" 
             />
@@ -315,7 +315,10 @@ export const Dashboard = () => {
                 <Box>
                   {data?.upcomingEvents.length === 0 ? (
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                      No upcoming events
+                      No upcoming courses scheduled.<br/>
+                      <Typography variant="caption" color="text.secondary">
+                        Create courses with future start dates to see them here.
+                      </Typography>
                     </Typography>
                   ) : (
                     data?.upcomingEvents.map((event) => (
@@ -381,7 +384,7 @@ export const Dashboard = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Paper 
-                    onClick={() => handleQuickAction('schedule_event')}
+                    onClick={() => handleQuickAction('create_form')}
                     sx={{ 
                       p: isMobile ? 1.5 : 2, 
                       textAlign: 'center', 
@@ -393,7 +396,7 @@ export const Dashboard = () => {
                   >
                     <EventIcon color="info" sx={{ fontSize: isMobile ? 24 : 32, mb: isMobile ? 0.5 : 1 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
-                      {t('dashboard.schedule_event')}
+                      {t('registrationForm.createForm')}
                     </Typography>
                   </Paper>
                 </Grid>
